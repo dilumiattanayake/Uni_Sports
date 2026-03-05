@@ -31,10 +31,10 @@ function Register() {
     return email.endsWith("@my.sliit.lk")
   }
 
-  const handleSubmit = (e :  React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async(e) => {
     e.preventDefault()
-    setError("")
-    setSuccess("")
+    setError("");
+    setSuccess("");
 
    
     if (!validateEmail(formData.email)) {
@@ -60,6 +60,36 @@ function Register() {
     console.log("Register Data:", { role, ...formData })
 
     setSuccess("Registration successful !")
+
+    const payload = {
+              
+    name: formData.name,
+    email: formData.email, 
+    password: formData.password,
+    role,
+    specialization: role === "coach" ? formData.sport : undefined,
+  };
+
+  try {
+    const response = await fetch("http://localhost:5000/api/auth/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      setSuccess("Registration successful!");
+      
+    } else {
+      setError(data.error || "Registration failed");
+    }
+  } catch (error) {
+    setError("Server error");
+  }
 
     setTimeout(() => {
     navigate("/auth/login")
@@ -190,7 +220,8 @@ function Register() {
             onChange={handleChange}
             required
             className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-950"
-          />
+          /><br></br>
+          
 
           <button
             type="submit"
@@ -201,6 +232,7 @@ function Register() {
         </form>
 
         {/* Login Link */}
+       
         <p className="text-center text-sm text-gray-500 mt-6">
           Already have an account?{" "}
           <Link
