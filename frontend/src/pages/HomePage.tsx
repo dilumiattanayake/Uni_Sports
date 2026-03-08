@@ -26,7 +26,7 @@ const features: Feature[] = [
     icon: <Users className="h-5 w-5" aria-hidden="true" />,
   },
   {
-    title: "Coach Management",
+    title: "Sports Management",
     description:
       "Organize squads, manage session requests, and keep training schedules consistent across teams.",
     icon: <ShieldCheck className="h-5 w-5" aria-hidden="true" />,
@@ -34,7 +34,7 @@ const features: Feature[] = [
   {
     title: "Events & Tournaments",
     description:
-      "Create events, publish schedules, and keep everyone aligned—from trials to finals.",
+      "Create events, publish dates, and keep everyone aligned—from trials to finals.",
     icon: <CalendarDays className="h-5 w-5" aria-hidden="true" />,
   },
   {
@@ -316,7 +316,7 @@ const upcoming = [
           </div>
 
           <a
-            href="#spots"
+            href="/auth/login"
             className="inline-flex items-center gap-2 font-semibold text-indigo-950 transition hover:text-indigo-900"
           >
             See all sports <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -340,10 +340,13 @@ const upcoming = [
                 Join teams, attend sessions, and compete in events.
               </p>
               <div className="relative mt-5 inline-flex items-center gap-2 text-sm font-semibold text-indigo-950">
-                Explore
-                <span className="transition group-hover:translate-x-0.5" aria-hidden="true">
-                  →
-                </span>
+                
+               <a
+               href="/auth/login"
+               className="inline-flex items-center gap-2 font-semibold text-indigo-950 transition hover:text-indigo-900"
+          >
+             Explore <ArrowRight className="h-4 w-4" aria-hidden="true" />
+             </a>
               </div>
             </div>
           ))}
@@ -382,10 +385,10 @@ const upcoming = [
                     <p className="mt-2 text-sm text-white/70">{e.date}</p>
                     <p className="mt-1 text-sm text-white/70">{e.location}</p>
                     <a
-                      href="#how-it-works"
+                      href="/auth/login"
                       className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-white"
                     >
-                      Learn more <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                      Apply now <ArrowRight className="h-4 w-4" aria-hidden="true" />
                     </a>
                   </div>
                 ))}
@@ -440,21 +443,6 @@ const upcoming = [
                 Uni<span className="text-orange-500">Sports</span>
               </div>
               <p className="mt-2 text-sm text-slate-600">SLIIT Sports Management System</p>
-            </div>
-
-            <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm font-semibold">
-              <a href="#features" className="text-slate-700 hover:text-indigo-950">
-                Features
-              </a>
-              <a href="#sports" className="text-slate-700 hover:text-indigo-950">
-                Sports
-              </a>
-              <a href="#events" className="text-slate-700 hover:text-indigo-950">
-                Events
-              </a>
-              <a href="#how-it-works" className="text-slate-700 hover:text-indigo-950">
-                How it works
-              </a>
             </div>
           </div>
 
