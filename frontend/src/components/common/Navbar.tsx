@@ -2,6 +2,8 @@ import React from "react";
 import { Link } from "react-router-dom";
 
 const Navbar: React.FC = () => {
+
+  
   return (
     <nav className="bg-indigo-950 text-white shadow-md">
       <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
@@ -10,15 +12,6 @@ const Navbar: React.FC = () => {
         <Link to="/" className="text-2xl font-bold text-orange-500">
           UniSports
         </Link>
-
-        {/* Menu */}
-        <div className="space-x-6 hidden md:flex">
-          <Link to="/" className="hover:text-orange-400">Home</Link>
-          <Link to="/#features" className="hover:text-orange-400">Features</Link>
-          <Link to="/#sports" className="hover:text-orange-400">Sports</Link>
-          <Link to="/#events" className="hover:text-orange-400">Events</Link>
-          <Link to="/#how-it-works" className="hover:text-orange-400">How it works</Link>
-        </div>
 
         {/* Auth Buttons */}
         <div className="space-x-4">
