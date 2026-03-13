@@ -1,5 +1,10 @@
 
 import { Link } from "react-router-dom"
+import ba from "../assets/ba.jpg"
+import cap from "../assets/cap.jpg"
+import jacket from "../assets/jacket.jpg"
+import pr from "../assets/pr.jpg"
+import cric from "../assets/cric.jpg"
 import {
   ArrowRight,
   CalendarDays,
@@ -9,8 +14,11 @@ import {
   Sparkles,
   Trophy,
   Users,
+  ShoppingCart,
+  Bot,
 } from "lucide-react"
 import bgImage from "../assets/registerLogin.jpg"
+
 
 type Feature = {
   title: string
@@ -32,16 +40,16 @@ const features: Feature[] = [
     icon: <ShieldCheck className="h-5 w-5" aria-hidden="true" />,
   },
   {
-    title: "Events & Tournaments",
+    title: "Tournaments",
     description:
-      "Create events, publish dates, and keep everyone aligned—from trials to finals.",
+      "Register for events, view matches, and stay updated on tournament progress all in one place.",
     icon: <CalendarDays className="h-5 w-5" aria-hidden="true" />,
   },
   {
-    title: "Clear Progress",
+    title: "Merchandise Store",
     description:
-      "A single place to see what’s happening this week, what’s upcoming, and what needs action.",
-    icon: <CheckCircle2 className="h-5 w-5" aria-hidden="true" />,
+      "Browse and purchase official sports gear and accessories to show your team spirit.",
+    icon: <ShoppingCart className="h-5 w-5" aria-hidden="true" />,
   },
 ]
 
@@ -77,6 +85,46 @@ const upcoming = [
   },
 ]
 
+const shopItems = [
+  {
+    name: "Sports Jersey",
+    price: "LKR 3,500",
+    category: "Apparel",
+    image: cric
+  },
+  {
+    name: "Training Bottoms",
+    price: "LKR 2,800",
+    category: "Apparel",
+    image: pr
+  },
+  {
+    name: "Practice Kit",
+    price: "LKR 4,200",
+    category: "Training",
+    image: pr
+  },
+  {
+    name: "Sports Cap",
+    price: "LKR 1,200",
+    category: "Accessories",
+    image: cap
+
+  },
+  {
+    name: "Sports Band",
+    price: "LKR 800",
+    category: "Accessories",
+    image: ba
+  },
+  {
+    name: "Team Jacket",
+    price: "LKR 5,500",
+    category: "Apparel",
+    image: jacket
+  }
+]
+
  function HomePage() {
   return (
     <div className="bg-white text-slate-900">
@@ -108,7 +156,7 @@ const upcoming = [
               </h1>
 
               <p className="mt-5 max-w-2xl text-pretty text-lg leading-relaxed text-white/80">
-                UniSports helps students and coaches manage sports activities smoothly—join a
+                UniSports helps students and coaches manage sports activities smoothly. Join a
                 sport, request sessions, organize events, and keep everyone on the same schedule.
               </p>
 
@@ -167,7 +215,7 @@ const upcoming = [
                 <ul className="mt-6 space-y-4 text-sm text-white/80">
                   <li className="flex gap-3">
                     <CheckCircle2 className="mt-0.5 h-4 w-4 text-orange-300" aria-hidden="true" />
-                    Register with your SLIIT email and pick your role (student/coach).
+                    Register with your SLIIT email and pick your role.
                   </li>
                   <li className="flex gap-3">
                     <CheckCircle2 className="mt-0.5 h-4 w-4 text-orange-300" aria-hidden="true" />
@@ -213,7 +261,7 @@ const upcoming = [
             Everything you need to manage sports, minus the chaos.
           </h2>
           <p className="mt-4 text-pretty text-base leading-relaxed text-slate-600">
-            A clean workflow for students, coaches, and admins—so you spend less time coordinating
+            A clean workflow for students, coaches, and admins, so you spend less time coordinating
             and more time training.
           </p>
         </div>
@@ -337,7 +385,7 @@ const upcoming = [
                 </div>
               </div>
               <p className="relative mt-3 text-sm text-slate-600">
-                Join teams, attend sessions, and compete in events.
+                Attend training sessions, join teams {s.name} at SLIIT, Enjoy the thrill of the game.
               </p>
               <div className="relative mt-5 inline-flex items-center gap-2 text-sm font-semibold text-indigo-950">
                 
@@ -373,7 +421,7 @@ const upcoming = [
                 {upcoming.map((e) => (
                   <div
                     key={e.title}
-                    className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-lg shadow-black/30 backdrop-blur"
+                    className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg"
                   >
                     <div className="flex items-center justify-between gap-3">
                       <span className="inline-flex items-center rounded-full bg-orange-400/15 px-3 py-1 text-xs font-semibold text-orange-200 ring-1 ring-orange-300/15">
@@ -397,6 +445,71 @@ const upcoming = [
           </div>
         </div>
       </section>
+      
+      {/* Shop */}
+      <section id="merchandise" className="mx-auto max-w-7xl px-6 py-16 sm:py-20">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-sm font-semibold tracking-wide text-orange-500">Merchandise</p>
+              <h2 className="mt-2 text-3xl font-bold tracking-tight text-indigo-950 sm:text-4xl">
+                Shop Sports Gear
+              </h2>
+              <p className="mt-3 max-w-2xl text-base leading-relaxed text-slate-600">
+                Get official UniSports gear including jerseys, training kits, and accessories.
+              </p>
+            </div>
+
+            <a
+              href="/auth/login"
+              className="inline-flex items-center gap-2 font-semibold text-indigo-950 hover:text-indigo-900"
+            >
+              View all products <ArrowRight className="h-4 w-4" />
+            </a>
+          </div>
+
+          <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            
+            {shopItems.map((item) => (
+              <div
+                key={item.name}
+                className="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg"
+              >
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    className="h-96 w-full object-cover"
+                  />
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-orange-500">
+                    {item.category}
+                  </span>
+                </div>
+
+                <h3 className="mt-4 text-lg font-semibold text-indigo-950">
+                  {item.name}
+                </h3>
+
+                <p className="mt-2 text-sm text-slate-600">
+                  Official UniSports merchandise.
+                </p>
+
+                <div className="mt-5 flex items-center justify-between">
+                  <span className="text-base font-bold text-indigo-950">
+                    {item.price}
+                  </span>
+                  
+                  <a
+                    href="/auth/login"
+                    className="inline-flex items-center rounded-full px-4 py-2 bg-indigo-950 gap-1 text-sm font-semibold text-white transition hover:bg-indigo-900"
+                  >
+                    Shop now <ArrowRight className="h-4 w-4" />
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
+      </section>
+
 
       {/* CTA */}
       <section className="mx-auto max-w-7xl px-6 py-16 sm:py-20">
