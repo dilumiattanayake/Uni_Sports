@@ -12,7 +12,7 @@ function Register() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    sport: "",
+    phone: "",
     password: "",
     confirmPassword: ""
   })
@@ -31,19 +31,37 @@ function Register() {
     return email.endsWith("@my.sliit.lk")
   }
 
+  const validatePhone = (phone) => {
+    let cleaned = phone.replace(/\s+/g, '').replace(/-/g, '');
+    if (cleaned.length === 9 && /^7/.test(cleaned)) {
+      cleaned = '0' + cleaned;
+    }
+    const phoneRegex = /^(\+94|0)[0-9]{9}$/;
+    return phoneRegex.test(cleaned);
+  }
+
+  const validatePassword = (password) => {
+    return password.length >= 8 && /[A-Z]/.test(password) && /[a-z]/.test(password) && /\d/.test(password);
+  }
+
   const handleSubmit = async(e) => {
     e.preventDefault()
     setError("");
     setSuccess("");
 
    
+    if (!formData.name.trim()) {
+      setError("Name is required")
+      return
+    }
+
     if (!validateEmail(formData.email)) {
       setError("Please use your SLIIT email (@my.sliit.lk)")
       return
     }
 
-    if (formData.password.length < 6) {
-      setError("Password must be at least 6 characters")
+    if (!validatePassword(formData.password)) {
+      setError("Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one number")
       return
     }
 
@@ -52,8 +70,8 @@ function Register() {
       return
     }
 
-    if (role === "coach" && formData.sport.trim() === "") {
-      setError("Sport field is required for coaches")
+    if (role === "coach" && !validatePhone(formData.phone)) {
+      setError("Please enter a valid phone number (10 digits, starting with 0 )")
       return
     }
 
@@ -67,7 +85,7 @@ function Register() {
     email: formData.email, 
     password: formData.password,
     role,
-    specialization: role === "coach" ? formData.sport : undefined,
+    phone: role === "coach" ? formData.phone : undefined,
   };
 
   try {
@@ -85,7 +103,11 @@ function Register() {
       setSuccess("Registration successful!");
       
     } else {
-      setError(data.error || "Registration failed");
+      const errorMessage =
+        data.message ||
+        data.error ||
+        "Registration failed";
+      setError(errorMessage);
     }
   } catch (error) {
     setError("Server error");
@@ -176,19 +198,19 @@ function Register() {
             className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-950"
           />
 
-          {/* Sport (Only for Coach) */}
+          {/* Phone (Only for Coach) */}
           {role === "coach" && (
           <label className="block text-sm font-medium mb-1">
-              Sport
+              Phone Number
             </label>
           )}
           {role === "coach" && (
             
             <input
-              type="text"
-              name="sport"
-              placeholder="Sport (e.g., Cricket, Football)"
-              value={formData.sport}
+              type="tel"
+              name="phone"
+              placeholder="Phone Number "
+              value={formData.phone}
               onChange={handleChange}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-950"
             />
