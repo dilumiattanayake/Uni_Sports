@@ -1,38 +1,48 @@
 import { useAuth } from "@/context/AuthContext";
 import { UserRole } from "@/types";
-import { useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { NavLink } from "@/components/NavLink";
 import {
-  LayoutDashboard, Trophy, Users, MapPin, Calendar, UserCheck, BookOpen, Bell, Settings,
-  ChevronLeft, Dumbbell
+  LayoutDashboard, Trophy, Users, MapPin, Calendar, UserCheck, BookOpen, Settings,
+  ChevronLeft, Medal, DollarSign,  Package,
 } from "lucide-react";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarFooter, useSidebar,
 } from "@/components/ui/sidebar";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import logo from "@/assets/Logo.jpg";
+import logoos from "@/assets/Logoos.jpg";
+
 
 const adminLinks = [
-  { title: "Dashboard", url: "/admin", icon: LayoutDashboard },
+  { title: "Dashboard", url: "/AdminDashboard", icon: LayoutDashboard },
   { title: "Sports", url: "/admin/sports", icon: Trophy },
   { title: "Coaches", url: "/admin/coaches", icon: Users },
   { title: "Students", url: "/admin/students", icon: UserCheck },
   { title: "Locations", url: "/admin/locations", icon: MapPin },
+  { title: "Events", url: "/admin/events", icon:  Medal },
+  { title: "Inventory", url: "/admin/inventory", icon:  Package },
+  { title: "Payments", url: "/admin/payments", icon:  DollarSign },
 ];
 
 const coachLinks = [
-  { title: "Dashboard", url: "/coach", icon: LayoutDashboard },
+  { title: "Dashboard", url: "/CoachDashboard", icon: LayoutDashboard },
   { title: "Sessions", url: "/coach/sessions", icon: Calendar },
   { title: "Join Requests", url: "/coach/requests", icon: UserCheck },
+  { title: "My Team", url: "/coach/teams", icon: Users },
 ];
 
 const studentLinks = [
-  { title: "Dashboard", url: "/student", icon: LayoutDashboard },
-  { title: "Browse Sports", url: "/student/sports", icon: BookOpen },
-  { title: "My Sessions", url: "/student/sessions", icon: Calendar },
-  { title: "My Requests", url: "/student/requests", icon: UserCheck },
+  { title: "Dashboard", url: "/StudentDashboard", icon: LayoutDashboard },
+  { title: "Browse Sports", url: "/StudentBrowseSports", icon: BookOpen },
+  { title: "My Sessions", url: "/StudentSessions", icon: Calendar },
+  { title: "My Requests", url: "/StudentRequests", icon: UserCheck },
+  { title: "Browse Events", url: "/StudentBrowseEvents", icon: Medal},
+  { title: "My Events", url: "/StudentEvents", icon:  Trophy },
+  { title: "Inventory", url: "/student/inventory", icon:  Package },
+  { title: "My Payements", url: "/student/payments", icon:  DollarSign },
 ];
 
 const roleConfig: Record<UserRole, { links: typeof adminLinks; label: string; color: string }> = {
@@ -42,29 +52,48 @@ const roleConfig: Record<UserRole, { links: typeof adminLinks; label: string; co
 };
 
 export function AppSidebar() {
-  const { role, switchRole, user } = useAuth();
+  const { role, user } = useAuth();
   const { state, toggleSidebar } = useSidebar();
   const collapsed = state === "collapsed";
-  const location = useLocation();
+  const navigate = useNavigate();
   const config = roleConfig[role];
+
+  const handleLogoClick = () => {
+  if (role === "admin") navigate("/AdminDashboard");
+  else if (role === "coach") navigate("/CoachDashboard");
+  else if (role === "student") navigate("/StudentDashboard");
+};
+
+const handleSettingsClick = () => {
+  if (role === "admin") navigate("/admin/settings");
+  else if (role === "coach") navigate("/coach/settings");
+  else if (role === "student") navigate("/student/settings");
+};
+
+
 
   return (
     <Sidebar collapsible="icon" className="border-r-0">
-      <div className="flex items-center gap-3 px-4 py-5 border-b border-sidebar-border">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground font-display font-bold text-sm">
-          <Dumbbell className="h-5 w-5" />
-        </div>
+      <div className="flex items-center justify-between px-4 py-5 border-b border-sidebar-border">
+
+  
+        <img
+          src={collapsed ? logoos : logo}
+          alt="UniSport Logo"
+          onClick={handleLogoClick}
+          className={`cursor-pointer object-contain transition-all ${collapsed ? "h-4 mx-auto" : "h-10 w-auto"}`}
+        />
+
         {!collapsed && (
-          <div className="flex flex-col">
-            <span className="font-display font-bold text-sm text-sidebar-foreground">UniSport</span>
-            <span className="text-xs text-sidebar-foreground/60">Sports Management</span>
-          </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-7 w-7 text-sidebar-foreground/50 hover:text-sidebar-foreground"
+          onClick={toggleSidebar}>
+        <ChevronLeft className="h-4 w-4" />
+        </Button>
         )}
-        {!collapsed && (
-          <Button variant="ghost" size="icon" className="ml-auto h-7 w-7 text-sidebar-foreground/50 hover:text-sidebar-foreground" onClick={toggleSidebar}>
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-        )}
+
       </div>
 
       <SidebarContent className="pt-2">
@@ -73,13 +102,16 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {config.links.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
+                <SidebarMenuItem key={item.title} className={item.title === "Dashboard" ? "mb-1" : ""}>
+                  <SidebarMenuButton asChild onClick={(e) => e.stopPropagation()}>
                     <NavLink
                       to={item.url}
-                      end={item.url === `/${role}`}
-                      className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors text-sm"
-                      activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
+                      end={item.title === "Dashboard"}
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors
+                                  text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground
+                                  ${collapsed ? "justify-center" : ""} `}
+                      activeClassName={`bg-sidebar-accent text-sidebar-primary font-medium
+                                      ${collapsed ? "border-2 border-orange-400 bg-orange-400 text-white rounded-xl p-2 flex justify-center items-center" : ""}`}
                     >
                       <item.icon className="h-4 w-4 shrink-0" />
                       {!collapsed && <span>{item.title}</span>}
@@ -90,30 +122,11 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-
-        {/* Placeholder for future modules */}
-        {!collapsed && (
-          <SidebarGroup>
-            <SidebarGroupLabel className="text-sidebar-foreground/40 uppercase text-[10px] tracking-widest font-body">Other Modules</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {["User Mgmt", "Events", "Payments"].map((label) => (
-                  <SidebarMenuItem key={label}>
-                    <SidebarMenuButton disabled className="opacity-40 cursor-not-allowed">
-                      <Settings className="h-4 w-4 mr-3" />
-                      <span className="text-sm">{label}</span>
-                      <Badge variant="outline" className="ml-auto text-[9px] border-sidebar-foreground/20 text-sidebar-foreground/40">Soon</Badge>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )}
+       
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border p-4">
-        {!collapsed && (
+        {!collapsed && user && (
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <div className="h-8 w-8 rounded-full bg-sidebar-primary/20 flex items-center justify-center text-sidebar-primary font-display font-bold text-xs">
@@ -124,16 +137,17 @@ export function AppSidebar() {
                 <p className="text-[10px] text-sidebar-foreground/50 truncate">{user.email}</p>
               </div>
             </div>
-            <Select value={role} onValueChange={(v) => switchRole(v as UserRole)}>
-              <SelectTrigger className="h-8 text-xs bg-sidebar-accent border-sidebar-border text-sidebar-foreground">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="admin">🛡️ Admin</SelectItem>
-                <SelectItem value="coach">🏋️ Coach</SelectItem>
-                <SelectItem value="student">🎓 Student</SelectItem>
-              </SelectContent>
-            </Select>
+            
+            <Button 
+              variant="default" 
+              className="w-full justify-centre mt-2 bg-orange-400 hover:bg-orange-500 text-white border-0"  
+              size="sm"
+              onClick={handleSettingsClick}
+            >
+              <Settings className="mr-2 h-4 w-4" />
+              Profile Settings
+            </Button>
+
           </div>
         )}
       </SidebarFooter>

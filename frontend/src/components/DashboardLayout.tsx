@@ -6,14 +6,14 @@ import { NotificationsDropdown } from "@/components/notifications/NotificationsD
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { user, role } = useAuth();
 
-  const roleLabel = role === "admin" ? "Administrator" : role === "coach" ? "Coach" : "Student";
+  const roleLabel = role === "admin" ? "Admin" : role === "coach" ? "Coach" : "Student";
 
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
         <AppSidebar />
         <div className="flex-1 flex flex-col min-w-0">
-          <header className="h-14 flex items-center justify-between border-b border-border bg-card px-4 lg:px-6 shrink-0">
+          <header className="h-14 flex items-center justify-between border-b border-border bg-card lg:px-6 shrink-0 px-4 py-5">
             <div className="flex items-center gap-2">
               <SidebarTrigger className="text-muted-foreground hover:text-foreground" />
               <div className="h-5 w-px bg-border mx-1 hidden sm:block" />
