@@ -31,13 +31,31 @@ function Register() {
     return email.endsWith("@my.sliit.lk")
   }
 
-  const validatePhone = (phone) => {
-    let cleaned = phone.replace(/\s+/g, '').replace(/-/g, '');
-    if (cleaned.length === 9 && /^7/.test(cleaned)) {
-      cleaned = '0' + cleaned;
+  const normalizePhone = (phone) => {
+    const digits = phone.replace(/\D/g, "");
+
+    // Common Sri Lanka formats:
+    // - 0771234567
+    // - +94771234567
+    // - 94771234567
+    // - 771234567 (auto-prefix 0)
+    if (digits.length === 9 && digits.startsWith("7")) {
+      return `0${digits}`;
     }
-    const phoneRegex = /^(\+94|0)[0-9]{9}$/;
-    return phoneRegex.test(cleaned);
+
+    if (digits.length === 10 && digits.startsWith("0")) {
+      return digits;
+    }
+
+    if (digits.length === 11 && digits.startsWith("94")) {
+      return `0${digits.slice(2)}`;
+    }
+
+    return null;
+  };
+
+  const validatePhone = (phone) => {
+    return Boolean(normalizePhone(phone));
   }
 
   const validatePassword = (password) => {
@@ -70,8 +88,10 @@ function Register() {
       return
     }
 
-    if (role === "coach" && !validatePhone(formData.phone)) {
-      setError("Please enter a valid phone number (10 digits, starting with 0 )")
+    const normalizedPhone = normalizePhone(formData.phone);
+
+    if (role === "coach" && !normalizedPhone) {
+      setError("Please enter a valid phone number (e.g., 0771234567 or +94771234567)")
       return
     }
 
@@ -80,13 +100,12 @@ function Register() {
     setSuccess("Registration successful !")
 
     const payload = {
-              
-    name: formData.name,
-    email: formData.email, 
-    password: formData.password,
-    role,
-    phone: role === "coach" ? formData.phone : undefined,
-  };
+      name: formData.name,
+      email: formData.email,
+      password: formData.password,
+      role,
+      phone: role === "coach" ? normalizedPhone : undefined,
+    };
 
   try {
     const response = await fetch("http://localhost:5000/api/auth/register", {
