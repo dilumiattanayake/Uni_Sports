@@ -48,6 +48,7 @@ app.use('/api/sessions', sessionRoutes);
 app.use('/api/join-requests', joinRequestRoutes);
 app.use('/api/notifications', notificationRoutes);
 
+
 // Placeholder routes for future modules
 // Uncomment and implement when Event Management module is ready
 // app.use('/api/events', eventRoutes);
@@ -71,16 +72,16 @@ app.use(errorHandler);
 const PORT = process.env.PORT || 5000;
 const server = app.listen(PORT, () => {
   console.log(`
-  ╔═══════════════════════════════════════════════════╗
-  ║                                                   ║
-  ║       UniSports Backend Server Running           ║
-  ║                                                   ║
-  ║       Mode: ${process.env.NODE_ENV || 'development'}                            ║
-  ║       Port: ${PORT}                                   ║
-  ║                                                   ║
-  ║       API Docs: http://localhost:${PORT}/api/health  ║
-  ║                                                   ║
-  ╚═══════════════════════════════════════════════════╝
+  ╔═══════════════════════════════════════════════════════════╗
+  ║                                                           ║
+  ║       UniSports Backend Server Running                    ║
+  ║                                                           ║
+  ║       Mode: ${process.env.NODE_ENV || 'development'}      ║
+  ║       Port: ${PORT}                                       ║
+  ║                                                           ║
+  ║       API Docs: http://localhost:${PORT}/                 ║
+  ║                                                           ║
+  ╚═══════════════════════════════════════════════════════════╝
   `);
 });
 

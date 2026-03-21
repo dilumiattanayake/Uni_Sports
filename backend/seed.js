@@ -34,7 +34,7 @@ const seedData = async () => {
     console.log('👤 Creating users...');
     const admin = await User.create({
       name: 'Admin User',
-      email: 'admin@unisports.com',
+      email: 'admin@my.sliit.lk',
       password: 'admin123',
       role: 'admin',
     });
@@ -42,7 +42,7 @@ const seedData = async () => {
     // Create Coaches
     const coach1 = await User.create({
       name: 'Coach John Smith',
-      email: 'coach1@unisports.com',
+      email: 'john.smith@my.sliit.lk',
       password: 'coach123',
       role: 'coach',
       specialization: 'Basketball & Athletics',
@@ -51,7 +51,7 @@ const seedData = async () => {
 
     const coach2 = await User.create({
       name: 'Coach Sarah Johnson',
-      email: 'coach2@unisports.com',
+      email: 'sarah.johnson@my.sliit.lk',
       password: 'coach123',
       role: 'coach',
       specialization: 'Swimming & Fitness',
@@ -61,7 +61,7 @@ const seedData = async () => {
     // Create Students
     const student1 = await User.create({
       name: 'Student Alice Brown',
-      email: 'student1@unisports.com',
+      email: 'alice.brown@my.sliit.lk',
       password: 'student123',
       role: 'student',
       studentId: 'ST2024001',
@@ -70,7 +70,7 @@ const seedData = async () => {
 
     const student2 = await User.create({
       name: 'Student Bob Wilson',
-      email: 'student2@unisports.com',
+      email: 'bob.wilson@my.sliit.lk',
       password: 'student123',
       role: 'student',
       studentId: 'ST2024002',
@@ -245,19 +245,19 @@ const seedData = async () => {
 
     console.log('📝 Login Credentials:\n');
     console.log('Admin:');
-    console.log('  Email: admin@unisports.com');
+    console.log('  Email: admin@my.sliit.lk');
     console.log('  Password: admin123\n');
     console.log('Coach 1:');
-    console.log('  Email: coach1@unisports.com');
+    console.log('  Email: john.smith@my.sliit.lk');
     console.log('  Password: coach123\n');
     console.log('Coach 2:');
-    console.log('  Email: coach2@unisports.com');
+    console.log('  Email: sarah.johnson@my.sliit.lk');
     console.log('  Password: coach123\n');
     console.log('Student 1:');
-    console.log('  Email: student1@unisports.com');
+    console.log('  Email: alice.brown@my.sliit.lk');
     console.log('  Password: student123\n');
     console.log('Student 2:');
-    console.log('  Email: student2@unisports.com');
+    console.log('  Email: bob.wilson@my.sliit.lk');
     console.log('  Password: student123\n');
 
     console.log('═══════════════════════════════════════\n');
