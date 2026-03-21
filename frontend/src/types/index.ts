@@ -71,3 +71,24 @@ export interface Notification {
   read: boolean;
   createdAt: string;
 }
+
+export interface EventRegistration {
+  studentId: string;
+  status: "pending" | "confirmed" | "waitlisted" | "cancelled";
+  registeredAt: string;
+}
+
+export interface Event {
+  id: string;
+  title: string;
+  description: string;
+  sportId: string;
+  startDate: string;
+  endDate: string;
+  registrationDeadline: string;
+  venue: string;
+  maxParticipants: number;
+  registrationFormUrl?: string;
+  status: "upcoming" | "ongoing" | "completed" | "cancelled";
+  registrations: EventRegistration[];
+}

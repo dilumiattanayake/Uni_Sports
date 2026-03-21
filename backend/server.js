@@ -13,6 +13,7 @@ const locationRoutes = require('./routes/locationRoutes');
 const sessionRoutes = require('./routes/sessionRoutes');
 const joinRequestRoutes = require('./routes/joinRequestRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
+const eventRoutes = require('./routes/eventRoutes')
 
 // Initialize app
 const app = express();
@@ -47,6 +48,7 @@ app.use('/api/locations', locationRoutes);
 app.use('/api/sessions', sessionRoutes);
 app.use('/api/join-requests', joinRequestRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/events',eventRoutes);
 
 // Placeholder routes for future modules
 // Uncomment and implement when Event Management module is ready
