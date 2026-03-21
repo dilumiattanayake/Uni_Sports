@@ -73,16 +73,16 @@ app.use(errorHandler);
 const PORT = process.env.PORT || 5000;
 const server = app.listen(PORT, () => {
   console.log(`
-  ╔═══════════════════════════════════════════════════╗
-  ║                                                   ║
-  ║       UniSports Backend Server Running           ║
-  ║                                                   ║
-  ║       Mode: ${process.env.NODE_ENV || 'development'}                            ║
-  ║       Port: ${PORT}                                   ║
-  ║                                                   ║
-  ║       API Docs: http://localhost:${PORT}/api/health  ║
-  ║                                                   ║
-  ╚═══════════════════════════════════════════════════╝
+  ╔═══════════════════════════════════════════════════════════╗
+  ║                                                           ║
+  ║       UniSports Backend Server Running                    ║
+  ║                                                           ║
+  ║       Mode: ${process.env.NODE_ENV || 'development'}      ║
+  ║       Port: ${PORT}                                       ║
+  ║                                                           ║
+  ║       API Docs: http://localhost:${PORT}/                 ║
+  ║                                                           ║
+  ╚═══════════════════════════════════════════════════════════╝
   `);
 });
 
