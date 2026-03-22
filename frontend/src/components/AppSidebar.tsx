@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { NavLink } from "@/components/NavLink";
 import {
   LayoutDashboard, Trophy, Users, MapPin, Calendar, UserCheck, BookOpen, Settings,
-  ChevronLeft, Medal, DollarSign,  Package,
+  ChevronLeft, Medal, DollarSign,  Package, Home,
 } from "lucide-react";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
@@ -17,6 +17,7 @@ import logoos from "@/assets/Logoos.jpg";
 
 
 const adminLinks = [
+  { title: "Home", url: "/admin/home", icon: Home },
   { title: "Dashboard", url: "/AdminDashboard", icon: LayoutDashboard },
   { title: "Sports", url: "/admin/sports", icon: Trophy },
   { title: "Coaches", url: "/admin/coaches", icon: Users },
