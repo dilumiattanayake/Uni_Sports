@@ -28,7 +28,7 @@ router.route('/')
   .get(protect, getAllInventory) 
   .post(
     protect, 
-    authorize('Admin'), 
+    authorize('admin'), 
     upload.single('image'), 
     validate(createInventorySchema), // MUST be after upload.single
     createInventory
@@ -38,10 +38,10 @@ router.route('/:id')
   .get(protect, getInventoryById)
   .put(
     protect, 
-    authorize('Admin'), 
+    authorize('admin'), 
     upload.single('image'), 
     validate(updateInventorySchema), // MUST be after upload.single
     updateInventory
   )
-  .delete(protect, authorize('Admin'), deleteInventory);
+  .delete(protect, authorize('admin'), deleteInventory);
 module.exports = router;

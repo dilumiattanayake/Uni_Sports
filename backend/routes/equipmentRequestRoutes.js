@@ -27,7 +27,7 @@ router.route('/my-requests')
   .get(protect, authorize('Student'), getMyRequests);
 
 router.route('/')
-  .get(protect, authorize('Admin', 'Coach'), getAllRequests) 
+  .get(protect, authorize('admin', 'Coach'), getAllRequests) 
   .post(
     protect, 
     authorize('Student'), 
@@ -38,7 +38,7 @@ router.route('/')
 router.route('/:id/status')
   .put(
     protect, 
-    authorize('Admin', 'Coach'), 
+    authorize('admin', 'Coach'), 
     validate(updateRequestStatusSchema), // Validation added
     updateRequestStatus
   );

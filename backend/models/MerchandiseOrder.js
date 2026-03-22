@@ -11,6 +11,10 @@ const MerchandiseOrderSchema = new mongoose.Schema({
     ref: 'Merchandise',
     required: true
   },
+  selectedSize: {
+    type: String,
+    required: true
+  },
   quantity: {
     type: Number,
     required: true,

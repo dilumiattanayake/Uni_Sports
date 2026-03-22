@@ -11,7 +11,16 @@ const MerchandiseOrder = require('../models/MerchandiseOrder');
 exports.createMerchandise = async (req, res, next) => {
   try {
     req.body.lastUpdatedBy = req.user.id;
-    // The image URL will be saved here if it's included in req.body
+    
+    // Parse the variants string back into a JSON array for Mongoose
+    if (typeof req.body.variants === 'string') {
+      req.body.variants = JSON.parse(req.body.variants);
+    }
+
+    if (req.file) {
+      req.body.image = `/uploads/${req.file.filename}`;
+    }
+
     const merch = await Merchandise.create(req.body);
     res.status(201).json({ success: true, data: merch });
   } catch (error) {
@@ -30,13 +39,24 @@ exports.updateMerchandise = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'Merchandise not found' });
     }
 
-    // Update allowed fields
+    // Parse variants if provided
+    if (req.body.variants) {
+      if (typeof req.body.variants === 'string') {
+        req.body.variants = JSON.parse(req.body.variants);
+      }
+      merch.variants = req.body.variants;
+    }
+
+    // Update other allowed fields
     if (req.body.itemName) merch.itemName = req.body.itemName;
+    if (req.body.sport) merch.sport = req.body.sport;
     if (req.body.category) merch.category = req.body.category;
-    if (req.body.size) merch.size = req.body.size;
     if (req.body.price !== undefined) merch.price = req.body.price;
-    if (req.body.stockQuantity !== undefined) merch.stockQuantity = req.body.stockQuantity;
-    if (req.body.image) merch.image = req.body.image; // Update image if provided
+    
+    // Catch the new image from Multer if uploaded
+    if (req.file) {
+      merch.image = `/uploads/${req.file.filename}`;
+    }
     
     merch.lastUpdatedBy = req.user.id;
 
@@ -47,7 +67,6 @@ exports.updateMerchandise = async (req, res, next) => {
     next(error);
   }
 };
-
 // @desc    Update order status (e.g., mark as Paid or Handed Over)
 // @route   PUT /api/merchandise/orders/:id/status
 // @access  Private (Admin, Coach)
@@ -80,8 +99,9 @@ exports.updateOrderStatus = async (req, res, next) => {
 // @access  Private (All)
 exports.getAllMerchandise = async (req, res, next) => {
   try {
-    // Only show items that are actually in stock
-    const merch = await Merchandise.find({ stockQuantity: { $gt: 0 } }).populate('sport', 'name');
+    // Removed the old stock filter so Admins can see ALL items, including out-of-stock ones.
+    const merch = await Merchandise.find({}).populate('sport', 'name');
+    
     res.status(200).json({ success: true, count: merch.length, data: merch });
   } catch (error) {
     next(error);
@@ -93,7 +113,7 @@ exports.getAllMerchandise = async (req, res, next) => {
 // @access  Private (Student)
 exports.createOrder = async (req, res, next) => {
   try {
-    const { quantity } = req.body;
+    const { quantity, selectedSize } = req.body; // NEW: Get selectedSize
     const requestedQty = Number(quantity) || 1;
 
     const merch = await Merchandise.findById(req.params.id);
@@ -102,29 +122,54 @@ exports.createOrder = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'Merchandise not found' });
     }
 
-    if (merch.stockQuantity < requestedQty) {
-      return res.status(400).json({ success: false, message: 'Not enough stock available' });
+    // NEW: Find the specific size variant
+    const variantIndex = merch.variants.findIndex(v => v.size === selectedSize);
+    
+    if (variantIndex === -1) {
+      return res.status(400).json({ success: false, message: `Size ${selectedSize} is not available for this item.` });
     }
 
-    // Calculate price
+    if (merch.variants[variantIndex].stockQuantity < requestedQty) {
+      return res.status(400).json({ success: false, message: 'Not enough stock available for this size' });
+    }
+
     const totalPrice = merch.price * requestedQty;
     const paymentStatus = totalPrice === 0 ? 'Free Issue' : 'Pending';
 
-    // Create the order
     const order = await MerchandiseOrder.create({
       student: req.user.id,
       merchandise: merch._id,
+      selectedSize, // Save the size!
       quantity: requestedQty,
       totalPrice,
       paymentStatus
     });
 
-    // Deduct from stock immediately to prevent double-selling
-    merch.stockQuantity -= requestedQty;
+    // Deduct stock from that specific variant
+    merch.variants[variantIndex].stockQuantity -= requestedQty;
     merch.soldOrIssuedQuantity += requestedQty;
     await merch.save();
 
     res.status(201).json({ success: true, data: order });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Delete merchandise entirely
+// @route   DELETE /api/merchandise/:id
+// @access  Private (Admin)
+exports.deleteMerchandise = async (req, res, next) => {
+  try {
+    const merch = await Merchandise.findById(req.params.id);
+
+    if (!merch) {
+      return res.status(404).json({ success: false, message: 'Merchandise not found' });
+    }
+
+    await merch.deleteOne();
+
+    res.status(200).json({ success: true, data: {} });
   } catch (error) {
     next(error);
   }

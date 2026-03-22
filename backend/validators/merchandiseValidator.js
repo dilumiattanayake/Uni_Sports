@@ -6,17 +6,42 @@ const createMerchandiseSchema = z.object({
   itemName: z.string().min(2, 'Merchandise name is required'),
   sport: objectId,
   category: z.enum(['Apparel', 'Team Kit', 'Accessories', 'Footwear', 'Other']),
-  size: z.enum(['XS', 'S', 'M', 'L', 'XL', 'XXL', 'N/A']).default('N/A'),
+  variants: z.string().transform((val, ctx) => {
+    try {
+      const parsed = JSON.parse(val);
+      if (!Array.isArray(parsed) || parsed.length === 0) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Must provide at least one variant" });
+        return z.NEVER;
+      }
+      return parsed;
+    } catch (e) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Invalid variants format" });
+      return z.NEVER;
+    }
+}),
   price: z.coerce.number().min(0, 'Price cannot be negative'),
-  stockQuantity: z.coerce.number().int().min(0, 'Stock cannot be negative'),
 });
 
 const updateMerchandiseSchema = z.object({
   itemName: z.string().min(2).optional(),
+  sport: objectId.optional(),
   category: z.enum(['Apparel', 'Team Kit', 'Accessories', 'Footwear', 'Other']).optional(),
-  size: z.enum(['XS', 'S', 'M', 'L', 'XL', 'XXL', 'N/A']).optional(),
   price: z.coerce.number().min(0).optional(),
-  stockQuantity: z.coerce.number().int().min(0).optional(),
+  
+  // Parse stringified variants array for updates
+  variants: z.string().transform((val, ctx) => {
+    try {
+      const parsed = JSON.parse(val);
+      if (!Array.isArray(parsed) || parsed.length === 0) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Must provide at least one variant" });
+        return z.NEVER;
+      }
+      return parsed;
+    } catch (e) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Invalid variants format" });
+      return z.NEVER;
+    }
+  }).optional(),
 });
 
 const createOrderSchema = z.object({

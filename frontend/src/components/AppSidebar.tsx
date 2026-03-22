@@ -25,6 +25,7 @@ const adminLinks = [
   { title: "Locations", url: "/admin/locations", icon: MapPin },
   { title: "Events", url: "/admin/events", icon:  Medal },
   { title: "Inventory", url: "/admin/inventory", icon:  Package },
+  { title: "Merchandise", url: "/admin/merchandise", icon:  BookOpen },
   { title: "Payments", url: "/admin/payments", icon:  DollarSign },
 ];
 

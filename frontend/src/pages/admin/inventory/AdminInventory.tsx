@@ -9,12 +9,13 @@ export default function AdminInventory() {
   
   // Modal State
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [editingId, setEditingId] = useState(null); // NEW: Track if we are editing
   
   // Form State
   const [formData, setFormData] = useState({
     itemName: '',
-    sport: '', // Note: In a full app, populate this via a dropdown from sportsService
-    location: '', // Note: Populate via dropdown from locationService
+    sport: '', 
+    location: '', 
     totalQuantity: 0,
     image: null
   });
@@ -37,22 +38,39 @@ export default function AdminInventory() {
     }
   };
 
-  // Handle Form Inputs
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  // Handle File Upload specifically
   const handleFileChange = (e) => {
     setFormData({ ...formData, image: e.target.files[0] });
   };
 
-  // Submit New Equipment
-  const handleAddSubmit = async (e) => {
+  // NEW: Open Modal for Editing
+  const openEditModal = (item) => {
+    setFormData({
+      itemName: item.itemName,
+      sport: item.sport?._id || '', // Safely get ID if populated
+      location: item.location?._id || '', // Safely get ID if populated
+      totalQuantity: item.totalQuantity,
+      image: null // Reset image so it doesn't upload a blank one
+    });
+    setEditingId(item._id);
+    setIsAddModalOpen(true);
+  };
+
+  // NEW: Reset form helper
+  const resetForm = () => {
+    setFormData({ itemName: '', sport: '', location: '', totalQuantity: 0, image: null });
+    setEditingId(null);
+    setIsAddModalOpen(false);
+  };
+
+  // Submit Equipment (Handles BOTH Add and Edit)
+  const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // 1. Create a FormData object because we are sending a file
       const submitData = new FormData();
       submitData.append('itemName', formData.itemName);
       submitData.append('sport', formData.sport);
@@ -63,16 +81,18 @@ export default function AdminInventory() {
         submitData.append('image', formData.image);
       }
 
-      // 2. Call the service
-      await inventoryService.create(submitData);
+      // NEW: Check if we are updating or creating
+      if (editingId) {
+        await inventoryService.update(editingId, submitData);
+      } else {
+        await inventoryService.create(submitData);
+      }
       
-      // 3. Cleanup and refresh
-      setIsAddModalOpen(false);
-      setFormData({ itemName: '', sport: '', location: '', totalQuantity: 0, image: null });
+      resetForm();
       fetchInventory(); // Refresh the table
       
     } catch (err) {
-      alert(err.message || 'Failed to add equipment');
+      alert(err.message || 'Failed to save equipment');
     }
   };
 
@@ -97,7 +117,7 @@ export default function AdminInventory() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-800">Inventory Management</h1>
         <button 
-          onClick={() => setIsAddModalOpen(true)}
+          onClick={() => { resetForm(); setIsAddModalOpen(true); }}
           className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow transition"
         >
           + Add Equipment
@@ -126,7 +146,6 @@ export default function AdminInventory() {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="flex-shrink-0 h-10 w-10 bg-gray-100 rounded flex items-center justify-center overflow-hidden">
-                        {/* Display image if it exists, otherwise a placeholder */}
                         {item.image && item.image !== 'no-photo.jpg' ? (
                           <img src={`http://localhost:5000${item.image}`} alt={item.itemName} className="h-full w-full object-cover" />
                         ) : (
@@ -158,7 +177,8 @@ export default function AdminInventory() {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button className="text-indigo-600 hover:text-indigo-900 mr-4">Edit</button>
+                    {/* NEW: Bind the Edit button */}
+                    <button onClick={() => openEditModal(item)} className="text-indigo-600 hover:text-indigo-900 mr-4">Edit</button>
                     <button onClick={() => handleDelete(item._id)} className="text-red-600 hover:text-red-900">Delete</button>
                   </td>
                 </tr>
@@ -168,12 +188,13 @@ export default function AdminInventory() {
         </table>
       </div>
 
-      {/* ADD EQUIPMENT MODAL */}
+      {/* ADD/EDIT EQUIPMENT MODAL */}
       {isAddModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-8 w-full max-w-md shadow-xl">
-            <h2 className="text-xl font-bold mb-4">Add New Equipment</h2>
-            <form onSubmit={handleAddSubmit}>
+            {/* NEW: Dynamic Title */}
+            <h2 className="text-xl font-bold mb-4">{editingId ? 'Edit Equipment' : 'Add New Equipment'}</h2>
+            <form onSubmit={handleSubmit}>
               
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Item Name</label>
@@ -185,7 +206,6 @@ export default function AdminInventory() {
                 />
               </div>
 
-              {/* Note: In a real app, replace these text inputs with <select> dropdowns fetching from sportsService and locationService */}
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Sport ID</label>
                 <input 
@@ -216,7 +236,10 @@ export default function AdminInventory() {
               </div>
 
               <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Equipment Image</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {/* NEW: Dynamic Image Label */}
+                  {editingId ? 'Update Image (Leave blank to keep current)' : 'Equipment Image'}
+                </label>
                 <input 
                   type="file" accept="image/*"
                   onChange={handleFileChange}
@@ -227,7 +250,7 @@ export default function AdminInventory() {
               <div className="flex justify-end space-x-3">
                 <button 
                   type="button" 
-                  onClick={() => setIsAddModalOpen(false)}
+                  onClick={resetForm}
                   className="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50 transition"
                 >
                   Cancel
@@ -236,7 +259,8 @@ export default function AdminInventory() {
                   type="submit"
                   className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
                 >
-                  Save Equipment
+                  {/* NEW: Dynamic Button Text */}
+                  {editingId ? 'Save Changes' : 'Save Equipment'}
                 </button>
               </div>
 

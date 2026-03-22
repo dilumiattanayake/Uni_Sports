@@ -1,3 +1,4 @@
+// models/Merchandise.js
 const mongoose = require('mongoose');
 
 const MerchandiseSchema = new mongoose.Schema({
@@ -13,28 +14,32 @@ const MerchandiseSchema = new mongoose.Schema({
   },
   image: {
     type: String,
-    default: 'no-photo.jpg' // Default placeholder if no image is uploaded
+    default: 'no-photo.jpg'
   },
   category: {
     type: String,
     required: true,
     enum: ['Apparel', 'Team Kit', 'Accessories', 'Footwear', 'Other'] 
   },
-  size: {
-    type: String,
-    enum: ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'N/A'],
-    default: 'N/A' 
-  },
   price: {
     type: Number,
     required: true,
     default: 0 
   },
-  stockQuantity: {
-    type: Number,
-    required: [true, 'Please add the total stock quantity'],
-    min: 0
-  },
+  // NEW: Array of sizes and their specific stock
+  variants: [{
+    size: {
+      type: String,
+      enum: ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'N/A'],
+      required: true
+    },
+    stockQuantity: {
+      type: Number,
+      required: true,
+      min: 0,
+      default: 0
+    }
+  }],
   soldOrIssuedQuantity: {
     type: Number,
     default: 0,

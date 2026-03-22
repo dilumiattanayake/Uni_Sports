@@ -6,6 +6,7 @@ const {
   createMerchandise, 
   updateMerchandise, 
   getAllMerchandise, 
+  deleteMerchandise,
   createOrder, 
   updateOrderStatus 
 } = require('../controllers/merchandiseController');
@@ -28,7 +29,7 @@ router.route('/')
   .get(protect, getAllMerchandise) 
   .post(
     protect, 
-    authorize('Admin'), 
+    authorize('admin'), 
     upload.single('image'), 
     validate(createMerchandiseSchema), // MUST be after upload.single
     createMerchandise
@@ -37,10 +38,12 @@ router.route('/')
 router.route('/:id')
   .put(
     protect, 
-    authorize('Admin'), 
+    authorize('admin'), 
     upload.single('image'), 
     validate(updateMerchandiseSchema), // MUST be after upload.single
     updateMerchandise
+  )
+  .delete(protect, authorize('admin'), deleteMerchandise
   );
 
 // Student Orders
@@ -52,11 +55,11 @@ router.route('/:id/order')
     createOrder
   );
 
-// Admin/Coach processing orders
+// admin/Coach processing orders
 router.route('/orders/:id/status')
   .put(
     protect, 
-    authorize('Admin', 'Coach'), 
+    authorize('admin', 'Coach'), 
     validate(updateOrderStatusSchema), // Validation added
     updateOrderStatus
   );

@@ -11,9 +11,13 @@ export const merchandiseService = {
     return fetchWithAuth(`/merchandise`, { method: "POST", body: formData }, true);
   },
   
-  // Uses FormData to handle the image upload
   update: async (id: string, formData: FormData) => {
     return fetchWithAuth(`/merchandise/${id}`, { method: "PUT", body: formData }, true);
+  },
+  
+  // NEW: Add the delete method
+  delete: async (id: string) => {
+    return fetchWithAuth(`/merchandise/${id}`, { method: "DELETE" });
   },
   
   createOrder: async (id: string, data: { quantity: number }) => {
