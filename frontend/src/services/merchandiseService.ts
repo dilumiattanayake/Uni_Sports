@@ -20,11 +20,19 @@ export const merchandiseService = {
     return fetchWithAuth(`/merchandise/${id}`, { method: "DELETE" });
   },
   
-  createOrder: async (id: string, data: { quantity: number }) => {
+  createOrder: async (id: string, data: { quantity: number; selectedSize: string }) => {
     return fetchWithAuth(`/merchandise/${id}/order`, {
       method: "POST",
       body: JSON.stringify(data),
     });
+  },
+
+  getMyOrders: async () => {
+    return fetchWithAuth(`/merchandise/my-orders`);
+  },
+
+  getAllOrders: async () => {
+    return fetchWithAuth(`/merchandise/orders`);
   },
   
   updateOrderStatus: async (id: string, data: { paymentStatus?: string; fulfillmentStatus?: string }) => {

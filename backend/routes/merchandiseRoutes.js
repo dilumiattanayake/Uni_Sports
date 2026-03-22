@@ -8,7 +8,9 @@ const {
   getAllMerchandise, 
   deleteMerchandise,
   createOrder, 
-  updateOrderStatus 
+  updateOrderStatus,
+  getMyOrders,
+  getAllOrders
 } = require('../controllers/merchandiseController');
 
 // Import Middleware
@@ -34,6 +36,12 @@ router.route('/')
     validate(createMerchandiseSchema), // MUST be after upload.single
     createMerchandise
   ); 
+
+router.route('/my-orders')
+  .get(protect, authorize('student'), getMyOrders);
+
+router.route('/orders')
+  .get(protect, authorize('admin', 'coach'), getAllOrders);
 
 router.route('/:id')
   .put(

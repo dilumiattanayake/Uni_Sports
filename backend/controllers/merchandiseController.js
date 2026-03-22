@@ -174,3 +174,31 @@ exports.deleteMerchandise = async (req, res, next) => {
     next(error);
   }
 };
+
+// @desc    Get logged-in student's merchandise orders
+// @route   GET /api/merchandise/my-orders
+// @access  Private (Student)
+exports.getMyOrders = async (req, res, next) => {
+  try {
+    const orders = await MerchandiseOrder.find({ student: req.user.id })
+      .populate('merchandise', 'itemName image category')
+      .sort({ createdAt: -1 }); // Newest orders first
+
+    res.status(200).json({ success: true, count: orders.length, data: orders });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.getAllOrders = async (req, res, next) => {
+  try {
+    const orders = await MerchandiseOrder.find()
+      .populate('student', 'name email') // Gets the student's details
+      .populate('merchandise', 'itemName image category price') // Gets the item details
+      .sort({ createdAt: -1 }); // Newest orders first
+
+    res.status(200).json({ success: true, count: orders.length, data: orders });
+  } catch (error) {
+    next(error);
+  }
+};

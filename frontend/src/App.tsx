@@ -6,10 +6,14 @@ import StudentDashboard from "./pages/student/StudentDashboard"
 import StudentPayments from "./pages/student/StudentPayments"
 import StudentInventory from "./pages/student/inventory/StudentInventory"
 import StudentMyRequest from "./pages/student/inventory/StudentMyRequests"
+import StudentMerchandise from "./pages/student/merchandise/StudentMerchandise"
+import StudentMyOrders from "./pages/student/merchandise/StudentMyOrders"
 
 import AdminHome from "./pages/admin/AdminHome"
 import AdminInventory from "./pages/admin/inventory/AdminInventory"
+import AdminEquipmentRequests from "./pages/admin/inventory/AdminEquipmentRequests"
 import AdminMerchandise from "./pages/admin/merchandise/AdminMerchandise"
+import AdminMerchandiseOrders from "./pages/admin/merchandise/AdminMerchandiseOrders"
 
 import CoachDashboard from "./pages/coach/CoachDashboard"
 import AdminSports from "./pages/admin/AdminSports"
@@ -38,12 +42,15 @@ const App = () => {
         <Route path="/admin/home" element={<AdminHome />} />
         <Route path="/admin/inventory/" element={<AdminInventory />} />
         <Route path="/admin/inventory/:id" element={<AdminInventory />} />
+        <Route path="/admin/requests" element={<AdminEquipmentRequests />} />
         <Route path="/admin/merchandise" element={<AdminMerchandise />} />
+        <Route path="/admin/orders" element={<AdminMerchandiseOrders />} />
 
         <Route path="/StudentDashboard"element={<StudentDashboard /> }/>
         <Route path="/student/inventory" element={<StudentInventory />} />
         <Route path="/student/inventory/my-requests" element={<StudentMyRequest />} />
-
+        <Route path="/student/merchandise" element={<StudentMerchandise />} />
+        <Route path="/student/merchandise/my-orders" element={<StudentMyOrders />} />
         
         <Route path="/CoachDashboard" element={ <CoachDashboard />}/>
         <Route path="/admin/sports" element={<AdminSports />} />
