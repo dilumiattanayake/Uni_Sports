@@ -17,8 +17,7 @@ import logoos from "@/assets/Logoos.jpg";
 
 
 const adminLinks = [
-  { title: "Home", url: "/admin/home", icon: Home },
-  { title: "Dashboard", url: "/AdminDashboard", icon: LayoutDashboard },
+  { title: "Dashboard", url: "/admin/dashboard", icon: LayoutDashboard },
   { title: "Sports", url: "/admin/sports", icon: Trophy },
   { title: "Coaches", url: "/admin/coaches", icon: Users },
   { title: "Students", url: "/admin/students", icon: UserCheck },

@@ -4,7 +4,7 @@ import Login from "./pages/Login"
 import StudentDashboard from "./pages/student/StudentDashboard"
 import StudentPayments from "./pages/student/StudentPayments"
 import AdminHome from "./pages/admin/AdminHome"
-
+import AdminDashboard from "./pages/admin/AdminDashboard"
 import CoachDashboard from "./pages/coach/CoachDashboard"
 import AdminSports from "./pages/admin/AdminSports"
 import AdminCoaches from "./pages/admin/AdminCoaches"
@@ -14,7 +14,7 @@ import Navbar from "./components/common/Navbar"
 import { Route, Routes, useLocation } from "react-router-dom"
 
 const NO_NAVBAR_PATHS = ["/StudentDashboard", "/CoachDashboard", "/AdminDashboard", "/admin/sports", "/admin/settings", "/coach/settings", "/student/settings", "/auth/login", "/auth/register", "/admin/coaches", "/student/payments"
-  ,"/admin/home"
+  ,"/admin/dashboard",
 ]
 
 const App = () => {
@@ -30,7 +30,7 @@ const App = () => {
         <Route path="/auth/login" element={<Login />} />
         <Route path="/admin/home" element={<AdminHome />} />
         <Route path="/StudentDashboard"element={<StudentDashboard /> }/>
-        
+        <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/CoachDashboard" element={ <CoachDashboard />}/>
         <Route path="/admin/sports" element={<AdminSports />} />
         <Route path="/admin/settings" element={<SettingsPage />} />

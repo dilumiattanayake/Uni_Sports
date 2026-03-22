@@ -44,7 +44,7 @@ function Login() {
 
     if (result.success) {
       if (result.role === "admin") {
-        navigate("/admin/home")
+        navigate("/admin/dashboard")
       } 
       else if (result.role === "coach") {
         navigate("/CoachDashboard")
