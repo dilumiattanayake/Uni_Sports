@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { eventService } from '../../../services/eventService';
 import { registrationService } from '../../../services/registrationService';
+import { sportService } from '../../../services/sportService'; // NEW: Import sport service
 import { DashboardLayout } from "@/components/DashboardLayout";
 
 // Define the shape of a team member for the UI
@@ -13,36 +14,48 @@ interface TeamMember {
 
 export default function StudentEvents() {
   const [events, setEvents] = useState<any[]>([]);
+  const [sports, setSports] = useState<any[]>([]); // NEW: State for sports dropdown
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // --- Filter States ---
+  const [searchFilter, setSearchFilter] = useState('');
+  const [sportFilter, setSportFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
+
   // Modal States
   const [selectedEvent, setSelectedEvent] = useState<any | null>(null); // For Registration
-  const [viewingEventDetails, setViewingEventDetails] = useState<any | null>(null); // NEW: For Details View
+  const [viewingEventDetails, setViewingEventDetails] = useState<any | null>(null); // For Details View
   const [isRegistering, setIsRegistering] = useState(false);
   
   // Team Form State
   const [teamName, setTeamName] = useState('');
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   
-  // Search State
+  // Search State (for Team Members)
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
-    fetchEventsData();
+    fetchData();
   }, []);
 
-  const fetchEventsData = async () => {
+  const fetchData = async () => {
     try {
       setLoading(true);
-      const [allEventsRes, myRegsRes] = await Promise.all([
+      // Fetch events, registrations, AND sports simultaneously
+      const [allEventsRes, myRegsRes, sportsRes] = await Promise.all([
         eventService.getAll(),
-        registrationService.getMyRegistrations()
+        registrationService.getMyRegistrations(),
+        sportService.getAll() // Fetch sports for the filter dropdown
       ]);
 
       const allEvents = allEventsRes.data || [];
       const myRegistrations = myRegsRes.data || [];
+      
+      // Handle different API response structures for sports safely
+      const sportsData = (sportsRes as any).data || sportsRes || [];
+      setSports(sportsData);
 
       const mergedEvents = allEvents.map((ev: any) => {
         const myReg = myRegistrations.find((reg: any) => 
@@ -58,14 +71,14 @@ export default function StudentEvents() {
 
       setEvents(mergedEvents);
     } catch (err: any) {
-      setError(err.message || 'Failed to load events');
+      setError(err.message || 'Failed to load data');
     } finally {
       setLoading(false);
     }
   };
 
   const openRegistrationModal = (event: any) => {
-    setViewingEventDetails(null); // Close details modal if open
+    setViewingEventDetails(null); 
     setSelectedEvent(event);
     setTeamName('');
     
@@ -138,7 +151,7 @@ export default function StudentEvents() {
       
       alert("Successfully registered!");
       setSelectedEvent(null);
-      fetchEventsData();
+      fetchData(); // Refresh to update UI state
     } catch (err: any) {
       alert(err.message || "Failed to register. Please try again.");
     } finally {
@@ -146,20 +159,24 @@ export default function StudentEvents() {
     }
   };
 
-  const handleUnregister = async (eventId: string) => {
-    if (window.confirm("Are you sure you want to cancel your registration? If there is a waitlist, you will lose your spot.")) {
-      try {
-        await eventService.delete(eventId); 
-        alert("Registration cancelled.");
-        fetchEventsData();
-      } catch (err: any) {
-        alert(err.message || "Failed to cancel registration.");
-      }
-    }
-  };
+  // --- NEW: Apply Filters ---
+  const filteredEvents = events.filter(event => {
+    // Search Filter (Title or Venue)
+    const matchesSearch = 
+      event.title.toLowerCase().includes(searchFilter.toLowerCase()) || 
+      event.venue?.toLowerCase().includes(searchFilter.toLowerCase());
+    
+    // Sport Filter
+    const matchesSport = sportFilter === 'all' || event.sport?._id === sportFilter;
+    
+    // Status Filter
+    const matchesStatus = statusFilter === 'all' || event.status === statusFilter;
 
-  if (loading) return <div className="p-10 text-center text-gray-500 font-medium">Loading upcoming events...</div>;
-  if (error) return <div className="p-10 text-center text-red-500">{error}</div>;
+    return matchesSearch && matchesSport && matchesStatus;
+  });
+
+  if (loading) return <DashboardLayout><div className="p-10 text-center text-gray-500 font-medium">Loading events...</div></DashboardLayout>;
+  if (error) return <DashboardLayout><div className="p-10 text-center text-red-500">{error}</div></DashboardLayout>;
 
   return (
       <div className="p-6 md:p-8 w-full max-w-7xl mx-auto space-y-6">
@@ -170,14 +187,67 @@ export default function StudentEvents() {
           <p className="text-gray-500 mt-1">Discover and register for upcoming sports tournaments and activities.</p>
         </div>
 
-        {/* EVENT GRID */}
+        {/* --- NEW: Filter Bar --- */}
+        <div className="flex flex-col md:flex-row gap-4 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+          {/* Search Input */}
+          <div className="flex-grow">
+            <input 
+              type="text" 
+              placeholder="Search by event name or venue..." 
+              value={searchFilter}
+              onChange={(e) => setSearchFilter(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+            />
+          </div>
+          
+          {/* Sport Dropdown */}
+          <div className="w-full md:w-48">
+            <select 
+              value={sportFilter} 
+              onChange={(e) => setSportFilter(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 bg-white outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+            >
+              <option value="all">All Sports</option>
+              {sports.map(sport => (
+                <option key={sport._id} value={sport._id}>{sport.name}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Status Dropdown */}
+          <div className="w-full md:w-48">
+            <select 
+              value={statusFilter} 
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 bg-white outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+            >
+              <option value="all">All Statuses</option>
+              <option value="upcoming">Upcoming</option>
+              <option value="ongoing">Ongoing</option>
+              <option value="completed">Completed</option>
+            </select>
+          </div>
+        </div>
+
+        {/* EVENT GRID (Using filteredEvents now) */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {events.length === 0 ? (
-            <div className="col-span-full py-12 text-center text-gray-500 bg-white rounded-xl border border-gray-100 shadow-sm">
-              No upcoming events at the moment.
+          {filteredEvents.length === 0 ? (
+            <div className="col-span-full py-16 text-center bg-white rounded-xl border border-gray-100 shadow-sm flex flex-col items-center">
+              <span className="text-4xl mb-3">🔍</span>
+              <h3 className="text-lg font-bold text-gray-900">No events found</h3>
+              <p className="text-gray-500 text-sm mt-1">Try adjusting your search or filters to find what you're looking for.</p>
+              {/* Quick clear filters button */}
+              {(searchFilter || sportFilter !== 'all' || statusFilter !== 'all') && (
+                <button 
+                  onClick={() => { setSearchFilter(''); setSportFilter('all'); setStatusFilter('all'); }}
+                  className="mt-4 text-sm font-semibold text-indigo-600 hover:text-indigo-800 transition"
+                >
+                  Clear All Filters
+                </button>
+              )}
             </div>
           ) : (
-            events.map(event => {
+            filteredEvents.map(event => {
               const confirmedCount = event.confirmedCount || 0;
               const isFull = confirmedCount >= event.maxParticipants;
               const isPastDeadline = new Date() > new Date(event.registrationDeadline);
@@ -188,7 +258,7 @@ export default function StudentEvents() {
                   {/* Banner Image Area */}
                   <div 
                     onClick={() => openDetailsModal(event)}
-                    className="h-40 bg-gray-100 relative border-b border-gray-100 cursor-pointer group"
+                    className="h-40 bg-gray-100 relative border-b border-gray-100 cursor-pointer group overflow-hidden"
                   >
                     {event.imageUrl ? (
                       <img src={`http://localhost:5000${event.imageUrl}`} alt={event.title} className="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
@@ -196,11 +266,11 @@ export default function StudentEvents() {
                       <div className="w-full h-full flex items-center justify-center text-gray-400 font-medium text-sm">No Banner Image</div>
                     )}
                     
-                    <span className={`absolute top-3 right-3 px-3 py-1 text-xs font-bold uppercase tracking-wide rounded shadow-sm border ${
-                        event.status === 'upcoming' ? 'bg-blue-100 text-blue-800 border-blue-200' : 
-                        event.status === 'ongoing' ? 'bg-green-100 text-green-800 border-green-200' : 
-                        event.status === 'cancelled' ? 'bg-red-100 text-red-800 border-red-200' : 
-                        'bg-gray-100 text-gray-800 border-gray-200'
+                    <span className={`absolute top-3 right-3 px-3 py-1 text-xs font-bold uppercase tracking-wide rounded shadow-sm border backdrop-blur-sm ${
+                        event.status === 'upcoming' ? 'bg-blue-100/90 text-blue-800 border-blue-200' : 
+                        event.status === 'ongoing' ? 'bg-green-100/90 text-green-800 border-green-200' : 
+                        event.status === 'cancelled' ? 'bg-red-100/90 text-red-800 border-red-200' : 
+                        'bg-gray-100/90 text-gray-800 border-gray-200'
                     }`}>
                       {event.status}
                     </span>
@@ -228,13 +298,12 @@ export default function StudentEvents() {
                         <span>{event.eventType === 'team' ? 'Teams Registered' : 'Slots Filled'}</span>
                         <span>{confirmedCount} / {event.maxParticipants}</span>
                       </div>
-                      <div className="w-full bg-gray-100 rounded-full h-2">
-                        <div className={`h-2 rounded-full transition-all ${isFull ? 'bg-red-500' : 'bg-indigo-500'}`} style={{ width: `${Math.min(100, (confirmedCount / event.maxParticipants) * 100)}%` }}></div>
+                      <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+                        <div className={`h-full transition-all duration-500 ease-out ${isFull ? 'bg-red-500' : 'bg-indigo-500'}`} style={{ width: `${Math.min(100, (confirmedCount / event.maxParticipants) * 100)}%` }}></div>
                       </div>
                     </div>
 
                     <div className="pt-4 border-t border-gray-100 flex gap-2">
-                      {/* NEW: View Details Button */}
                       <button 
                         onClick={() => openDetailsModal(event)}
                         className="w-1/3 py-2.5 rounded-lg font-bold text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 transition"
@@ -242,7 +311,6 @@ export default function StudentEvents() {
                         Details
                       </button>
 
-                      {/* Register/Status Button */}
                       {event.myRegistrationStatus ? (
                         <button disabled className={`w-2/3 py-2.5 border rounded-lg font-bold text-xs cursor-not-allowed ${
                           event.myRegistrationStatus === 'confirmed' ? 'bg-green-50 text-green-700 border-green-200' :
@@ -271,13 +339,12 @@ export default function StudentEvents() {
         </div>
 
         {/* ----------------------------------------------------------------- */}
-        {/* NEW: EVENT DETAILS MODAL                                        */}
+        {/* EVENT DETAILS MODAL                                               */}
         {/* ----------------------------------------------------------------- */}
         {viewingEventDetails && (
           <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
             <div className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl max-h-[90vh] overflow-hidden flex flex-col">
               
-              {/* Modal Banner Image */}
               <div className="h-48 md:h-64 bg-gray-100 relative shrink-0">
                 {viewingEventDetails.imageUrl ? (
                   <img src={`http://localhost:5000${viewingEventDetails.imageUrl}`} alt={viewingEventDetails.title} className="w-full h-full object-cover" />
@@ -292,7 +359,6 @@ export default function StudentEvents() {
                 </button>
               </div>
 
-              {/* Modal Content */}
               <div className="p-6 md:p-8 overflow-y-auto">
                 <div className="flex justify-between items-start mb-4">
                   <div>
@@ -341,7 +407,6 @@ export default function StudentEvents() {
                 </div>
               </div>
 
-              {/* Modal Footer Actions */}
               <div className="p-6 border-t border-gray-100 bg-white flex justify-end shrink-0 gap-3">
                 <button 
                   onClick={() => setViewingEventDetails(null)}
@@ -350,7 +415,6 @@ export default function StudentEvents() {
                   Close
                 </button>
                 
-                {/* Registration button inside details modal */}
                 {!viewingEventDetails.myRegistrationStatus && viewingEventDetails.status === 'upcoming' && new Date() <= new Date(viewingEventDetails.registrationDeadline) && (
                   <button 
                     onClick={() => openRegistrationModal(viewingEventDetails)}
@@ -364,9 +428,8 @@ export default function StudentEvents() {
           </div>
         )}
 
-
         {/* ----------------------------------------------------------------- */}
-        {/* NATIVE REGISTRATION MODAL (Kept exactly the same as previous)   */}
+        {/* NATIVE REGISTRATION MODAL                                         */}
         {/* ----------------------------------------------------------------- */}
         {selectedEvent && (
           <div className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
@@ -374,7 +437,6 @@ export default function StudentEvents() {
               <h2 className="text-2xl font-bold mb-2 text-gray-900">Confirm Registration</h2>
               <p className="text-gray-600 text-sm mb-6">Complete your registration for this event.</p>
               
-              {/* Event Summary Box with Event Status */}
               <div className="bg-gray-50 p-4 rounded-lg border border-gray-100 mb-6 space-y-3 text-sm">
                 <div>
                   <span className="text-gray-500 block text-xs uppercase font-bold tracking-wider">Event</span>
@@ -397,7 +459,6 @@ export default function StudentEvents() {
                 </div>
               </div>
 
-              {/* TEAM REGISTRATION SECTION */}
               {selectedEvent.eventType === 'team' && (
                 <div className="mb-6 space-y-4">
                   <div>
@@ -424,7 +485,6 @@ export default function StudentEvents() {
                       You are the Captain. Search by University ID or Email to add members. Minimum team size is {selectedEvent.minTeamSize}.
                     </p>
 
-                    {/* Member List */}
                     <div className="space-y-2 mb-4">
                       <div className="flex justify-between items-center p-2.5 bg-indigo-50 border border-indigo-100 rounded-lg">
                         <span className="text-sm font-medium text-indigo-900">👤 You (Team Captain)</span>
@@ -447,7 +507,6 @@ export default function StudentEvents() {
                       ))}
                     </div>
 
-                    {/* Search Input */}
                     {teamMembers.length + 1 < selectedEvent.maxTeamSize && (
                       <div className="flex gap-2">
                         <input 
@@ -472,7 +531,6 @@ export default function StudentEvents() {
                 </div>
               )}
 
-              {/* Waitlist Warning */}
               {((selectedEvent.confirmedCount || 0) >= selectedEvent.maxParticipants) && (
                 <div className="mb-6 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                   <p className="text-xs text-yellow-800 font-medium">

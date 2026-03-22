@@ -58,6 +58,8 @@ const NO_NAVBAR_PATHS = [
   "/admin/requests",
   "/admin/merchandise",
   "/admin/orders",
+  "/student/events",
+  "/student/events/my-events"
 ];
 
 const App = () => {
