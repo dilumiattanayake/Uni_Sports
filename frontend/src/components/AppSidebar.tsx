@@ -1,15 +1,17 @@
 import { useAuth } from "@/context/AuthContext";
 import { UserRole } from "@/types";
-import { useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { NavLink } from "@/components/NavLink";
 import {
-  LayoutDashboard, Trophy, Users, MapPin, Calendar, UserCheck, BookOpen, Settings,
-  ChevronLeft, Medal, DollarSign,  Package, Home,
+  LayoutDashboard, Trophy, Users, MapPin, Calendar, UserCheck, BookOpen, Bell, Settings,
+  ChevronLeft, Dumbbell
 } from "lucide-react";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
-  SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarFooter, useSidebar,
+  SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarFooter, useSidebar, SidebarMenuSub,
+  SidebarMenuSubButton, SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import logo from "@/assets/Logo.jpg";
@@ -17,15 +19,11 @@ import logoos from "@/assets/Logoos.jpg";
 
 
 const adminLinks = [
-  { title: "Home", url: "/admin/home", icon: Home },
-  { title: "Dashboard", url: "/AdminDashboard", icon: LayoutDashboard },
+  { title: "Dashboard", url: "/admin", icon: LayoutDashboard },
   { title: "Sports", url: "/admin/sports", icon: Trophy },
   { title: "Coaches", url: "/admin/coaches", icon: Users },
   { title: "Students", url: "/admin/students", icon: UserCheck },
   { title: "Locations", url: "/admin/locations", icon: MapPin },
-  { title: "Events", url: "/admin/events", icon:  Medal },
-  { title: "Inventory", url: "/admin/inventory", icon:  Package },
-  { title: "Payments", url: "/admin/payments", icon:  DollarSign },
 ];
 
 const coachLinks = [
@@ -46,32 +44,24 @@ const studentLinks = [
   { title: "My Payements", url: "/student/payments", icon:  DollarSign },
 ];
 
-const roleConfig: Record<UserRole, { links: typeof adminLinks; label: string; color: string }> = {
-  admin: { links: adminLinks, label: "Admin", color: "bg-accent text-accent-foreground" },
+const roleConfig: Partial<Record<UserRole, { links: typeof coachLinks; label: string; color: string }>> = {
   coach: { links: coachLinks, label: "Coach", color: "bg-secondary text-secondary-foreground" },
   student: { links: studentLinks, label: "Student", color: "bg-info text-info-foreground" },
 };
+
+const adminPrimaryButtons = [
+  { title: "Event Management", icon: CalendarDays },
+  { title: "Inventory Management", icon: Boxes },
+  { title: "Payment Management", icon: CreditCard },
+  { title: "User Management", icon: Users },
+];
 
 export function AppSidebar() {
   const { role, user } = useAuth();
   const { state, toggleSidebar } = useSidebar();
   const collapsed = state === "collapsed";
-  const navigate = useNavigate();
+  const location = useLocation();
   const config = roleConfig[role];
-
-  const handleLogoClick = () => {
-  if (role === "admin") navigate("/AdminDashboard");
-  else if (role === "coach") navigate("/CoachDashboard");
-  else if (role === "student") navigate("/StudentDashboard");
-};
-
-const handleSettingsClick = () => {
-  if (role === "admin") navigate("/admin/settings");
-  else if (role === "coach") navigate("/coach/settings");
-  else if (role === "student") navigate("/student/settings");
-};
-
-
 
   return (
     <Sidebar collapsible="icon" className="border-r-0">
@@ -99,20 +89,21 @@ const handleSettingsClick = () => {
 
       <SidebarContent className="pt-2">
         <SidebarGroup>
-          {!collapsed && <SidebarGroupLabel className="text-sidebar-foreground/40 uppercase text-[10px] tracking-widest font-body">{config.label} Menu</SidebarGroupLabel>}
+          {!collapsed && (
+            <SidebarGroupLabel className="text-sidebar-foreground/40 uppercase text-[10px] tracking-widest font-body">
+              {role === "admin" ? "Admin Menu" : `${config?.label} Menu`}
+            </SidebarGroupLabel>
+          )}
           <SidebarGroupContent>
             <SidebarMenu>
               {config.links.map((item) => (
-                <SidebarMenuItem key={item.title} className={item.title === "Dashboard" ? "mb-1" : ""}>
-                  <SidebarMenuButton asChild onClick={(e) => e.stopPropagation()}>
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
                     <NavLink
                       to={item.url}
-                      end={item.title === "Dashboard"}
-                      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors
-                                  text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground
-                                  ${collapsed ? "justify-center" : ""} `}
-                      activeClassName={`bg-sidebar-accent text-sidebar-primary font-medium
-                                      ${collapsed ? "border-2 border-orange-400 bg-orange-400 text-white rounded-xl p-2 flex justify-center items-center" : ""}`}
+                      end={item.url === `/${role}`}
+                      className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors text-sm"
+                      activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
                     >
                       <item.icon className="h-4 w-4 shrink-0" />
                       {!collapsed && <span>{item.title}</span>}
@@ -123,7 +114,26 @@ const handleSettingsClick = () => {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-       
+
+        {/* Placeholder for future modules */}
+        {!collapsed && (
+          <SidebarGroup>
+            <SidebarGroupLabel className="text-sidebar-foreground/40 uppercase text-[10px] tracking-widest font-body">Other Modules</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {["User Mgmt", "Events", "Payments"].map((label) => (
+                  <SidebarMenuItem key={label}>
+                    <SidebarMenuButton disabled className="opacity-40 cursor-not-allowed">
+                      <Settings className="h-4 w-4 mr-3" />
+                      <span className="text-sm">{label}</span>
+                      <Badge variant="outline" className="ml-auto text-[9px] border-sidebar-foreground/20 text-sidebar-foreground/40">Soon</Badge>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border p-4">
@@ -138,17 +148,16 @@ const handleSettingsClick = () => {
                 <p className="text-[10px] text-sidebar-foreground/50 truncate">{user.email}</p>
               </div>
             </div>
-            
-            <Button 
-              variant="default" 
-              className="w-full justify-centre mt-2 bg-orange-400 hover:bg-orange-500 text-white border-0"  
-              size="sm"
-              onClick={handleSettingsClick}
-            >
-              <Settings className="mr-2 h-4 w-4" />
-              Profile Settings
-            </Button>
-
+            <Select value={role} onValueChange={(v) => switchRole(v as UserRole)}>
+              <SelectTrigger className="h-8 text-xs bg-sidebar-accent border-sidebar-border text-sidebar-foreground">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="admin">🛡️ Admin</SelectItem>
+                <SelectItem value="coach">🏋️ Coach</SelectItem>
+                <SelectItem value="student">🎓 Student</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         )}
       </SidebarFooter>
