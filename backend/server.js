@@ -18,6 +18,7 @@ const eventRoutes = require('./routes/eventRoutes')
 const inventoryRoutes = require('./routes/inventoryRoutes');
 const equipmentRequestRoutes = require('./routes/equipmentRequestRoutes');
 const merchandiseRoutes = require('./routes/merchandiseRoutes');
+const registrationRoutes = require('./routes/registrationRoute');
 
 // Initialize app
 const app = express();
@@ -57,6 +58,7 @@ app.use('/api/events',eventRoutes);
 app.use('/api/inventory', inventoryRoutes);
 app.use('/api/equipment-requests', equipmentRequestRoutes);
 app.use('/api/merchandise', merchandiseRoutes);
+app.use('/api/registrations', registrationRoutes);
 
 
 // Placeholder routes for future modules

@@ -10,7 +10,7 @@ export const mockLocations: Location[] = [
 ];
 
 export const mockSports: Sport[] = [
-  { id: "sp-1", name: "Football", description: "University football team training and matches", coachIds: ["coach-1"], maxStudents: 30, icon: "⚽" },
+  { id: "69bfcf0bbb00bd9a6e867073", name: "Football", description: "University football team training and matches", coachIds: ["coach-1"], maxStudents: 30, icon: "⚽" },
   { id: "sp-2", name: "Basketball", description: "Basketball practice and inter-university competitions", coachIds: ["coach-2"], maxStudents: 20, icon: "🏀" },
   { id: "sp-3", name: "Tennis", description: "Individual and doubles tennis training", coachIds: ["coach-3"], maxStudents: 15, icon: "🎾" },
   { id: "sp-4", name: "Swimming", description: "Competitive swimming and water polo", coachIds: ["coach-1", "coach-4"], maxStudents: 25, icon: "🏊" },
