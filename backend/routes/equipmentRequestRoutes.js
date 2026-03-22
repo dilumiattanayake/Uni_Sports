@@ -24,13 +24,13 @@ const {
 // Note: Order matters here. Put specific routes (like /my-requests) BEFORE dynamic ones (like /:id)
 
 router.route('/my-requests')
-  .get(protect, authorize('Student'), getMyRequests);
+  .get(protect, authorize('student'), getMyRequests);
 
 router.route('/')
-  .get(protect, authorize('admin', 'Coach'), getAllRequests) 
+  .get(protect, authorize('admin', 'coach'), getAllRequests) 
   .post(
     protect, 
-    authorize('Student'), 
+    authorize('student'), 
     validate(createBorrowRequestSchema), // Validation added
     createBorrowRequest
   ); 
@@ -38,7 +38,7 @@ router.route('/')
 router.route('/:id/status')
   .put(
     protect, 
-    authorize('admin', 'Coach'), 
+    authorize('admin', 'coach'), 
     validate(updateRequestStatusSchema), // Validation added
     updateRequestStatus
   );
@@ -46,7 +46,7 @@ router.route('/:id/status')
 router.route('/:id/report-issue')
   .put(
     protect, 
-    authorize('Student'), 
+    authorize('student'), 
     validate(reportIssueOnRequestSchema), // Validation added
     reportIssueOnRequest
   );

@@ -40,7 +40,7 @@ const studentLinks = [
   { title: "Dashboard", url: "/StudentDashboard", icon: LayoutDashboard },
   { title: "Browse Sports", url: "/StudentBrowseSports", icon: BookOpen },
   { title: "My Sessions", url: "/StudentSessions", icon: Calendar },
-  { title: "My Requests", url: "/StudentRequests", icon: UserCheck },
+  { title: "My Requests", url: "/student/inventory/my-requests", icon: UserCheck },
   { title: "Browse Events", url: "/StudentBrowseEvents", icon: Medal},
   { title: "My Events", url: "/StudentEvents", icon:  Trophy },
   { title: "Inventory", url: "/student/inventory", icon:  Package },

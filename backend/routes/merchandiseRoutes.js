@@ -46,20 +46,20 @@ router.route('/:id')
   .delete(protect, authorize('admin'), deleteMerchandise
   );
 
-// Student Orders
+// student Orders
 router.route('/:id/order')
   .post(
     protect, 
-    authorize('Student'), 
+    authorize('student'), 
     validate(createOrderSchema), // Validation added
     createOrder
   );
 
-// admin/Coach processing orders
+// admin/coach processing orders
 router.route('/orders/:id/status')
   .put(
     protect, 
-    authorize('admin', 'Coach'), 
+    authorize('admin', 'coach'), 
     validate(updateOrderStatusSchema), // Validation added
     updateOrderStatus
   );
