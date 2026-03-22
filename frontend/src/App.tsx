@@ -13,6 +13,7 @@ import AdminSports from "./pages/admin/AdminSports";
 import AdminCoaches from "./pages/admin/AdminCoaches";
 import AdminStudents from "./pages/admin/AdminStudents";
 import AdminLocations from "./pages/admin/AdminLocations";
+import AdminEvents from  "./pages/admin/AdminEvents";
 
 // Coach pages
 import CoachDashboard from "./pages/coach/CoachDashboard";
@@ -24,6 +25,7 @@ import StudentDashboard from "./pages/student/StudentDashboard";
 import StudentBrowseSports from "./pages/student/StudentBrowseSports";
 import StudentSessions from "./pages/student/StudentSessions";
 import StudentRequests from "./pages/student/StudentRequests";
+import StudentEvents from "./pages/student/StudentEvents";
 
 const queryClient = new QueryClient();
 
@@ -43,6 +45,7 @@ function AppRoutes() {
       <Route path="/admin/coaches" element={<DashboardLayout><AdminCoaches /></DashboardLayout>} />
       <Route path="/admin/students" element={<DashboardLayout><AdminStudents /></DashboardLayout>} />
       <Route path="/admin/locations" element={<DashboardLayout><AdminLocations /></DashboardLayout>} />
+      <Route path="/admin/events" element={<DashboardLayout><AdminEvents/></DashboardLayout>}/>
 
       {/* Coach routes */}
       <Route path="/coach" element={<DashboardLayout><CoachDashboard /></DashboardLayout>} />
@@ -54,6 +57,7 @@ function AppRoutes() {
       <Route path="/student/sports" element={<DashboardLayout><StudentBrowseSports /></DashboardLayout>} />
       <Route path="/student/sessions" element={<DashboardLayout><StudentSessions /></DashboardLayout>} />
       <Route path="/student/requests" element={<DashboardLayout><StudentRequests /></DashboardLayout>} />
+      <Route path="/student/events" element={<DashboardLayout><StudentEvents/></DashboardLayout>}/>
 
       {/* TODO: Future module routes */}
       {/* <Route path="/users/*" element={...} /> */}
