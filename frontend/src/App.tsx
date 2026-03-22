@@ -8,7 +8,7 @@ import HomePage from "./pages/HomePage";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
 import SettingsPage from "./pages/ProfileSettings";
-import { DashboardLayout } from "@/components/DashboardLayout"; // Assuming this is your layout path
+import { DashboardLayout } from "@/components/DashboardLayout";
 
 // Admin Pages
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -25,8 +25,8 @@ import AdminMerchandiseOrders from "./pages/admin/merchandise/AdminMerchandiseOr
 
 // Coach Pages
 import CoachDashboard from "./pages/coach/CoachDashboard";
-import CoachSessions from "./pages/coach/CoachSessions"; // Added missing import
-import CoachRequests from "./pages/coach/CoachRequests"; // Added missing import
+import CoachSessions from "./pages/coach/CoachSessions"; 
+import CoachRequests from "./pages/coach/CoachRequests"; 
 
 // Student Pages
 import StudentDashboard from "./pages/student/StudentDashboard";
@@ -38,7 +38,8 @@ import StudentInventory from "./pages/student/inventory/StudentInventory";
 import StudentMyRequest from "./pages/student/inventory/StudentMyRequests";
 import StudentMerchandise from "./pages/student/merchandise/StudentMerchandise";
 import StudentMyOrders from "./pages/student/merchandise/StudentMyOrders";
-import StudentEvents from "./pages/student/events/StudentEvents"; // Added missing import
+import StudentEvents from "./pages/student/events/StudentEvents"; 
+import StudentMyEvents from "./pages/student/events/StudentMyEvents";
 
 const NO_NAVBAR_PATHS = [
   "/StudentDashboard", 
@@ -103,6 +104,7 @@ const App = () => {
         <Route path="/student/sessions" element={<DashboardLayout><StudentSessions /></DashboardLayout>} />
         <Route path="/student/requests" element={<DashboardLayout><StudentRequests /></DashboardLayout>} />
         <Route path="/student/events" element={<DashboardLayout><StudentEvents /></DashboardLayout>} />
+        <Route path="/student/events/my-events" element={<DashboardLayout><StudentMyEvents /></DashboardLayout>} />
         <Route path="/student/payments" element={<StudentPayments />} />
         
         {/* Student Inventory & Merch */}

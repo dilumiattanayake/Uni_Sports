@@ -47,7 +47,6 @@ const studentLinks = [
   { title: "My Requests", url: "/student/inventory/my-requests", icon: UserCheck },
   { title: "Browse Events", url: "/student/events", icon: Medal},
   {title: "My Events", url: "/student/events/my-events", icon:  Trophy},
-  { title: "My Events", url: "/StudentEvents", icon:  Trophy },
   { title: "Inventory", url: "/student/inventory", icon:  Package },
   { title: "My Payements", url: "/student/payments", icon:  DollarSign },
 ];

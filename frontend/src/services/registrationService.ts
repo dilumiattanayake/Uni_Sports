@@ -52,5 +52,24 @@ export const registrationService = {
 
   searchStudent: async (searchQuery: string) => {
     return fetchWithAuth(`/registrations/search-student?query=${encodeURIComponent(searchQuery)}`);
-  }
+  },
+
+  /**
+   * Update an existing team's members
+   */
+  updateTeamMembers: async (registrationId: string, teamMembers: string[]) => {
+    return fetchWithAuth(`/registrations/${registrationId}`, {
+      method: "PUT",
+      body: JSON.stringify({ teamMembers }),
+    });
+  },
+
+  /**
+   * Cancel an existing registration
+   */
+  cancelRegistration: async (registrationId: string) => {
+    return fetchWithAuth(`/registrations/${registrationId}`, {
+      method: "DELETE",
+    });
+  },
 };

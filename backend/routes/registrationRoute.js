@@ -51,15 +51,28 @@ router.get(
   registrationController.getEventRegistrations
 );
 
-// Optional: If you want admins to manually update a registration status later
-/*
+/**
+ * @route   PUT /api/registrations/:id
+ * @desc    Update team members
+ * @access  Private/Student
+ */
 router.put(
-  '/:id/status',
+  '/:id',
   protect,
-  authorize('admin'),
-  validate(updateRegistrationStatusSchema),
-  registrationController.updateRegistrationStatus
+  authorize('student'),
+  registrationController.updateMyRegistration
 );
-*/
+
+/**
+ * @route   DELETE /api/registrations/:id
+ * @desc    Cancel a registration
+ * @access  Private/Student
+ */
+router.delete(
+  '/:id',
+  protect,
+  authorize('student'),
+  registrationController.cancelMyRegistration
+);
 
 module.exports = router;

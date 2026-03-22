@@ -123,13 +123,17 @@ const getMyRegistrations = async (req, res, next) => {
   try {
     const studentId = req.user.id || req.user._id;
 
-    // Find registrations where student is captain OR a team member
     const registrations = await Registration.find({
       $or: [
         { primaryStudent: studentId },
         { teamMembers: studentId }
       ]
-    }).populate('event', 'title startDate venue');
+    })
+      // ⚠️ FIX: We must populate the status, deadlines, and team sizes so the frontend knows we can edit!
+      .populate('event', 'title startDate venue status registrationDeadline minTeamSize maxTeamSize')
+      .populate('primaryStudent', 'name email studentId')
+      .populate('teamMembers', 'name email studentId')
+      .sort({ createdAt: -1 });
 
     res.status(200).json({
       success: true,
@@ -183,10 +187,95 @@ const searchStudent = async (req, res, next) => {
   }
 };
 
+// --- Add these inside controllers/registrationController.js ---
+
+/**
+ * @desc    Update team members for an existing registration
+ * @route   PUT /api/registrations/:id
+ * @access  Private/Student
+ */
+const updateMyRegistration = async (req, res, next) => {
+  try {
+    const registration = await Registration.findById(req.params.id).populate('event');
+    if (!registration) {
+      return next(new ErrorResponse('Registration not found', 404));
+    }
+
+    // 1. Verify the user is the Captain (Primary Student)
+    const currentUserId = req.user.id || req.user._id;
+    if (registration.primaryStudent.toString() !== currentUserId.toString()) {
+      return next(new ErrorResponse('Only the team captain can edit the team members.', 403));
+    }
+
+    // 2. Verify the event is still open for modifications
+    const event = registration.event;
+    if (event.status !== 'upcoming' || new Date() > new Date(event.registrationDeadline)) {
+      return next(new ErrorResponse('Modifications are no longer allowed for this event.', 400));
+    }
+
+    // 3. Validate new team size
+    const { teamMembers } = req.body;
+    const totalTeamSize = teamMembers.length + 1; // +1 for the captain
+    if (totalTeamSize < event.minTeamSize || totalTeamSize > event.maxTeamSize) {
+      return next(new ErrorResponse(`Team size must be between ${event.minTeamSize} and ${event.maxTeamSize} members.`, 400));
+    }
+
+    // 4. Update and Save
+    registration.teamMembers = teamMembers;
+    await registration.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Team updated successfully',
+      data: registration
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @desc    Cancel/Delete a registration entirely
+ * @route   DELETE /api/registrations/:id
+ * @access  Private/Student
+ */
+const cancelMyRegistration = async (req, res, next) => {
+  try {
+    const registration = await Registration.findById(req.params.id).populate('event');
+    if (!registration) {
+      return next(new ErrorResponse('Registration not found', 404));
+    }
+
+    // 1. Verify ownership
+    const currentUserId = req.user.id || req.user._id;
+    if (registration.primaryStudent.toString() !== currentUserId.toString()) {
+      return next(new ErrorResponse('Only the person who registered can cancel this.', 403));
+    }
+
+    // 2. Verify event status
+    if (registration.event.status !== 'upcoming') {
+      return next(new ErrorResponse('You cannot cancel a registration for an ongoing or completed event.', 400));
+    }
+
+    await registration.deleteOne();
+
+    res.status(200).json({
+      success: true,
+      message: 'Registration successfully cancelled.'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+
 
 module.exports = {
   createRegistration,
   getEventRegistrations,
   getMyRegistrations,
-  searchStudent
+  searchStudent,
+  updateMyRegistration,
+  cancelMyRegistration
 };
