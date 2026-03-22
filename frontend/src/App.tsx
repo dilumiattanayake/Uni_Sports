@@ -4,6 +4,7 @@ import Login from "./pages/Login"
 import StudentDashboard from "./pages/student/StudentDashboard"
 import StudentPayments from "./pages/student/StudentPayments"
 import AdminHome from "./pages/admin/AdminHome"
+import AdminInventory from "./pages/admin/inventory/AdminInventory"
 
 import CoachDashboard from "./pages/coach/CoachDashboard"
 import AdminSports from "./pages/admin/AdminSports"
@@ -29,6 +30,7 @@ const App = () => {
         <Route path="/auth/register" element={<Register />} />
         <Route path="/auth/login" element={<Login />} />
         <Route path="/admin/home" element={<AdminHome />} />
+        <Route path="/admin/inventory/" element={<AdminInventory />} />
         <Route path="/StudentDashboard"element={<StudentDashboard /> }/>
         
         <Route path="/CoachDashboard" element={ <CoachDashboard />}/>

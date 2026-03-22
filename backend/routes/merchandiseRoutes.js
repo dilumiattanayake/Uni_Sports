@@ -1,0 +1,64 @@
+const express = require('express');
+const router = express.Router();
+
+// Import Controllers
+const { 
+  createMerchandise, 
+  updateMerchandise, 
+  getAllMerchandise, 
+  createOrder, 
+  updateOrderStatus 
+} = require('../controllers/merchandiseController');
+
+// Import Middleware
+const { protect, authorize } = require('../middleware/auth');
+const upload = require('../middleware/upload');
+const validate = require('../middleware/validator'); // Your validator middleware
+
+// Import Zod Schemas
+const {
+  createMerchandiseSchema,
+  updateMerchandiseSchema,
+  createOrderSchema,
+  updateOrderStatusSchema
+} = require('../validators/merchandiseValidator');
+
+// Merchandise CRUD
+router.route('/')
+  .get(protect, getAllMerchandise) 
+  .post(
+    protect, 
+    authorize('Admin'), 
+    upload.single('image'), 
+    validate(createMerchandiseSchema), // MUST be after upload.single
+    createMerchandise
+  ); 
+
+router.route('/:id')
+  .put(
+    protect, 
+    authorize('Admin'), 
+    upload.single('image'), 
+    validate(updateMerchandiseSchema), // MUST be after upload.single
+    updateMerchandise
+  );
+
+// Student Orders
+router.route('/:id/order')
+  .post(
+    protect, 
+    authorize('Student'), 
+    validate(createOrderSchema), // Validation added
+    createOrder
+  );
+
+// Admin/Coach processing orders
+router.route('/orders/:id/status')
+  .put(
+    protect, 
+    authorize('Admin', 'Coach'), 
+    validate(updateOrderStatusSchema), // Validation added
+    updateOrderStatus
+  );
+
+module.exports = router;
