@@ -6,6 +6,9 @@ export interface User {
   email: string;
   role: UserRole;
   avatar?: string;
+  registeredSports: string;
+  activeSessions: string;
+  assignedSports: string;
 }
 
 export interface Sport {

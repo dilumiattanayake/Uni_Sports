@@ -61,6 +61,4 @@ venv/
 env/
 ENV/
 
-/uploads
-
-
+uploads/

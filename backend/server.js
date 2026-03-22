@@ -4,6 +4,7 @@ const cors = require('cors');
 const morgan = require('morgan');
 const connectDB = require('./config/database');
 const { errorHandler } = require('./middleware/errorHandler');
+const path = require('path');
 
 // Import routes
 const authRoutes = require('./routes/authRoutes');
@@ -14,6 +15,9 @@ const sessionRoutes = require('./routes/sessionRoutes');
 const joinRequestRoutes = require('./routes/joinRequestRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 const eventRoutes = require('./routes/eventRoutes')
+const inventoryRoutes = require('./routes/inventoryRoutes');
+const equipmentRequestRoutes = require('./routes/equipmentRequestRoutes');
+const merchandiseRoutes = require('./routes/merchandiseRoutes');
 
 // Initialize app
 const app = express();
@@ -25,6 +29,7 @@ connectDB();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 // Logging middleware (only in development)
 if (process.env.NODE_ENV === 'development') {
@@ -49,6 +54,10 @@ app.use('/api/sessions', sessionRoutes);
 app.use('/api/join-requests', joinRequestRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/events',eventRoutes);
+app.use('/api/inventory', inventoryRoutes);
+app.use('/api/equipment-requests', equipmentRequestRoutes);
+app.use('/api/merchandise', merchandiseRoutes);
+
 
 // Placeholder routes for future modules
 // Uncomment and implement when Event Management module is ready

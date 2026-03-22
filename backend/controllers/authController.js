@@ -75,7 +75,8 @@ const login = async (req, res, next) => {
     // Check for user (include password for comparison)
     const user = await User.findOne({ email }).select('+password');
     if (!user) {
-      return next(new ErrorResponse('Invalid credentials', 401));
+      // User does not exist in the system
+      return next(new ErrorResponse('User not registered', 404));
     }
 
     // Check if user is active

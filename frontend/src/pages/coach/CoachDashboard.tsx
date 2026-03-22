@@ -5,6 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import { Calendar, Users, UserCheck, Trophy, Clock, AlertTriangle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { DashboardLayout } from "@/components/DashboardLayout"
 import { toast } from "sonner";
 
 export default function CoachDashboard() {
@@ -18,20 +19,58 @@ export default function CoachDashboard() {
   });
   const pendingRequests = myRequests.filter(r => r.status === "pending");
 
+  const stats = [
+  {
+    label: "My Sports",
+    value: mySports.length,
+    icon: <Trophy className="h-5 w-5" />
+  },
+  {
+    label: "Sessions",
+    value: mySessions.length,
+    icon: <Calendar className="h-5 w-5" />
+  },
+  {
+    label: "Pending Requests",
+    value: pendingRequests.length,
+    icon: <UserCheck className="h-5 w-5" />
+  },
+  {
+    label: "Total Enrolled",
+    value: new Set(mySessions.flatMap(s => s.enrolledStudents)).size,
+    icon: <Users className="h-5 w-5" />
+  }
+];
+
   return (
+    <DashboardLayout>
     <div className="space-y-6">
       <PageHeader title="Coach Dashboard" description={`Welcome back, ${user.name}`} />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard title="My Sports" value={mySports.length} icon={<Trophy className="h-5 w-5" />} variant="primary" />
-        <StatCard title="Sessions" value={mySessions.length} icon={<Calendar className="h-5 w-5" />} variant="secondary" />
-        <StatCard title="Pending Requests" value={pendingRequests.length} icon={<UserCheck className="h-5 w-5" />} variant="accent" />
-        <StatCard title="Total Enrolled" value={new Set(mySessions.flatMap(s => s.enrolledStudents)).size} icon={<Users className="h-5 w-5" />} />
-      </div>
+      {/* Stats */}
+        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {stats.map((s) => (
+            <div
+              key={s.label}
+              className="rounded-xl border border-border bg-card p-5 shadow-sm transition bg-indigo-100 hover:shadow-md"
+            >
+              <div className="flex items-center gap-2">
+                {s.icon}
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  {s.label}
+                </p>
+              </div>
+
+              <p className="mt-2 text-3xl font-bold text-foreground">
+                {s.value}
+              </p>
+            </div>
+          ))}
+        </section>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* My Sessions */}
-        <div className="bg-card rounded-xl shadow-card p-5">
+        <div className="rounded-xl border border-zinc-400 bg-card p-5 shadow-sm">
           <h2 className="font-display font-bold text-lg mb-4">My Sessions</h2>
           <div className="space-y-3">
             {mySessions.map(session => {
@@ -72,7 +111,7 @@ export default function CoachDashboard() {
         </div>
 
         {/* Pending Join Requests */}
-        <div className="bg-card rounded-xl shadow-card p-5">
+        <div className="rounded-xl border border-zinc-400 bg-card p-5 shadow-sm">
           <h2 className="font-display font-bold text-lg mb-4">Join Requests</h2>
           <div className="space-y-3">
             {myRequests.map(req => {
@@ -82,7 +121,7 @@ export default function CoachDashboard() {
                 <div key={req.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
                   <div className="flex items-center gap-3">
                     <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-display font-bold text-xs">
-                      {student?.name.split(" ").map(n => n[0]).join("")}
+                      {student?.name?.split(" ").map(n => n[0]).join("")}
                     </div>
                     <div>
                       <p className="text-sm font-medium">{student?.name}</p>
@@ -104,5 +143,6 @@ export default function CoachDashboard() {
         </div>
       </div>
     </div>
+    </DashboardLayout>
   );
 }

@@ -29,8 +29,13 @@ export function StatCard({ title, value, icon, description, trend, variant = "de
 
   return (
     <div className={cn("rounded-xl p-5 animate-fade-up", variantStyles[variant])}>
+      
       <div className="flex items-start justify-between">
+
         <div>
+          <div className={cn("h-10 w-10 rounded-lg flex items-center justify-center shrink-0" , iconBgStyles[variant])}>
+          {icon}
+         </div>
           <p className={cn("text-sm font-medium", isColored ? "opacity-80" : "text-muted-foreground")}>{title}</p>
           <p className="text-3xl font-display font-bold mt-1">{value}</p>
           {description && (
@@ -40,9 +45,7 @@ export function StatCard({ title, value, icon, description, trend, variant = "de
             <p className={cn("text-xs mt-1 font-medium", isColored ? "opacity-90" : "text-success")}>{trend}</p>
           )}
         </div>
-        <div className={cn("h-10 w-10 rounded-lg flex items-center justify-center shrink-0", iconBgStyles[variant])}>
-          {icon}
-        </div>
+        
       </div>
     </div>
   );
