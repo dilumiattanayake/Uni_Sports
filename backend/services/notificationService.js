@@ -52,6 +52,21 @@ const notifySessionTimeChange = async (studentIds, sessionDetails) => {
 };
 
 /**
+ * Notify students that a new session is available
+ */
+const notifyNewSessionAvailable = async (studentIds, sessionDetails) => {
+  const notificationTemplate = {
+    type: 'new_session_available',
+    title: 'New Practice Session Available',
+    message: `${sessionDetails.sport} session is scheduled for ${sessionDetails.startTime}`,
+    relatedSession: sessionDetails.sessionId,
+    relatedSport: sessionDetails.sportId,
+  };
+
+  return await createBulkNotifications(studentIds, notificationTemplate);
+};
+
+/**
  * Notify student about join request decision
  */
 const notifyJoinRequestDecision = async (studentId, decision, sessionDetails) => {
@@ -167,6 +182,7 @@ module.exports = {
   createNotification,
   createBulkNotifications,
   notifySessionTimeChange,
+  notifyNewSessionAvailable,
   notifyJoinRequestDecision,
   notifySessionCancellation,
   markAsRead,

@@ -51,7 +51,7 @@ export default function AdminSports() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 page-shell">
       <PageHeader title="Sports Management" description="Add, edit, and manage university sports programs">
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
@@ -99,7 +99,7 @@ export default function AdminSports() {
           const coaches = mockCoaches.filter(c => sport.coachIds.includes(c.id));
           const studentCount = mockStudents.filter(s => s.enrolledSports.includes(sport.id)).length;
           return (
-            <div key={sport.id} className="bg-card rounded-xl shadow-card p-5 hover:shadow-elevated transition-shadow animate-fade-up group">
+            <div key={sport.id} className="surface-card p-5 animate-fade-in group">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
                   <span className="text-3xl">{sport.icon}</span>

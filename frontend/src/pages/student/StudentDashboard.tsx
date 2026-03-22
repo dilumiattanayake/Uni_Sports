@@ -11,7 +11,7 @@ import {
   Trophy,
 } from "lucide-react"
 
-const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:5000"
+const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:5001"
 
 const StudentDashboard = () => {
   const [events, setEvents] = useState<any[]>([])
@@ -89,21 +89,21 @@ const StudentDashboard = () => {
       title: "Browse Sports",
       description: "Explore sports and join teams",
       icon: <Dumbbell className="h-5 w-5" aria-hidden="true" />,
-      href: "/StudentBrowseSports",
+      href: "/student/sports",
       bg: "bg-indigo-500/10",
     },
     {
       title: "My Sessions",
       description: "View your practice schedule",
       icon: <CalendarDays className="h-5 w-5" aria-hidden="true" />,
-      href: "/StudentSessions",
+      href: "/student/sessions",
       bg: "bg-orange-500/10",
     },
     {
       title: "My Requests",
       description: "Track join request status",
       icon: <ClipboardList className="h-5 w-5" aria-hidden="true" />,
-      href: "/StudentRequests",
+      href: "/student/requests",
       bg: "bg-emerald-500/10",
     },
   ]
@@ -167,7 +167,7 @@ const StudentDashboard = () => {
                 <h2 className="font-semibold text-foreground">Upcoming sessions</h2>
               </div>
               <Link
-                to="/StudentSessions"
+                to="/student/sessions"
                 className="text-sm font-semibold text-primary hover:underline"
               >
                 View all
@@ -205,7 +205,7 @@ const StudentDashboard = () => {
                 <h2 className="font-semibold text-foreground">Recent requests</h2>
               </div>
               <Link
-                to="/StudentRequests"
+                to="/student/requests"
                 className="text-sm font-semibold text-primary hover:underline"
               >
                 Manage

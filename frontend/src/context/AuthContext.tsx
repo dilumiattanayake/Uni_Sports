@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, ReactNode } from "react";
 import { User, UserRole } from "@/types";
 
+const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:5001";
+
 interface AuthContextType {
   user: User | null;
   role: UserRole | null;
@@ -44,7 +46,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // REAL BACKEND LOGIN 
     // =========================================================================
     try {
-      const response = await fetch("http://localhost:5000/api/auth/login", {
+      const response = await fetch(`${API_BASE}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
