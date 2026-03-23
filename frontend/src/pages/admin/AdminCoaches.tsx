@@ -71,11 +71,35 @@ export default function AdminCoaches() {
   };
 
   const handleSave = async () => {
-    if (!form.name.trim() || !form.email.trim()) {
-      return toast.error("Name and email are required");
+    const name = form.name.trim();
+    const email = form.email.trim();
+    const phone = form.phone.trim();
+    const specialization = form.specialization.trim();
+    const password = form.password.trim();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const normalizePhone = (value: string) => {
+      const digits = value.replace(/\D/g, "");
+      if (digits.length === 11 && digits.startsWith("94")) return `0${digits.slice(2)}`;
+      return digits;
+    };
+
+    if (!name || name.length < 2) {
+      return toast.error("Please fill valid fields: coach name must be at least 2 characters.");
     }
-    if (!editingCoach && !form.password.trim()) {
-      return toast.error("Password is required for new coaches");
+    if (!email || !emailRegex.test(email)) {
+      return toast.error("Please fill valid fields: a valid coach email is required.");
+    }
+    if (!specialization) {
+      return toast.error("Please fill valid fields: specialization is required.");
+    }
+    if (phone && !/^07\d{8}$/.test(normalizePhone(phone))) {
+      return toast.error("Please fill valid fields: phone number must be exactly 10 digits (07XXXXXXXX).");
+    }
+    if (!editingCoach && password.length < 6) {
+      return toast.error("Please fill valid fields: password must be at least 6 characters.");
+    }
+    if (editingCoach && password && password.length < 6) {
+      return toast.error("Please fill valid fields: password must be at least 6 characters.");
     }
 
     try {
@@ -98,8 +122,14 @@ export default function AdminCoaches() {
       });
 
       if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.message || "Operation failed");
+        const errorData = await res.json().catch(() => null);
+        const validationMessage = Array.isArray(errorData?.errors)
+          ? errorData.errors
+              .map((item: { msg?: string; message?: string }) => item.msg || item.message)
+              .filter(Boolean)
+              .join(" ")
+          : "";
+        throw new Error(validationMessage || errorData?.message || "Operation failed");
       }
 
       const data = await res.json();

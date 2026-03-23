@@ -17,6 +17,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 type ProfileData = {
   name: string;
@@ -73,6 +74,8 @@ export default function ProfileSettings() {
   }, [user]);
 
   const notify = (message: string, success = true) => {
+    if (success) toast.success(message);
+    else toast.error(message);
     if (success) setSuccessMessage(message);
     else setErrorMessage(message);
     setTimeout(() => {

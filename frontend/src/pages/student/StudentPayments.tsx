@@ -281,9 +281,63 @@ export default function StudentPayments() {
             <CardContent>
              <form
               onSubmit={(e) => {
-              e.preventDefault();
-              alert("Billing details saved!");
-              // Here you can call your API to save/update billing info
+                e.preventDefault();
+
+                const formData = new FormData(e.currentTarget as HTMLFormElement);
+                const fullName = String(formData.get("fullName") || "").trim();
+                const email = String(formData.get("email") || "").trim();
+                const phone1 = String(formData.get("phone1") || "").trim();
+                const phone2 = String(formData.get("phone2") || "").trim();
+                const address = String(formData.get("address") || "").trim();
+                const city = String(formData.get("city") || "").trim();
+                const district = String(formData.get("district") || "").trim();
+                const postalCode = String(formData.get("postalCode") || "").trim();
+
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                const normalizePhone = (value: string) => {
+                  const digits = value.replace(/\D/g, "");
+                  if (digits.length === 11 && digits.startsWith("94")) return `0${digits.slice(2)}`;
+                  return digits;
+                };
+
+                const phone1Digits = normalizePhone(phone1);
+                const phone2Digits = normalizePhone(phone2);
+
+                if (!fullName || fullName.length < 2) {
+                  toast.error("Please fill valid fields: full name is required.");
+                  return;
+                }
+                if (!emailRegex.test(email)) {
+                  toast.error("Please fill valid fields: valid email is required.");
+                  return;
+                }
+                if (!/^07\d{8}$/.test(phone1Digits)) {
+                  toast.error("Please fill valid fields: primary phone must be exactly 10 digits (07XXXXXXXX).");
+                  return;
+                }
+                if (phone2 && !/^07\d{8}$/.test(phone2Digits)) {
+                  toast.error("Please fill valid fields: secondary phone must be exactly 10 digits (07XXXXXXXX).");
+                  return;
+                }
+                if (!address || address.length < 5) {
+                  toast.error("Please fill valid fields: address is required.");
+                  return;
+                }
+                if (!city) {
+                  toast.error("Please fill valid fields: city is required.");
+                  return;
+                }
+                if (!district) {
+                  toast.error("Please fill valid fields: district/province is required.");
+                  return;
+                }
+                if (!/^\d{5}$/.test(postalCode)) {
+                  toast.error("Please fill valid fields: postal code must be 5 digits.");
+                  return;
+                }
+
+                toast.success("Billing details saved successfully.");
+                // Here you can call your API to save/update billing info
                }}
               className="grid grid-cols-1 md:grid-cols-2 gap-6">
             
@@ -292,6 +346,7 @@ export default function StudentPayments() {
                <label className="text-sm font-medium text-gray-700">Full Name</label>
                <input
                type="text"
+               name="fullName"
                disabled={!isEditing}
                placeholder="John Doe"
                className="w-full border bg-gray-100 border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-950"/>
@@ -301,6 +356,7 @@ export default function StudentPayments() {
               <label className="text-sm font-medium text-gray-700">Email</label>
               <input
               type="email"
+               name="email"
                disabled={!isEditing}
               placeholder="john@example.com"
               className="w-full border bg-gray-100 border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-950"/>
@@ -310,6 +366,7 @@ export default function StudentPayments() {
               <label className="text-sm font-medium text-gray-700">Phone Number</label>
               <input
               type="tel"
+               name="phone1"
                disabled={!isEditing}
               placeholder="07x-xxxxxxx"
               className="w-full border bg-gray-100 border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-950"/>
@@ -319,6 +376,7 @@ export default function StudentPayments() {
               <label className="text-sm font-medium text-gray-700">Phone Number 2 (Optional)</label>
               <input
               type="tel"
+               name="phone2"
                disabled={!isEditing}
               placeholder="07x-xxxxxxx"
               className="w-full border bg-gray-100 border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-950"/>
@@ -330,6 +388,7 @@ export default function StudentPayments() {
               <label className="text-sm font-medium text-gray-700">Address</label>
               <input
                type="text"
+               name="address"
                 disabled={!isEditing}
                placeholder="123 Main St"
                className="w-full border bg-gray-100 border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-950"/>
@@ -339,6 +398,7 @@ export default function StudentPayments() {
               <label className="text-sm font-medium text-gray-700">City</label>
               <input
                type="text"
+               name="city"
                 disabled={!isEditing}
                placeholder="Colombo"
               className="w-full border bg-gray-100 border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-950"/>
@@ -348,6 +408,7 @@ export default function StudentPayments() {
               <label className="text-sm font-medium text-gray-700">Distric/Province</label>
               <input
                type="text"
+               name="district"
                 disabled={!isEditing}
                placeholder="Western Province"
                className="w-full border bg-gray-100 border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-950"/>
@@ -357,6 +418,7 @@ export default function StudentPayments() {
               <label className="text-sm font-medium text-gray-700">Postal Code</label>
               <input
                type="text"
+               name="postalCode"
                 disabled={!isEditing}
                placeholder="00100"
                className="w-full border bg-gray-100 border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-950"/>

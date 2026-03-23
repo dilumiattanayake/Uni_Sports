@@ -1,4 +1,4 @@
-const Payment = require('../models/Payment');
+const Payment = require('../models/Payments');
 const { ErrorResponse } = require('../middleware/errorHandler');
 
 /**

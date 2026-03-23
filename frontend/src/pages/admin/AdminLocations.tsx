@@ -79,8 +79,18 @@ export default function AdminLocations() {
   };
 
   const handleSave = async () => {
-    if (!form.name.trim() || !form.address.trim()) {
-      return toast.error("Location name and address are required");
+    const name = form.name.trim();
+    const address = form.address.trim();
+    const capacity = Number(form.capacity);
+
+    if (!name || name.length < 2) {
+      return toast.error("Please fill valid fields: location name must be at least 2 characters.");
+    }
+    if (!address || address.length < 5) {
+      return toast.error("Please fill valid fields: address must be at least 5 characters.");
+    }
+    if (!Number.isFinite(capacity) || capacity < 1) {
+      return toast.error("Please fill valid fields: capacity must be a positive number.");
     }
 
     try {
@@ -99,8 +109,14 @@ export default function AdminLocations() {
       });
 
       if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.message || "Operation failed");
+        const errorData = await res.json().catch(() => null);
+        const validationMessage = Array.isArray(errorData?.errors)
+          ? errorData.errors
+              .map((item: { msg?: string; message?: string }) => item.msg || item.message)
+              .filter(Boolean)
+              .join(" ")
+          : "";
+        throw new Error(validationMessage || errorData?.message || "Operation failed");
       }
 
       const data = await res.json();

@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { useAuth } from "@/context/AuthContext"
+import { toast } from "sonner"
 import bgImage from "../assets/registerLogin.jpg"
 
 function Login() {
@@ -19,21 +20,25 @@ function Login() {
     setError("")
 
     if (!email.trim()) {
+      toast.error("Please fill valid fields: email is required")
       setError("Email is required")
       return
     }
 
     if (!validateEmail(email)) {
+      toast.error("Please fill valid fields: use your SLIIT email")
       setError("Please use your SLIIT email (@my.sliit.lk)")
       return
     }
 
     if (!password.trim()) {
+      toast.error("Please fill valid fields: password is required")
       setError("Password is required")
       return
     }
 
     if (password.length < 8) {
+      toast.error("Please fill valid fields: password must be at least 8 characters")
       setError("Password must be at least 8 characters")
       return
     }
@@ -53,6 +58,7 @@ function Login() {
         navigate("/StudentDashboard")
       }
     } else {
+      toast.error(result.error ?? "Login failed")
       setError(result.error ?? "Login failed")
       setLoading(false)
     }
@@ -87,7 +93,7 @@ function Login() {
             <input
               type="email"
               placeholder="example@sliit.lk"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-950"
+              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-950"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -102,7 +108,7 @@ function Login() {
             <input
               type="password"
               placeholder="Enter your password"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-950"
+              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-950"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}

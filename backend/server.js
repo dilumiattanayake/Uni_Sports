@@ -13,6 +13,7 @@ const locationRoutes = require('./routes/locationRoutes');
 const sessionRoutes = require('./routes/sessionRoutes');
 const joinRequestRoutes = require('./routes/joinRequestRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
+const paymentRoutes = require('./routes/paymentRoutes');
 
 // Initialize app
 const app = express();
@@ -47,15 +48,12 @@ app.use('/api/locations', locationRoutes);
 app.use('/api/sessions', sessionRoutes);
 app.use('/api/join-requests', joinRequestRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/payments', paymentRoutes);
 
 
 // Placeholder routes for future modules
 // Uncomment and implement when Event Management module is ready
 // app.use('/api/events', eventRoutes);
-
-// Placeholder routes for future modules
-// Uncomment and implement when Payment Management module is ready
-// app.use('/api/payments', paymentRoutes);
 
 // 404 handler
 app.use((req, res, next) => {

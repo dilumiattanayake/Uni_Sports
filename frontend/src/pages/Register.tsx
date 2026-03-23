@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { Link  } from "react-router-dom"
 import { useNavigate } from "react-router-dom"
+import { toast } from "sonner"
 import bgImage from "../assets/registerLogin.jpg"
 
 const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:5001"
@@ -34,30 +35,24 @@ function Register() {
   }
 
   const normalizePhone = (phone) => {
-    const digits = phone.replace(/\D/g, "");
+    const digits = phone.replace(/\D/g, "")
 
-    // Common Sri Lanka formats:
-    // - 0771234567
-    // - +94771234567
-    // - 94771234567
-    // - 771234567 (auto-prefix 0)
-    if (digits.length === 9 && digits.startsWith("7")) {
-      return `0${digits}`;
-    }
-
-    if (digits.length === 10 && digits.startsWith("0")) {
-      return digits;
-    }
-
+    // Accept +94XXXXXXXXX or 94XXXXXXXXX and normalize to 0XXXXXXXXX
     if (digits.length === 11 && digits.startsWith("94")) {
-      return `0${digits.slice(2)}`;
+      return `0${digits.slice(2)}`
     }
 
-    return null;
-  };
+    // Require exact 10 digits local mobile format e.g. 07XXXXXXXX
+    if (digits.length === 10 && digits.startsWith("0")) {
+      return digits
+    }
+
+    return null
+  }
 
   const validatePhone = (phone) => {
-    return Boolean(normalizePhone(phone));
+    const normalized = normalizePhone(phone)
+    return Boolean(normalized && /^07\d{8}$/.test(normalized))
   }
 
   const validatePassword = (password) => {
@@ -71,29 +66,34 @@ function Register() {
 
    
     if (!formData.name.trim()) {
+      toast.error("Please fill valid fields: name is required")
       setError("Name is required")
       return
     }
 
     if (!validateEmail(formData.email)) {
+      toast.error("Please fill valid fields: use your SLIIT email")
       setError("Please use your SLIIT email (@my.sliit.lk)")
       return
     }
 
     if (!validatePassword(formData.password)) {
+      toast.error("Please fill valid fields: password must meet complexity requirements")
       setError("Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one number")
       return
     }
 
     if (formData.password !== formData.confirmPassword) {
+      toast.error("Please fill valid fields: passwords do not match")
       setError("Passwords do not match")
       return
     }
 
     const normalizedPhone = normalizePhone(formData.phone);
 
-    if (role === "coach" && !normalizedPhone) {
-      setError("Please enter a valid phone number (e.g., 0771234567 or +94771234567)")
+    if (role === "coach" && !validatePhone(formData.phone)) {
+      toast.error("Please fill valid fields: phone number must be exactly 10 digits (e.g., 0771234567)")
+      setError("Please enter a valid phone number with exactly 10 digits (e.g., 0771234567)")
       return
     }
 
@@ -122,15 +122,18 @@ function Register() {
 
     if (response.ok) {
       setSuccess("Registration successful!");
+      toast.success("Registration successful")
       
     } else {
       const errorMessage =
         data.message ||
         data.error ||
         "Registration failed";
+      toast.error(errorMessage)
       setError(errorMessage);
     }
   } catch (error) {
+    toast.error("Server error")
     setError("Server error");
   }
 

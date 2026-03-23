@@ -63,7 +63,12 @@ export default function AdminPayments() {
   };
 
   const handleVerifyPayment = async () => {
-    if (!selectedPayment) return;
+    if (!selectedPayment) {
+      return toast.error("Please fill valid fields: select a payment to verify.");
+    }
+    if (verifyStatus === "rejected" && !verifyNote.trim()) {
+      return toast.error("Please fill valid fields: rejection note is required.");
+    }
 
     try {
       const res = await fetch(`http://localhost:5001/api/payments/${selectedPayment._id}/verify`, {

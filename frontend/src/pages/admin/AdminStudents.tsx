@@ -65,11 +65,26 @@ export default function AdminStudents() {
   };
 
   const handleSave = async () => {
-    if (!form.name.trim() || !form.email.trim()) {
-      return toast.error("Student name and email are required");
+    const name = form.name.trim();
+    const email = form.email.trim();
+    const password = form.password.trim();
+    const studentId = form.studentId.trim();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!name || name.length < 2) {
+      return toast.error("Please fill valid fields: student name must be at least 2 characters.");
     }
-    if (!editingStudent && !form.password.trim()) {
-      return toast.error("Password is required for new students");
+    if (!email || !emailRegex.test(email)) {
+      return toast.error("Please fill valid fields: a valid student email is required.");
+    }
+    if (studentId && studentId.length < 4) {
+      return toast.error("Please fill valid fields: student ID must be at least 4 characters.");
+    }
+    if (!editingStudent && password.length < 6) {
+      return toast.error("Please fill valid fields: password must be at least 6 characters.");
+    }
+    if (editingStudent && password && password.length < 6) {
+      return toast.error("Please fill valid fields: password must be at least 6 characters.");
     }
 
     try {

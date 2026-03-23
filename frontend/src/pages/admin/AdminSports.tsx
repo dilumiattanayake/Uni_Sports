@@ -65,8 +65,25 @@ export default function AdminSports() {
   };
 
   const handleSave = async () => {
-    if (!form.name.trim()) return toast.error("Sport name is required");
-    if (!form.description.trim()) return toast.error("Description is required");
+    const name = form.name.trim();
+    const description = form.description.trim();
+    const maxParticipants = Number(form.maxParticipants);
+
+    if (!name) {
+      return toast.error("Please fill valid fields: sport name is required.");
+    }
+    if (name.length < 2) {
+      return toast.error("Please fill valid fields: sport name must be at least 2 characters.");
+    }
+    if (!description) {
+      return toast.error("Please fill valid fields: description is required.");
+    }
+    if (description.length < 10) {
+      return toast.error("Please fill valid fields: description must be at least 10 characters.");
+    }
+    if (!Number.isFinite(maxParticipants) || maxParticipants < 1) {
+      return toast.error("Please fill valid fields: max participants must be a positive number.");
+    }
     
     try {
       const method = editingSport ? "PUT" : "POST";
@@ -84,8 +101,14 @@ export default function AdminSports() {
       });
 
       if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.message || "Operation failed");
+        const errorData = await res.json().catch(() => null);
+        const validationMessage = Array.isArray(errorData?.errors)
+          ? errorData.errors
+              .map((item: { msg?: string; message?: string }) => item.msg || item.message)
+              .filter(Boolean)
+              .join(" ")
+          : "";
+        throw new Error(validationMessage || errorData?.message || "Operation failed");
       }
 
       const data = await res.json();

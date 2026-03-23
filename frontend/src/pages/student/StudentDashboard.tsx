@@ -115,7 +115,7 @@ const StudentDashboard = () => {
           {stats.map((s) => (
             <div
               key={s.label}
-              className="rounded-xl border border-border bg-card p-5 shadow-sm transition bg-indigo-100 hover:shadow-md"
+              className="rounded-xl border border-slate-700/80 bg-slate-900/70 p-5 shadow-sm transition hover:shadow-md"
             >
               <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 {s.label}
@@ -133,7 +133,7 @@ const StudentDashboard = () => {
               <Link
                 key={action.title}
                 to={action.href}
-                className="group rounded-xl border border-border bg-card p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg"
+                className="group rounded-xl border border-slate-700/80 bg-slate-900/70 p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg"
               >
                 <div
                   className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl ${action.bg} text-primary`}
@@ -152,7 +152,7 @@ const StudentDashboard = () => {
 
         <div className="grid gap-6 lg:grid-cols-3">
           {/* Upcoming sessions */}
-          <section className="rounded-xl border border-border bg-card p-6 shadow-sm">
+          <section className="rounded-xl border border-slate-700/80 bg-slate-900/70 p-6 shadow-sm">
             <div className="mb-5 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground">
@@ -172,7 +172,7 @@ const StudentDashboard = () => {
               {upcomingSessions.map((session) => (
                 <div
                   key={`${session.sport}-${session.date}-${session.time}`}
-                  className="flex items-center justify-between rounded-lg border border-border bg-muted/50 px-4 py-4 text-sm transition hover:bg-muted/80"
+                  className="flex items-center justify-between rounded-lg border border-slate-700/70 bg-slate-800/40 px-4 py-4 text-sm transition hover:bg-slate-800/55"
                 >
                   <div>
                     <p className="font-semibold text-foreground">{session.sport}</p>
@@ -190,7 +190,7 @@ const StudentDashboard = () => {
           </section>
 
           {/* Recent requests */}
-          <section className="rounded-xl border border-border bg-card p-6 shadow-sm">
+          <section className="rounded-xl border border-slate-700/80 bg-slate-900/70 p-6 shadow-sm">
             <div className="mb-5 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-orange-500/10 text-orange-600 dark:text-orange-400">
@@ -210,7 +210,7 @@ const StudentDashboard = () => {
               {recentRequests.map((req) => (
                 <div
                   key={`${req.sport}-${req.status}`}
-                  className="flex items-center justify-between rounded-lg border border-border bg-muted/50 px-4 py-3"
+                  className="flex items-center justify-between rounded-lg border border-slate-700/70 bg-slate-800/40 px-4 py-3"
                 >
                   <p className="font-semibold text-foreground">{req.sport}</p>
                   <span
@@ -230,7 +230,7 @@ const StudentDashboard = () => {
             </div>
           </section>
 
-           <section className="rounded-xl border border-border bg-card p-6 shadow-sm">
+           <section className="rounded-xl border border-slate-700/80 bg-slate-900/70 p-6 shadow-sm">
             <div className="mb-5 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-orange-500/10 text-orange-600 dark:text-orange-400">
@@ -257,7 +257,7 @@ const StudentDashboard = () => {
                 upcomingEvents.slice(0, 5).map((event) => (
                   <div
                     key={event._id || event.id}
-                    className="flex items-center justify-between rounded-lg border border-border bg-muted/50 px-4 py-3"
+                    className="flex items-center justify-between rounded-lg border border-slate-700/70 bg-slate-800/40 px-4 py-3"
                   >
                     <div>
                       <p className="font-semibold text-foreground">{event.eventName}</p>

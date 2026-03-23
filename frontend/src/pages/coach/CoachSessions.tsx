@@ -160,14 +160,14 @@ export default function CoachSessions() {
           <DialogTrigger asChild>
             <Button className="gap-2"><Plus className="h-4 w-4" /> New Session</Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="border-slate-700 bg-slate-950/95 text-slate-100">
             <DialogHeader><DialogTitle className="font-display">Create Practice Session</DialogTitle></DialogHeader>
             <div className="space-y-4 py-2">
               <div>
                 <Label>Sport</Label>
                 <Select value={form.sportId} onValueChange={v => setForm(f => ({ ...f, sportId: v }))}>
-                  <SelectTrigger><SelectValue placeholder="Select sport" /></SelectTrigger>
-                  <SelectContent>
+                  <SelectTrigger className="border-slate-700 bg-slate-900 text-slate-100"><SelectValue placeholder="Select sport" /></SelectTrigger>
+                  <SelectContent className="z-[100] border-slate-700 bg-slate-900 text-slate-100">
                     {sports.map((sport) => <SelectItem key={sport._id} value={sport._id}>{sport.name}</SelectItem>)}
                   </SelectContent>
                 </Select>
@@ -175,16 +175,16 @@ export default function CoachSessions() {
               <div>
                 <Label>Location</Label>
                 <Select value={form.locationId} onValueChange={v => setForm(f => ({ ...f, locationId: v }))}>
-                  <SelectTrigger><SelectValue placeholder="Select location" /></SelectTrigger>
-                  <SelectContent>
+                  <SelectTrigger className="border-slate-700 bg-slate-900 text-slate-100"><SelectValue placeholder="Select location" /></SelectTrigger>
+                  <SelectContent className="z-[100] border-slate-700 bg-slate-900 text-slate-100">
                     {locations.map((location) => <SelectItem key={location._id} value={location._id}>{location.name} ({location.type})</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
-              <div><Label>Date</Label><Input type="date" value={form.date} onChange={e => setForm(f => ({ ...f, date: e.target.value }))} /></div>
+              <div><Label>Date</Label><Input type="date" value={form.date} onChange={e => setForm(f => ({ ...f, date: e.target.value }))} className="border-slate-700 bg-slate-900 text-slate-100" /></div>
               <div className="grid grid-cols-2 gap-3">
-                <div><Label>Start Time</Label><Input type="time" value={form.startTime} onChange={e => setForm(f => ({ ...f, startTime: e.target.value }))} /></div>
-                <div><Label>End Time</Label><Input type="time" value={form.endTime} onChange={e => setForm(f => ({ ...f, endTime: e.target.value }))} /></div>
+                <div><Label>Start Time</Label><Input type="time" value={form.startTime} onChange={e => setForm(f => ({ ...f, startTime: e.target.value }))} className="border-slate-700 bg-slate-900 text-slate-100" /></div>
+                <div><Label>End Time</Label><Input type="time" value={form.endTime} onChange={e => setForm(f => ({ ...f, endTime: e.target.value }))} className="border-slate-700 bg-slate-900 text-slate-100" /></div>
               </div>
             </div>
             <DialogFooter>
@@ -198,24 +198,24 @@ export default function CoachSessions() {
           <DialogTrigger asChild>
             <span />
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="border-slate-700 bg-slate-950/95 text-slate-100">
             <DialogHeader><DialogTitle className="font-display">Edit Session Time</DialogTitle></DialogHeader>
             <div className="space-y-4 py-2">
               <div>
                 <Label>Location</Label>
                 <Select value={form.locationId} onValueChange={(value) => setForm((prev) => ({ ...prev, locationId: value }))}>
-                  <SelectTrigger><SelectValue placeholder="Select location" /></SelectTrigger>
-                  <SelectContent>
+                  <SelectTrigger className="border-slate-700 bg-slate-900 text-slate-100"><SelectValue placeholder="Select location" /></SelectTrigger>
+                  <SelectContent className="z-[100] border-slate-700 bg-slate-900 text-slate-100">
                     {locations.map((location) => (
                       <SelectItem key={location._id} value={location._id}>{location.name} ({location.type})</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
-              <div><Label>Date</Label><Input type="date" value={form.date} onChange={(e) => setForm((prev) => ({ ...prev, date: e.target.value }))} /></div>
+              <div><Label>Date</Label><Input type="date" value={form.date} onChange={(e) => setForm((prev) => ({ ...prev, date: e.target.value }))} className="border-slate-700 bg-slate-900 text-slate-100" /></div>
               <div className="grid grid-cols-2 gap-3">
-                <div><Label>Start Time</Label><Input type="time" value={form.startTime} onChange={(e) => setForm((prev) => ({ ...prev, startTime: e.target.value }))} /></div>
-                <div><Label>End Time</Label><Input type="time" value={form.endTime} onChange={(e) => setForm((prev) => ({ ...prev, endTime: e.target.value }))} /></div>
+                <div><Label>Start Time</Label><Input type="time" value={form.startTime} onChange={(e) => setForm((prev) => ({ ...prev, startTime: e.target.value }))} className="border-slate-700 bg-slate-900 text-slate-100" /></div>
+                <div><Label>End Time</Label><Input type="time" value={form.endTime} onChange={(e) => setForm((prev) => ({ ...prev, endTime: e.target.value }))} className="border-slate-700 bg-slate-900 text-slate-100" /></div>
               </div>
               <div className="flex items-center gap-2 p-3 rounded-lg bg-warning/10 text-warning text-sm">
                 <AlertTriangle className="h-4 w-4 shrink-0" />
