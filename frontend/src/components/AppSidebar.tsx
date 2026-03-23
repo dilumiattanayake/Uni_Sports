@@ -5,7 +5,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { NavLink } from "@/components/NavLink";
 import {
   LayoutDashboard, Trophy, Users, MapPin, Calendar, UserCheck, BookOpen, Settings,
-  ChevronLeft, Medal, DollarSign,  Package, Home,
+  ChevronLeft, Medal, DollarSign, Package, Home, CalendarDays, CreditCard, Boxes,
+  Dumbbell, ChevronDown, ChevronRight, LogOut,
 } from "lucide-react";
 import {
   Sidebar,
@@ -71,20 +72,25 @@ export function AppSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const config = role !== "admin" ? roleConfig[role] : undefined;
+  const [sportsMenuOpen, setSportsMenuOpen] = useState(false);
+
+  const sportsManagementLinks = [
+    { title: "Add and View Sports", url: "/admin/sports" },
+    { title: "Add and View Coaches", url: "/admin/coaches" },
+    { title: "Add and View Students", url: "/admin/students" },
+    { title: "Add and View Locations", url: "/admin/locations" },
+  ];
+
+  const hasSportsPath = location.pathname.includes("/admin/sports") || 
+                       location.pathname.includes("/admin/coaches") ||
+                       location.pathname.includes("/admin/students") ||
+                       location.pathname.includes("/admin/locations");
 
   const handleLogoClick = () => {
-  if (role === "admin") navigate("/AdminDashboard");
-  else if (role === "coach") navigate("/CoachDashboard");
-  else if (role === "student") navigate("/StudentDashboard");
-};
-
-const handleSettingsClick = () => {
-  if (role === "admin") navigate("/admin/settings");
-  else if (role === "coach") navigate("/coach/settings");
-  else if (role === "student") navigate("/student/settings");
-};
-
-
+    if (role === "admin") navigate("/AdminDashboard");
+    else if (role === "coach") navigate("/CoachDashboard");
+    else if (role === "student") navigate("/StudentDashboard");
+  };
 
   return (
     <Sidebar collapsible="icon" className="border-r-0">
