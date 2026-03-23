@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { NavLink } from "@/components/NavLink";
 import {
   LayoutDashboard, Trophy, Users, MapPin, Calendar, UserCheck, BookOpen, Settings,
-  ChevronLeft, Medal, DollarSign,  Package, Home,
+  ChevronLeft, Medal, DollarSign,  Package, CreditCard, BarChart, Receipt,Globe,
 } from "lucide-react";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
@@ -18,6 +18,7 @@ import logoos from "@/assets/Logoos.jpg";
 
 const adminLinks = [
   { title: "Dashboard", url: "/admin/dashboard", icon: LayoutDashboard },
+  { title: "View Users", url: "/admin/view/users", icon: Users },
   { title: "Sports", url: "/admin/sports", icon: Trophy },
   { title: "Coaches", url: "/admin/coaches", icon: Users },
   { title: "Students", url: "/admin/students", icon: UserCheck },
@@ -25,6 +26,9 @@ const adminLinks = [
   { title: "Events", url: "/admin/events", icon:  Medal },
   { title: "Inventory", url: "/admin/inventory", icon:  Package },
   { title: "Payments", url: "/admin/payments", icon:  DollarSign },
+  { title: "Transactions", url: "/admin/transactions", icon:  CreditCard },
+ 
+
 ];
 
 const coachLinks = [
@@ -59,7 +63,7 @@ export function AppSidebar() {
   const config = roleConfig[role];
 
   const handleLogoClick = () => {
-  if (role === "admin") navigate("/AdminDashboard");
+  if (role === "admin") navigate("/admin/dashboard");
   else if (role === "coach") navigate("/CoachDashboard");
   else if (role === "student") navigate("/StudentDashboard");
 };
