@@ -192,7 +192,7 @@ function Register() {
         <form onSubmit={handleSubmit} className="space-y-2">
 
           {/* Name */}
-          <label className="block text-sm font-medium mb-1">
+          <label className="block text-sm font-medium mb-1 text-black">
               Name 
             </label>
           <input
@@ -206,7 +206,7 @@ function Register() {
           />
 
           {/* Email */}
-          <label className="block text-sm font-medium mb-1">
+          <label className="block text-sm font-medium mb-1 text-black">
               SLIIT Email
             </label>
           <input
@@ -221,7 +221,7 @@ function Register() {
 
           {/* Phone (Only for Coach) */}
           {role === "coach" && (
-          <label className="block text-sm font-medium mb-1">
+          <label className="block text-sm font-medium mb-1 text-black">
               Phone Number
             </label>
           )}
@@ -238,7 +238,7 @@ function Register() {
           )}
 
           {/* Password */}
-          <label className="block text-sm font-medium mb-1">
+          <label className="block text-sm font-medium mb-1 text-black">
               Password
             </label>
           <input
@@ -252,7 +252,7 @@ function Register() {
           />
 
           {/* Confirm Password */}
-          <label className="block text-sm font-medium mb-1">
+          <label className="block text-sm font-medium mb-1 text-black">
               Confirm Password
             </label>
           <input

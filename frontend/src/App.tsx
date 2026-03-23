@@ -37,7 +37,7 @@ const App = () => {
         <Route path="/auth/register" element={<Register />} />
         <Route path="/auth/login" element={<Login />} />
         <Route path="/admin" element={<Navigate to="/admin/home" replace />} />
-        <Route path="/admin/home" element={<DashboardLayout><AdminDashboard /></DashboardLayout>} />
+        <Route path="/admin/home" element={<AdminDashboard />} />
         <Route path="/admin/sports" element={<DashboardLayout><AdminSports /></DashboardLayout>} />
         <Route path="/admin/coaches" element={<DashboardLayout><AdminCoaches /></DashboardLayout>} />
         <Route path="/admin/students" element={<DashboardLayout><AdminStudents /></DashboardLayout>} />
@@ -53,7 +53,7 @@ const App = () => {
         <Route path="/student/sports" element={<DashboardLayout><StudentBrowseSports /></DashboardLayout>} />
         <Route path="/student/sessions" element={<DashboardLayout><StudentSessions /></DashboardLayout>} />
         <Route path="/student/requests" element={<DashboardLayout><StudentRequests /></DashboardLayout>} />
-        <Route path="/student/payments" element={<DashboardLayout><StudentPayments /></DashboardLayout>} />
+        <Route path="/student/payments" element={<StudentPayments />} />
 
         <Route path="/StudentDashboard" element={<StudentDashboard />} />
         <Route path="/CoachDashboard" element={<CoachDashboard />} />

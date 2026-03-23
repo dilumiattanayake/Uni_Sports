@@ -1,5 +1,4 @@
 import { StatCard } from "@/components/common/StatCard";
-import { PageHeader } from "@/components/common/PageHeader";
 import { mockSports, mockSessions, mockJoinRequests, mockStudents, mockLocations, mockCoaches } from "@/data/mockData";
 import { useAuth } from "@/context/AuthContext";
 import { Calendar, Users, UserCheck, Trophy, Clock, AlertTriangle } from "lucide-react";
@@ -45,7 +44,6 @@ export default function CoachDashboard() {
   return (
     <DashboardLayout>
     <div className="space-y-6">
-      <PageHeader title="Coach Dashboard" description={`Welcome back, ${user.name}`} />
 
       {/* Stats */}
         <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

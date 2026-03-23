@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom"
 import { useEffect, useMemo, useState } from "react"
 import { DashboardLayout } from "@/components/DashboardLayout"
-import { PageHeader } from "@/components/common/PageHeader"
 import {
   ArrowRight,
   CalendarDays,
@@ -111,11 +110,6 @@ const StudentDashboard = () => {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <PageHeader
-          title="Dashboard"
-          description="Manage your sports, sessions, and join requests in one place"
-        />
-
         {/* Stats */}
         <section className="grid gap-4 sm:grid-cols-3">
           {stats.map((s) => (

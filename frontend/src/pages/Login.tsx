@@ -81,7 +81,7 @@ function Login() {
 
           {/* Email */}
           <div>
-            <label className="block text-sm font-medium mb-1">
+            <label className="block text-sm font-medium mb-1 text-black">
               SLIIT Email
             </label>
             <input
@@ -96,7 +96,7 @@ function Login() {
 
           {/* Password */}
           <div>
-            <label className="block text-sm font-medium mb-1">
+            <label className="block text-sm font-medium mb-1 text-black">
               Password
             </label>
             <input

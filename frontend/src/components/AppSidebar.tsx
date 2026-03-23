@@ -19,9 +19,6 @@ import {
   SidebarMenuItem,
   SidebarFooter,
   useSidebar,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import logo from "@/assets/Logo.jpg";
@@ -103,6 +100,71 @@ export function AppSidebar() {
   const [inventoryMenuOpen, setInventoryMenuOpen] = useState(false);
   const [eventMenuOpen, setEventMenuOpen] = useState(false);
 
+  const toggleSportsMenu = () => {
+    setSportsMenuOpen((prev) => {
+      const next = !prev;
+      if (next) {
+        setUserMenuOpen(false);
+        setEventMenuOpen(false);
+        setPaymentMenuOpen(false);
+        setInventoryMenuOpen(false);
+      }
+      return next;
+    });
+  };
+
+  const toggleUserMenu = () => {
+    setUserMenuOpen((prev) => {
+      const next = !prev;
+      if (next) {
+        setSportsMenuOpen(false);
+        setEventMenuOpen(false);
+        setPaymentMenuOpen(false);
+        setInventoryMenuOpen(false);
+      }
+      return next;
+    });
+  };
+
+  const toggleEventMenu = () => {
+    setEventMenuOpen((prev) => {
+      const next = !prev;
+      if (next) {
+        setSportsMenuOpen(false);
+        setUserMenuOpen(false);
+        setPaymentMenuOpen(false);
+        setInventoryMenuOpen(false);
+      }
+      return next;
+    });
+  };
+
+  const togglePaymentMenu = () => {
+    setPaymentMenuOpen((prev) => {
+      const next = !prev;
+      if (next) {
+        setSportsMenuOpen(false);
+        setUserMenuOpen(false);
+        setEventMenuOpen(false);
+        setInventoryMenuOpen(false);
+      }
+      return next;
+    });
+  };
+
+  const toggleInventoryMenu = () => {
+    setInventoryMenuOpen((prev) => {
+      const next = !prev;
+      if (next) {
+        setSportsMenuOpen(false);
+        setUserMenuOpen(false);
+        setEventMenuOpen(false);
+        setPaymentMenuOpen(false);
+      }
+      return next;
+    });
+  };
+
   const hasSportsPath = location.pathname.includes("/admin/sports") || 
                        location.pathname.includes("/admin/coaches") ||
                        location.pathname.includes("/admin/locations");
@@ -154,177 +216,137 @@ export function AppSidebar() {
           )}
           <SidebarGroupContent>
             {role === "admin" ? (
-              <SidebarMenu>
-                {/* Sports Management */}
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors text-sm"
-                    onClick={() => setSportsMenuOpen((prev) => !prev)}
-                    isActive={hasSportsPath}
+              <div className="space-y-1">
+                <div>
+                  <button
+                    onClick={toggleSportsMenu}
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
                   >
                     <Trophy className="h-4 w-4 shrink-0" />
-                    {!collapsed && (
-                      <>
-                        <span className="flex-1 text-left">Sports Management</span>
-                        {sportsMenuOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                      </>
-                    )}
-                  </SidebarMenuButton>
-                  {!collapsed && sportsMenuOpen && (
-                    <SidebarMenuSub>
+                    <span className="flex-1 text-left">Sports Management</span>
+                    {sportsMenuOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                  </button>
+                  {sportsMenuOpen && !collapsed && (
+                    <div className="mt-1 space-y-1 pl-8">
                       {sportsManagementLinks.map((item) => (
-                        <SidebarMenuSubItem key={item.title}>
-                          <SidebarMenuSubButton asChild>
-                            <NavLink
-                              to={item.url}
-                              className="text-sidebar-foreground/70"
-                              activeClassName="text-sidebar-primary font-medium"
-                            >
-                              {item.title}
-                            </NavLink>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
+                        <NavLink
+                          key={item.title}
+                          to={item.url}
+                          className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                          activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
+                        >
+                          <item.icon className="h-4 w-4 shrink-0" />
+                          <span>{item.title}</span>
+                        </NavLink>
                       ))}
-                    </SidebarMenuSub>
+                    </div>
                   )}
-                </SidebarMenuItem>
+                </div>
 
-                {/* User Management */}
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors text-sm"
-                    onClick={() => setUserMenuOpen((prev) => !prev)}
-                    isActive={hasUserPath}
+                <div>
+                  <button
+                    onClick={toggleUserMenu}
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
                   >
                     <Users className="h-4 w-4 shrink-0" />
-                    {!collapsed && (
-                      <>
-                        <span className="flex-1 text-left">User Management</span>
-                        {userMenuOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                      </>
-                    )}
-                  </SidebarMenuButton>
-                  {!collapsed && userMenuOpen && (
-                    <SidebarMenuSub>
+                    <span className="flex-1 text-left">User Management</span>
+                    {userMenuOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                  </button>
+                  {userMenuOpen && !collapsed && (
+                    <div className="mt-1 space-y-1 pl-8">
                       {userManagementLinks.map((item) => (
-                        <SidebarMenuSubItem key={item.title}>
-                          <SidebarMenuSubButton asChild>
-                            <NavLink
-                              to={item.url}
-                              className="text-sidebar-foreground/70"
-                              activeClassName="text-sidebar-primary font-medium"
-                            >
-                              {item.title}
-                            </NavLink>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
+                        <NavLink
+                          key={item.title}
+                          to={item.url}
+                          className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                          activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
+                        >
+                          <item.icon className="h-4 w-4 shrink-0" />
+                          <span>{item.title}</span>
+                        </NavLink>
                       ))}
-                    </SidebarMenuSub>
+                    </div>
                   )}
-                </SidebarMenuItem>
+                </div>
 
-                {/* Event Management */}
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors text-sm"
-                    onClick={() => setEventMenuOpen((prev) => !prev)}
-                    isActive={hasEventPath}
+                <div>
+                  <button
+                    onClick={toggleEventMenu}
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
                   >
                     <Medal className="h-4 w-4 shrink-0" />
-                    {!collapsed && (
-                      <>
-                        <span className="flex-1 text-left">Event Management</span>
-                        {eventMenuOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                      </>
-                    )}
-                  </SidebarMenuButton>
-                  {!collapsed && eventMenuOpen && (
-                    <SidebarMenuSub>
+                    <span className="flex-1 text-left">Event Management</span>
+                    {eventMenuOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                  </button>
+                  {eventMenuOpen && !collapsed && (
+                    <div className="mt-1 space-y-1 pl-8">
                       {eventManagementLinks.map((item) => (
-                        <SidebarMenuSubItem key={item.title}>
-                          <SidebarMenuSubButton asChild>
-                            <NavLink
-                              to={item.url}
-                              className="text-sidebar-foreground/70"
-                              activeClassName="text-sidebar-primary font-medium"
-                            >
-                              {item.title}
-                            </NavLink>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
+                        <NavLink
+                          key={item.title}
+                          to={item.url}
+                          className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                          activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
+                        >
+                          <item.icon className="h-4 w-4 shrink-0" />
+                          <span>{item.title}</span>
+                        </NavLink>
                       ))}
-                    </SidebarMenuSub>
+                    </div>
                   )}
-                </SidebarMenuItem>
+                </div>
 
-                {/* Payment Management */}
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors text-sm"
-                    onClick={() => setPaymentMenuOpen((prev) => !prev)}
-                    isActive={hasPaymentPath}
+                <div>
+                  <button
+                    onClick={togglePaymentMenu}
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
                   >
                     <DollarSign className="h-4 w-4 shrink-0" />
-                    {!collapsed && (
-                      <>
-                        <span className="flex-1 text-left">Payment Management</span>
-                        {paymentMenuOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                      </>
-                    )}
-                  </SidebarMenuButton>
-                  {!collapsed && paymentMenuOpen && (
-                    <SidebarMenuSub>
+                    <span className="flex-1 text-left">Payment Management</span>
+                    {paymentMenuOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                  </button>
+                  {paymentMenuOpen && !collapsed && (
+                    <div className="mt-1 space-y-1 pl-8">
                       {paymentManagementLinks.map((item) => (
-                        <SidebarMenuSubItem key={item.title}>
-                          <SidebarMenuSubButton asChild>
-                            <NavLink
-                              to={item.url}
-                              className="text-sidebar-foreground/70"
-                              activeClassName="text-sidebar-primary font-medium"
-                            >
-                              {item.title}
-                            </NavLink>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
+                        <NavLink
+                          key={item.title}
+                          to={item.url}
+                          className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                          activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
+                        >
+                          <item.icon className="h-4 w-4 shrink-0" />
+                          <span>{item.title}</span>
+                        </NavLink>
                       ))}
-                    </SidebarMenuSub>
+                    </div>
                   )}
-                </SidebarMenuItem>
+                </div>
 
-                {/* Inventory Management */}
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors text-sm"
-                    onClick={() => setInventoryMenuOpen((prev) => !prev)}
-                    isActive={hasInventoryPath}
+                <div>
+                  <button
+                    onClick={toggleInventoryMenu}
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
                   >
                     <Package className="h-4 w-4 shrink-0" />
-                    {!collapsed && (
-                      <>
-                        <span className="flex-1 text-left">Inventory Management</span>
-                        {inventoryMenuOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                      </>
-                    )}
-                  </SidebarMenuButton>
-                  {!collapsed && inventoryMenuOpen && (
-                    <SidebarMenuSub>
+                    <span className="flex-1 text-left">Inventory Management</span>
+                    {inventoryMenuOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                  </button>
+                  {inventoryMenuOpen && !collapsed && (
+                    <div className="mt-1 space-y-1 pl-8">
                       {inventoryManagementLinks.map((item) => (
-                        <SidebarMenuSubItem key={item.title}>
-                          <SidebarMenuSubButton asChild>
-                            <NavLink
-                              to={item.url}
-                              className="text-sidebar-foreground/70"
-                              activeClassName="text-sidebar-primary font-medium"
-                            >
-                              {item.title}
-                            </NavLink>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
+                        <NavLink
+                          key={item.title}
+                          to={item.url}
+                          className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                          activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
+                        >
+                          <item.icon className="h-4 w-4 shrink-0" />
+                          <span>{item.title}</span>
+                        </NavLink>
                       ))}
-                    </SidebarMenuSub>
+                    </div>
                   )}
-                </SidebarMenuItem>
-              </SidebarMenu>
+                </div>
+              </div>
             ) : (
               <SidebarMenu>
                 {config?.links.map((item) => (

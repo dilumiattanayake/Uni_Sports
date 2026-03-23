@@ -22,11 +22,6 @@ export default function AdminDashboard() {
     <DashboardLayout>
       <div className="space-y-6">
 
-        <PageHeader
-          title="Admin Dashboard"
-          description="Overview of sports management system"
-        />
-
         {/* STAT CARDS */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 
