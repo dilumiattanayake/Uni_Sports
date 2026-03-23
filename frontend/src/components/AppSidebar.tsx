@@ -38,6 +38,7 @@ const adminLinks = [
   { title: "Events", url: "/admin/events", icon:  Medal },
   { title: "Inventory", url: "/admin/inventory", icon:  Package },
   { title: "Payments", url: "/admin/payments", icon:  DollarSign },
+  
 ];
 
 const sportsManagementLinks = [
@@ -53,6 +54,8 @@ const userManagementLinks = [
 
 const paymentManagementLinks = [
   { title: "Payments", url: "/admin/payments", icon: DollarSign },
+  { title: "Verification", url: "/admin/payments/verify", icon: DollarSign },
+  { title: "Payment Reports", url: "/admin/payment/reports", icon: DollarSign },
 ];
 
 const inventoryManagementLinks = [
@@ -110,7 +113,9 @@ export function AppSidebar() {
   const hasUserPath = location.pathname.includes("/admin/students") || 
                      location.pathname.includes("/admin/coaches");
 
-  const hasPaymentPath = location.pathname.includes("/admin/payments");
+  const hasPaymentPath = paymentManagementLinks.some((item) =>
+    location.pathname.startsWith(item.url)
+  );
   
   const hasInventoryPath = location.pathname.includes("/admin/inventory");
   
