@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { PageHeader } from "@/components/common/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,59 +7,73 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Eye } from "lucide-react";
+import { Eye, Loader } from "lucide-react";
 import { Link } from "react-router-dom";
+import { toast } from "sonner";
 
-type EventPayment = {
-  id: string;
-  event: string;
+type Payment = {
+  _id: string;
+  type: "event" | "item";
   amount: number;
-  date: string;
-  status: "Pending" | "Approved" | "Rejected";
-};
-
-type ItemOrder = {
-  id: string;
-  item: string;
-  quantity: number;
-  total: number;
-  date: string;
-  status: "Paid" | "Processing" | "Delivered";
+  status: "pending" | "approved" | "rejected" | "paid" | "delivered";
+  createdAt: string;
+  referenceId?: string;
+  note?: string;
 };
 
 export default function StudentPayments() {
+  const [payments, setPayments] = useState<Payment[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<any>(null);
 
-  // Dummy Data (Replace with API later)
-  const eventPayments: EventPayment[] = [
-    { id: "P001", event: "Football Tournament", amount: 1500, date: "2026-03-10", status: "Approved" },
-    { id: "P002", event: "Basketball League", amount: 1200, date: "2026-03-12", status: "Pending" },
-  ];
+  useEffect(() => {
+    loadPayments();
+  }, []);
 
-  const itemOrders: ItemOrder[] = [
-    { id: "O001", item: "Sports Shoes", quantity: 1, total: 5000, date: "2026-03-15", status: "Delivered" },
-    { id: "O002", item: "Jersey", quantity: 2, total: 3000, date: "2026-03-16", status: "Processing" },
-  ];
+  const getToken = () => localStorage.getItem("token") || "";
+
+  const loadPayments = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch("http://localhost:5001/api/payments/my", {
+        headers: { "Authorization": `Bearer ${getToken()}` }
+      });
+      if (!res.ok) throw new Error("Failed to load payments");
+      const data = await res.json();
+      setPayments(data.data || []);
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to load payments");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const eventPayments = payments.filter(p => p.type === "event");
+  const itemOrders = payments.filter(p => p.type === "item");
 
   const getStatusVariant = (status: string) => {
     switch (status) {
-      case "Approved":
-      case "Delivered":
-      case "Paid":
+      case "approved":
+      case "delivered":
+      case "paid":
         return "default";
-      case "Pending":
-      case "Processing":
+      case "pending":
         return "secondary";
-      case "Rejected":
+      case "rejected":
         return "destructive";
       default:
         return "outline";
     }
   };
 
-  const totalPayments =
-    eventPayments.reduce((sum, p) => sum + p.amount, 0) +
-    itemOrders.reduce((sum, o) => sum + o.total, 0);
+  const formatDate = (date: string) => {
+    return new Date(date).toLocaleDateString();
+  };
+
+  const totalPayments = payments.reduce((sum, p) => sum + p.amount, 0);
+  const pendingCount = payments.filter(p => p.status === "pending").length;
+  const approvedCount = payments.filter(p => p.status === "approved" || p.status === "paid").length;
 
   const [isEditing, setIsEditing] = useState(false);
 
@@ -68,7 +82,7 @@ export default function StudentPayments() {
       <div className="space-y-6">
         <PageHeader
           title="My Payments"
-          description="Track your sports item orders and event payments"
+          description="Track your sports event payments and item orders"
         />
 
         {/* Summary Cards */}
@@ -86,9 +100,7 @@ export default function StudentPayments() {
               <CardTitle className="text-sm font-medium">Pending</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
-                {eventPayments.filter(p => p.status === "Pending").length}
-              </div>
+              <div className="text-2xl font-bold">{pendingCount}</div>
             </CardContent>
           </Card>
           <Card className=" bg-indigo-100 hover:shadow-md">
@@ -96,17 +108,15 @@ export default function StudentPayments() {
               <CardTitle className="text-sm font-medium">Approved</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
-                {eventPayments.filter(p => p.status === "Approved").length}
-              </div>
+              <div className="text-2xl font-bold">{approvedCount}</div>
             </CardContent>
           </Card>
           <Card className=" bg-indigo-100 hover:shadow-md">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Orders</CardTitle>
+              <CardTitle className="text-sm font-medium">Total Records</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{itemOrders.length}</div>
+              <div className="text-2xl font-bold">{payments.length}</div>
             </CardContent>
           </Card>
         </div>
@@ -141,55 +151,58 @@ export default function StudentPayments() {
                 <CardTitle>Sports Items Orders</CardTitle>
               </CardHeader>
               <CardContent>
-                <Table>
-                  <TableHeader className="bg-orange-100">
-                    <TableRow>
-                      <TableHead>Order ID</TableHead>
-                      <TableHead>Item</TableHead>
-                      <TableHead>Qty</TableHead>
-                      <TableHead>Total</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Action</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {itemOrders.map((o) => (
-                      <TableRow key={o.id}>
-                        <TableCell>{o.id}</TableCell>
-                        <TableCell>{o.item}</TableCell>
-                        <TableCell>{o.quantity}</TableCell>
-                        <TableCell>{o.total} LKR</TableCell>
-                        <TableCell>{o.date}</TableCell>
-                        <TableCell>
-                          <Badge variant={getStatusVariant(o.status)}>{o.status}</Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <Button variant="ghost" size="sm" onClick={() => setSelected(o)}>
-                                <Eye className="h-4 w-4" />
-                              </Button>
-                            </DialogTrigger>
-                            <DialogContent className="bg-white">
-                              <DialogHeader>
-                                <DialogTitle>Order Details</DialogTitle>
-                              </DialogHeader>
-                              <div className="space-y-2">
-                                <p><strong>ID:</strong> {o.id}</p>
-                                <p><strong>Item:</strong> {o.item}</p>
-                                <p><strong>Quantity:</strong> {o.quantity}</p>
-                                <p><strong>Total:</strong> {o.total} LKR</p>
-                                <p><strong>Date:</strong> {o.date}</p>
-                                <p><strong>Status:</strong> <Badge variant={getStatusVariant(o.status)}>{o.status}</Badge></p>
-                              </div>
-                            </DialogContent>
-                          </Dialog>
-                        </TableCell>
+                {loading ? (
+                  <div className="flex justify-center items-center py-8">
+                    <Loader className="h-6 w-6 animate-spin text-indigo-600" />
+                  </div>
+                ) : itemOrders.length === 0 ? (
+                  <p className="text-center text-gray-500 py-8">No item orders found</p>
+                ) : (
+                  <Table>
+                    <TableHeader className="bg-orange-100">
+                      <TableRow>
+                        <TableHead>Payment ID</TableHead>
+                        <TableHead>Amount</TableHead>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Action</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {itemOrders.map((p) => (
+                        <TableRow key={p._id}>
+                          <TableCell>{p._id.substring(0, 8)}</TableCell>
+                          <TableCell>{p.amount} LKR</TableCell>
+                          <TableCell>{formatDate(p.createdAt)}</TableCell>
+                          <TableCell>
+                            <Badge variant={getStatusVariant(p.status)}>{p.status}</Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button variant="ghost" size="sm" onClick={() => setSelected(p)}>
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="bg-slate-900 bg-opacity-95 border-slate-700">
+                                <DialogHeader>
+                                  <DialogTitle>Order Details</DialogTitle>
+                                </DialogHeader>
+                                <div className="space-y-2">
+                                  <p><strong>ID:</strong> {p._id}</p>
+                                  <p><strong>Amount:</strong> {p.amount} LKR</p>
+                                  <p><strong>Date:</strong> {formatDate(p.createdAt)}</p>
+                                  <p><strong>Status:</strong> <Badge variant={getStatusVariant(p.status)}>{p.status}</Badge></p>
+                                  {p.note && <p><strong>Note:</strong> {p.note}</p>}
+                                </div>
+                              </DialogContent>
+                            </Dialog>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -202,52 +215,58 @@ export default function StudentPayments() {
                 <CardTitle>Event Payments</CardTitle>
               </CardHeader>
               <CardContent>
-                <Table>
-                  <TableHeader className="bg-orange-100">
-                    <TableRow>
-                      <TableHead>Payment ID</TableHead>
-                      <TableHead>Event</TableHead>
-                      <TableHead>Amount</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Action</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {eventPayments.map((p) => (
-                      <TableRow key={p.id}>
-                        <TableCell>{p.id}</TableCell>
-                        <TableCell>{p.event}</TableCell>
-                        <TableCell>{p.amount} LKR</TableCell>
-                        <TableCell>{p.date}</TableCell>
-                        <TableCell>
-                          <Badge variant={getStatusVariant(p.status)}>{p.status}</Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <Button variant="ghost" size="sm" onClick={() => setSelected(p)}>
-                                <Eye className="h-4 w-4" />
-                              </Button>
-                            </DialogTrigger>
-                            <DialogContent className="bg-white">
-                              <DialogHeader>
-                                <DialogTitle>Payment Details</DialogTitle>
-                              </DialogHeader>
-                              <div className="space-y-2">
-                                <p><strong>ID:</strong> {p.id}</p>
-                                <p><strong>Event:</strong> {p.event}</p>
-                                <p><strong>Amount:</strong> {p.amount} LKR</p>
-                                <p><strong>Date:</strong> {p.date}</p>
-                                <p><strong>Status:</strong> <Badge variant={getStatusVariant(p.status)}>{p.status}</Badge></p>
-                              </div>
-                            </DialogContent>
-                          </Dialog>
-                        </TableCell>
+                {loading ? (
+                  <div className="flex justify-center items-center py-8">
+                    <Loader className="h-6 w-6 animate-spin text-indigo-600" />
+                  </div>
+                ) : eventPayments.length === 0 ? (
+                  <p className="text-center text-gray-500 py-8">No event payments found</p>
+                ) : (
+                  <Table>
+                    <TableHeader className="bg-orange-100">
+                      <TableRow>
+                        <TableHead>Payment ID</TableHead>
+                        <TableHead>Amount</TableHead>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Action</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {eventPayments.map((p) => (
+                        <TableRow key={p._id}>
+                          <TableCell>{p._id.substring(0, 8)}</TableCell>
+                          <TableCell>{p.amount} LKR</TableCell>
+                          <TableCell>{formatDate(p.createdAt)}</TableCell>
+                          <TableCell>
+                            <Badge variant={getStatusVariant(p.status)}>{p.status}</Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button variant="ghost" size="sm" onClick={() => setSelected(p)}>
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="bg-slate-900 bg-opacity-95 border-slate-700">
+                                <DialogHeader>
+                                  <DialogTitle>Payment Details</DialogTitle>
+                                </DialogHeader>
+                                <div className="space-y-2">
+                                  <p><strong>ID:</strong> {p._id}</p>
+                                  <p><strong>Amount:</strong> {p.amount} LKR</p>
+                                  <p><strong>Date:</strong> {formatDate(p.createdAt)}</p>
+                                  <p><strong>Status:</strong> <Badge variant={getStatusVariant(p.status)}>{p.status}</Badge></p>
+                                  {p.note && <p><strong>Note:</strong> {p.note}</p>}
+                                </div>
+                              </DialogContent>
+                            </Dialog>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

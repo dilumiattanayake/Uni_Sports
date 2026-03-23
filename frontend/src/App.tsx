@@ -7,10 +7,12 @@ import StudentBrowseSports from "./pages/student/StudentBrowseSports"
 import StudentSessions from "./pages/student/StudentSessions"
 import StudentRequests from "./pages/student/StudentRequests"
 import AdminDashboard from "./pages/admin/AdminDashboard"
+import AdminPayments from "./pages/admin/AdminPayments"
 
 import CoachDashboard from "./pages/coach/CoachDashboard"
 import CoachSessions from "./pages/coach/CoachSessions"
 import CoachRequests from "./pages/coach/CoachRequests"
+import CoachPayments from "./pages/coach/CoachPayments"
 import AdminSports from "./pages/admin/AdminSports"
 import AdminCoaches from "./pages/admin/AdminCoaches"
 import AdminStudents from "./pages/admin/AdminStudents"
@@ -40,22 +42,25 @@ const App = () => {
         <Route path="/admin/coaches" element={<DashboardLayout><AdminCoaches /></DashboardLayout>} />
         <Route path="/admin/students" element={<DashboardLayout><AdminStudents /></DashboardLayout>} />
         <Route path="/admin/locations" element={<DashboardLayout><AdminLocations /></DashboardLayout>} />
+        <Route path="/admin/payments" element={<DashboardLayout><AdminPayments /></DashboardLayout>} />
 
         <Route path="/coach" element={<CoachDashboard />} />
         <Route path="/coach/sessions" element={<DashboardLayout><CoachSessions /></DashboardLayout>} />
         <Route path="/coach/requests" element={<DashboardLayout><CoachRequests /></DashboardLayout>} />
+        <Route path="/coach/payments" element={<DashboardLayout><CoachPayments /></DashboardLayout>} />
 
         <Route path="/student" element={<StudentDashboard />} />
         <Route path="/student/sports" element={<DashboardLayout><StudentBrowseSports /></DashboardLayout>} />
         <Route path="/student/sessions" element={<DashboardLayout><StudentSessions /></DashboardLayout>} />
         <Route path="/student/requests" element={<DashboardLayout><StudentRequests /></DashboardLayout>} />
+        <Route path="/student/payments" element={<DashboardLayout><StudentPayments /></DashboardLayout>} />
 
         <Route path="/StudentDashboard" element={<StudentDashboard />} />
         <Route path="/CoachDashboard" element={<CoachDashboard />} />
         <Route path="/admin/settings" element={<SettingsPage />} />
         <Route path="/coach/settings" element={<SettingsPage />} />
         <Route path="/student/settings" element={<SettingsPage />} />
-        <Route path="/student/payments" element={<StudentPayments />} />
+
         <Route path="*" element={<NotFound />} />
       </Routes>
     </div>

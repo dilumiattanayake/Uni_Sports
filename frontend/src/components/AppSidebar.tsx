@@ -40,10 +40,34 @@ const adminLinks = [
   { title: "Payments", url: "/admin/payments", icon:  DollarSign },
 ];
 
+const sportsManagementLinks = [
+  { title: "Sports", url: "/admin/sports", icon: Trophy },
+  { title: "Coaches", url: "/admin/coaches", icon: Users },
+  { title: "Locations", url: "/admin/locations", icon: MapPin },
+];
+
+const userManagementLinks = [
+  { title: "Students", url: "/admin/students", icon: UserCheck },
+  { title: "Coaches", url: "/admin/coaches", icon: Users },
+];
+
+const paymentManagementLinks = [
+  { title: "Payments", url: "/admin/payments", icon: DollarSign },
+];
+
+const inventoryManagementLinks = [
+  { title: "Inventory", url: "/admin/inventory", icon: Package },
+];
+
+const eventManagementLinks = [
+  { title: "Events", url: "/admin/events", icon: Medal },
+];
+
 const coachLinks = [
   { title: "Dashboard", url: "/coach", icon: LayoutDashboard },
   { title: "Sessions", url: "/coach/sessions", icon: Calendar },
   { title: "Join Requests", url: "/coach/requests", icon: UserCheck },
+  { title: "Payments", url: "/coach/payments", icon: CreditCard },
 ];
 
 const studentLinks = [
@@ -51,6 +75,7 @@ const studentLinks = [
   { title: "Browse Sports", url: "/student/sports", icon: BookOpen },
   { title: "My Sessions", url: "/student/sessions", icon: Calendar },
   { title: "My Requests", url: "/student/requests", icon: UserCheck },
+  { title: "Payments", url: "/student/payments", icon: CreditCard },
 ];
 
 const roleConfig: Partial<Record<UserRole, { links: typeof coachLinks; label: string }>> = {
@@ -73,18 +98,23 @@ export function AppSidebar() {
   const navigate = useNavigate();
   const config = role !== "admin" ? roleConfig[role] : undefined;
   const [sportsMenuOpen, setSportsMenuOpen] = useState(false);
-
-  const sportsManagementLinks = [
-    { title: "Add and View Sports", url: "/admin/sports" },
-    { title: "Add and View Coaches", url: "/admin/coaches" },
-    { title: "Add and View Students", url: "/admin/students" },
-    { title: "Add and View Locations", url: "/admin/locations" },
-  ];
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [paymentMenuOpen, setPaymentMenuOpen] = useState(false);
+  const [inventoryMenuOpen, setInventoryMenuOpen] = useState(false);
+  const [eventMenuOpen, setEventMenuOpen] = useState(false);
 
   const hasSportsPath = location.pathname.includes("/admin/sports") || 
                        location.pathname.includes("/admin/coaches") ||
-                       location.pathname.includes("/admin/students") ||
                        location.pathname.includes("/admin/locations");
+
+  const hasUserPath = location.pathname.includes("/admin/students") || 
+                     location.pathname.includes("/admin/coaches");
+
+  const hasPaymentPath = location.pathname.includes("/admin/payments");
+  
+  const hasInventoryPath = location.pathname.includes("/admin/inventory");
+  
+  const hasEventPath = location.pathname.includes("/admin/events");
 
   const handleLogoClick = () => {
     if (role === "admin") navigate("/AdminDashboard");
@@ -125,6 +155,7 @@ export function AppSidebar() {
           <SidebarGroupContent>
             {role === "admin" ? (
               <SidebarMenu>
+                {/* Sports Management */}
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors text-sm"
@@ -158,14 +189,141 @@ export function AppSidebar() {
                   )}
                 </SidebarMenuItem>
 
-                {adminPrimaryButtons.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sidebar-foreground/60 text-sm cursor-default">
-                      <item.icon className="h-4 w-4 shrink-0" />
-                      {!collapsed && <span>{item.title}</span>}
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
+                {/* User Management */}
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors text-sm"
+                    onClick={() => setUserMenuOpen((prev) => !prev)}
+                    isActive={hasUserPath}
+                  >
+                    <Users className="h-4 w-4 shrink-0" />
+                    {!collapsed && (
+                      <>
+                        <span className="flex-1 text-left">User Management</span>
+                        {userMenuOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                      </>
+                    )}
+                  </SidebarMenuButton>
+                  {!collapsed && userMenuOpen && (
+                    <SidebarMenuSub>
+                      {userManagementLinks.map((item) => (
+                        <SidebarMenuSubItem key={item.title}>
+                          <SidebarMenuSubButton asChild>
+                            <NavLink
+                              to={item.url}
+                              className="text-sidebar-foreground/70"
+                              activeClassName="text-sidebar-primary font-medium"
+                            >
+                              {item.title}
+                            </NavLink>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))}
+                    </SidebarMenuSub>
+                  )}
+                </SidebarMenuItem>
+
+                {/* Event Management */}
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors text-sm"
+                    onClick={() => setEventMenuOpen((prev) => !prev)}
+                    isActive={hasEventPath}
+                  >
+                    <Medal className="h-4 w-4 shrink-0" />
+                    {!collapsed && (
+                      <>
+                        <span className="flex-1 text-left">Event Management</span>
+                        {eventMenuOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                      </>
+                    )}
+                  </SidebarMenuButton>
+                  {!collapsed && eventMenuOpen && (
+                    <SidebarMenuSub>
+                      {eventManagementLinks.map((item) => (
+                        <SidebarMenuSubItem key={item.title}>
+                          <SidebarMenuSubButton asChild>
+                            <NavLink
+                              to={item.url}
+                              className="text-sidebar-foreground/70"
+                              activeClassName="text-sidebar-primary font-medium"
+                            >
+                              {item.title}
+                            </NavLink>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))}
+                    </SidebarMenuSub>
+                  )}
+                </SidebarMenuItem>
+
+                {/* Payment Management */}
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors text-sm"
+                    onClick={() => setPaymentMenuOpen((prev) => !prev)}
+                    isActive={hasPaymentPath}
+                  >
+                    <DollarSign className="h-4 w-4 shrink-0" />
+                    {!collapsed && (
+                      <>
+                        <span className="flex-1 text-left">Payment Management</span>
+                        {paymentMenuOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                      </>
+                    )}
+                  </SidebarMenuButton>
+                  {!collapsed && paymentMenuOpen && (
+                    <SidebarMenuSub>
+                      {paymentManagementLinks.map((item) => (
+                        <SidebarMenuSubItem key={item.title}>
+                          <SidebarMenuSubButton asChild>
+                            <NavLink
+                              to={item.url}
+                              className="text-sidebar-foreground/70"
+                              activeClassName="text-sidebar-primary font-medium"
+                            >
+                              {item.title}
+                            </NavLink>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))}
+                    </SidebarMenuSub>
+                  )}
+                </SidebarMenuItem>
+
+                {/* Inventory Management */}
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors text-sm"
+                    onClick={() => setInventoryMenuOpen((prev) => !prev)}
+                    isActive={hasInventoryPath}
+                  >
+                    <Package className="h-4 w-4 shrink-0" />
+                    {!collapsed && (
+                      <>
+                        <span className="flex-1 text-left">Inventory Management</span>
+                        {inventoryMenuOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                      </>
+                    )}
+                  </SidebarMenuButton>
+                  {!collapsed && inventoryMenuOpen && (
+                    <SidebarMenuSub>
+                      {inventoryManagementLinks.map((item) => (
+                        <SidebarMenuSubItem key={item.title}>
+                          <SidebarMenuSubButton asChild>
+                            <NavLink
+                              to={item.url}
+                              className="text-sidebar-foreground/70"
+                              activeClassName="text-sidebar-primary font-medium"
+                            >
+                              {item.title}
+                            </NavLink>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))}
+                    </SidebarMenuSub>
+                  )}
+                </SidebarMenuItem>
               </SidebarMenu>
             ) : (
               <SidebarMenu>
