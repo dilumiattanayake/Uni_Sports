@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Mail, Phone, Pencil, Trash2, Search } from "lucide-react";
+import { Download, Mail, Pencil, Phone, Plus, Search, Trash2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 
@@ -20,6 +20,8 @@ interface CoachData {
 export default function AdminCoaches() {
   const [coaches, setCoaches] = useState<CoachData[]>([]);
   const [search, setSearch] = useState("");
+  const [specializationFilter, setSpecializationFilter] = useState("all");
+  const [sortBy, setSortBy] = useState<"name-asc" | "name-desc">("name-asc");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingCoach, setEditingCoach] = useState<CoachData | null>(null);
   const [form, setForm] = useState({ name: "", email: "", phone: "", specialization: "", password: "" });
@@ -48,9 +50,44 @@ export default function AdminCoaches() {
     }
   };
 
-  const filtered = coaches.filter((coach) =>
-    [coach.name, coach.email, coach.specialization].join(" ").toLowerCase().includes(search.toLowerCase()),
-  );
+  const specializations = Array.from(new Set(coaches.map((coach) => coach.specialization).filter(Boolean))).sort();
+
+  const filtered = coaches
+    .filter((coach) => {
+      const matchesSearch = [coach.name, coach.email, coach.specialization]
+        .join(" ")
+        .toLowerCase()
+        .includes(search.toLowerCase());
+      const matchesSpecialization = specializationFilter === "all" || coach.specialization === specializationFilter;
+      return matchesSearch && matchesSpecialization;
+    })
+    .sort((a, b) => (sortBy === "name-asc" ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name)));
+
+  const resetFilters = () => {
+    setSearch("");
+    setSpecializationFilter("all");
+    setSortBy("name-asc");
+  };
+
+  const exportVisibleCoachesCsv = () => {
+    const rows = [
+      ["Name", "Email", "Phone", "Specialization"],
+      ...filtered.map((coach) => [coach.name, coach.email, coach.phone || "", coach.specialization || ""]),
+    ];
+
+    const csv = rows
+      .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","))
+      .join("\n");
+
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "coaches-management.csv";
+    link.click();
+    URL.revokeObjectURL(url);
+    toast.success("Coaches list exported");
+  };
 
   const openAdd = () => {
     setEditingCoach(null);
@@ -168,15 +205,19 @@ export default function AdminCoaches() {
   };
 
   return (
-    <div className="space-y-6 page-shell">
-      <PageHeader title="Coaches" description="Manage coaching staff and sport assignments">
+    <div className="relative space-y-6 overflow-hidden page-shell">
+      <div className="pointer-events-none absolute -left-20 top-10 h-72 w-72 rounded-full bg-amber-500/10 blur-3xl" />
+      <div className="pointer-events-none absolute -right-24 -top-16 h-72 w-72 rounded-full bg-teal-500/10 blur-3xl" />
+
+      <div className="relative rounded-2xl border border-amber-400/25 bg-gradient-to-br from-[#2b2114] via-[#1f2d34] to-[#15222c] p-5 shadow-lg shadow-black/25">
+        <PageHeader title="Coaches" description="Manage coaching staff and sport assignments">
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="gap-2" onClick={openAdd}>
+            <Button className="gap-2 bg-amber-400 text-slate-900 hover:bg-amber-300" onClick={openAdd}>
               <Plus className="h-4 w-4" /> Add Coach
             </Button>
           </DialogTrigger>
-          <DialogContent className="bg-slate-900 bg-opacity-95 border-slate-700">
+          <DialogContent className="border-amber-500/30 bg-slate-950/95">
             <DialogHeader>
               <DialogTitle className="font-display">{editingCoach ? "Edit Coach" : "Add Coach"}</DialogTitle>
             </DialogHeader>
@@ -233,50 +274,104 @@ export default function AdminCoaches() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
-              <Button onClick={handleSave}>{editingCoach ? "Save Changes" : "Add Coach"}</Button>
+              <Button className="bg-amber-400 text-slate-900 hover:bg-amber-300" onClick={handleSave}>{editingCoach ? "Save Changes" : "Add Coach"}</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
-      </PageHeader>
+        </PageHeader>
 
-      <div className="relative max-w-sm">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search coaches..."
-          className="pl-9 bg-white text-black placeholder:text-gray-500"
-        />
+        <div className="relative mt-4 max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search coaches..."
+            className="pl-9 bg-white text-black placeholder:text-gray-500"
+          />
+        </div>
+
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          <Badge className="border border-amber-300/30 bg-amber-400/15 text-amber-100">Total Coaches: {coaches.length}</Badge>
+          <Badge className="border border-teal-300/30 bg-teal-400/15 text-teal-100">Visible: {filtered.length}</Badge>
+        </div>
+
+        <div className="mt-4 grid gap-3 md:grid-cols-4">
+          <select
+            value={specializationFilter}
+            onChange={(e) => setSpecializationFilter(e.target.value)}
+            className="h-10 rounded-md border border-amber-400/40 bg-slate-900/70 px-3 text-sm text-slate-100"
+          >
+            <option value="all">All specializations</option>
+            {specializations.map((specialization) => (
+              <option key={specialization} value={specialization}>
+                {specialization}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as "name-asc" | "name-desc")}
+            className="h-10 rounded-md border border-teal-400/40 bg-slate-900/70 px-3 text-sm text-slate-100"
+          >
+            <option value="name-asc">Sort: Name A-Z</option>
+            <option value="name-desc">Sort: Name Z-A</option>
+          </select>
+
+          <Button type="button" variant="outline" className="border-amber-400/40 bg-amber-500/10 text-amber-100 hover:bg-amber-500/20" onClick={resetFilters}>
+            Reset Filters
+          </Button>
+
+          <Button type="button" variant="outline" className="gap-2 border-teal-400/40 bg-teal-500/10 text-teal-100 hover:bg-teal-500/20" onClick={exportVisibleCoachesCsv}>
+            <Download className="h-4 w-4" /> Export CSV
+          </Button>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-amber-200/80">Coaching Directory</h3>
+        <span className="text-xs text-slate-400">Manage profiles and specialties</span>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {loading ? (
           <div className="col-span-full text-center text-muted-foreground py-8">Loading coaches...</div>
         ) : filtered.length === 0 ? (
-          <div className="col-span-full text-center text-muted-foreground py-8">No coaches found</div>
+          <div className="col-span-full rounded-2xl border border-amber-500/25 bg-amber-500/5 py-10 text-center">
+            <p className="text-sm font-medium text-amber-100">No coaches found</p>
+            <p className="mt-1 text-xs text-slate-400">Try changing filters or add a new coach profile.</p>
+          </div>
         ) : (
-          filtered.map((coach) => (
-            <div key={coach._id} className="surface-card p-5 animate-fade-in group">
+          filtered.map((coach, index) => (
+            <div
+              key={coach._id}
+              className="group rounded-2xl border border-amber-400/25 bg-gradient-to-br from-slate-900/90 to-[#2b2316] p-5 shadow-md shadow-black/20 transition duration-300 hover:-translate-y-1 hover:border-amber-300/40 hover:shadow-amber-500/15 animate-fade-in"
+              style={{ animationDelay: `${index * 45}ms` }}
+            >
               <div className="flex items-center gap-3 mb-3">
-                <div className="h-11 w-11 rounded-full bg-secondary flex items-center justify-center text-secondary-foreground font-display font-bold text-sm">
+                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-amber-400/20 text-amber-100 font-display font-bold text-sm border border-amber-300/30">
                   {coach.name.split(" ").map(n => n[0]).join("")}
                 </div>
                 <div>
-                  <h3 className="font-display font-bold text-sm">{coach.name}</h3>
-                  <p className="text-xs text-muted-foreground">{coach.specialization}</p>
+                  <h3 className="font-display font-bold text-sm text-slate-100">{coach.name}</h3>
+                  <p className="text-xs text-slate-300">{coach.specialization}</p>
                 </div>
                 <div className="ml-auto flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(coach)}>
+                  <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-200 hover:bg-amber-500/20" onClick={() => openEdit(coach)}>
                     <Pencil className="h-3.5 w-3.5" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => handleDelete(coach._id)}>
+                  <Button variant="ghost" size="icon" className="h-7 w-7 text-rose-300 hover:bg-rose-500/20" onClick={() => handleDelete(coach._id)}>
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>
                 </div>
               </div>
-              <div className="space-y-1.5 text-xs text-muted-foreground">
+              <div className="space-y-1.5 text-xs text-slate-300">
                 <p className="flex items-center gap-2"><Mail className="h-3 w-3" />{coach.email}</p>
                 <p className="flex items-center gap-2"><Phone className="h-3 w-3" />{coach.phone}</p>
+              </div>
+              <div className="mt-3 flex items-center gap-2">
+                <Badge className="border border-amber-300/30 bg-amber-400/15 text-amber-100">{coach.specialization || "General"}</Badge>
+                <Badge className="border border-teal-300/30 bg-teal-400/15 text-teal-100">Active Coach</Badge>
               </div>
             </div>
           ))
