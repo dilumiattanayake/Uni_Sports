@@ -33,7 +33,10 @@ const adminLinks = [
   { title: "Students", url: "/admin/students", icon: UserCheck },
   { title: "Locations", url: "/admin/locations", icon: MapPin },
   { title: "Events", url: "/admin/events", icon:  Medal },
+  { title: "Orders", url: "/admin/orders", icon:  DollarSign },
   { title: "Inventory", url: "/admin/inventory", icon:  Package },
+  { title: "Equipment Requests", url: "/admin/requests", icon:  UserCheck },
+  { title: "Merchandise", url: "/admin/merchandise", icon:  BookOpen },
   { title: "Payments", url: "/admin/payments", icon:  DollarSign },
   
 ];
@@ -71,6 +74,16 @@ const coachLinks = [
 ];
 
 const studentLinks = [
+  { title: "Dashboard", url: "/StudentDashboard", icon: LayoutDashboard },
+  { title: "Browse Sports", url: "/StudentBrowseSports", icon: BookOpen },
+  {title: "Shop Merchandise", url: "/student/merchandise", icon: Package},
+  {title: "My Orders", url: "/student/merchandise/my-orders", icon:  Package},
+  { title: "My Sessions", url: "/StudentSessions", icon: Calendar },
+  { title: "My Requests", url: "/student/inventory/my-requests", icon: UserCheck },
+  { title: "Browse Events", url: "/student/events", icon: Medal},
+  {title: "My Events", url: "/student/events/my-events", icon:  Trophy},
+  { title: "Inventory", url: "/student/inventory", icon:  Package },
+  { title: "My Payements", url: "/student/payments", icon:  DollarSign },
   { title: "Dashboard", url: "/student", icon: LayoutDashboard },
   { title: "Browse Sports", url: "/student/sports", icon: BookOpen },
   { title: "My Sessions", url: "/student/sessions", icon: Calendar },
