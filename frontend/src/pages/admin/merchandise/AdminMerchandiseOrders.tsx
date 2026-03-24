@@ -156,7 +156,7 @@ export default function AdminMerchandiseOrders() {
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-10 w-10 bg-gray-100 rounded border flex items-center justify-center overflow-hidden">
                           {order.merchandise?.image && order.merchandise.image !== 'no-photo.jpg' ? (
-                            <img src={`http://localhost:5000${order.merchandise.image}`} alt={order.merchandise.itemName} className="h-full w-full object-cover" />
+                            <img src={`http://localhost:5001${order.merchandise.image}`} alt={order.merchandise.itemName} className="h-full w-full object-cover" />
                           ) : (
                             <span className="text-gray-400 text-xs">No Img</span>
                           )}

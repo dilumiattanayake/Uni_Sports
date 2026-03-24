@@ -147,7 +147,7 @@ export default function AdminInventory() {
                     <div className="flex items-center">
                       <div className="flex-shrink-0 h-10 w-10 bg-gray-100 rounded flex items-center justify-center overflow-hidden">
                         {item.image && item.image !== 'no-photo.jpg' ? (
-                          <img src={`http://localhost:5000${item.image}`} alt={item.itemName} className="h-full w-full object-cover" />
+                          <img src={`http://localhost:5001${item.image}`} alt={item.itemName} className="h-full w-full object-cover" />
                         ) : (
                           <span className="text-gray-400 text-xs">No Img</span>
                         )}

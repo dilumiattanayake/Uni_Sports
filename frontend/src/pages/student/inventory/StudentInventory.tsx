@@ -156,7 +156,7 @@ export default function StudentInventory() {
               {/* Image Section */}
               <div className="h-48 bg-gray-100 relative">
                 {item.image && item.image !== 'no-photo.jpg' ? (
-                  <img src={`http://localhost:5000${item.image}`} alt={item.itemName} className="w-full h-full object-cover" />
+                  <img src={`http://localhost:5001${item.image}`} alt={item.itemName} className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-gray-400">No Image</div>
                 )}

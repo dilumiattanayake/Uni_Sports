@@ -195,7 +195,7 @@ export default function AdminEvents() {
     return matchesStatus && matchesSearch;
   });
 
-  if (loading) return <DashboardLayout><div className="p-10 text-center text-gray-500 font-medium">Loading Events...</div></DashboardLayout>;
+  if (loading) return <div className="p-10 text-center text-slate-400 font-medium mt-20">Loading Events...</div>;
 
   // =========================================================================
   // RENDER 1: DETAILED REGISTRATIONS VIEW (If an event is selected)
@@ -204,64 +204,64 @@ export default function AdminEvents() {
     const confirmedCount = registrations.filter(r => r.status === 'confirmed').length;
 
     return (
-        <div className="p-6 md:p-8 w-full max-w-7xl mx-auto space-y-6">
+        <div className="p-6 md:p-8 w-full max-w-7xl mx-auto space-y-6 text-slate-200">
           {/* Back Button & Header */}
           <div className="flex items-center gap-4 mb-2">
             <button 
               onClick={() => setViewingEvent(null)}
-              className="flex items-center text-sm font-semibold text-gray-500 hover:text-blue-600 transition"
+              className="flex items-center text-sm font-semibold text-slate-400 hover:text-indigo-400 transition"
             >
               ← Back to Events
             </button>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex justify-between items-center">
+          <div className="bg-[#1e1e2d] rounded-xl shadow-sm border border-slate-700/50 p-6 flex justify-between items-center">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 tracking-tight">{viewingEvent.title}</h1>
-              <p className="text-gray-500 text-sm mt-1">
+              <h1 className="text-2xl font-bold text-white tracking-tight">{viewingEvent.title}</h1>
+              <p className="text-slate-400 text-sm mt-1">
                 {viewingEvent.eventType === 'team' ? 'Team Event' : 'Solo Event'} | 📍 {viewingEvent.venue}
               </p>
             </div>
             <div className="text-right">
-              <p className="text-3xl font-black text-gray-900">
-                {confirmedCount} <span className="text-lg text-gray-500 font-medium">/ {viewingEvent.maxParticipants}</span>
+              <p className="text-3xl font-black text-white">
+                {confirmedCount} <span className="text-lg text-slate-500 font-medium">/ {viewingEvent.maxParticipants}</span>
               </p>
-              <p className="text-xs text-gray-500 uppercase tracking-wide font-bold">Confirmed {viewingEvent.eventType === 'team' ? 'Teams' : 'Students'}</p>
+              <p className="text-xs text-slate-500 uppercase tracking-wide font-bold">Confirmed {viewingEvent.eventType === 'team' ? 'Teams' : 'Students'}</p>
             </div>
           </div>
 
           {/* Registrations Table */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="bg-[#1e1e2d] rounded-xl shadow-sm border border-slate-700/50 overflow-hidden">
             {loadingRegistrations ? (
-              <div className="p-10 text-center text-gray-500">Loading attendees...</div>
+              <div className="p-10 text-center text-slate-400">Loading attendees...</div>
             ) : registrations.length === 0 ? (
-              <div className="p-10 text-center text-gray-500">No one has registered for this event yet.</div>
+              <div className="p-10 text-center text-slate-400">No one has registered for this event yet.</div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="bg-gray-50 border-b border-gray-200 text-xs uppercase tracking-wider text-gray-500 font-bold">
+                    <tr className="bg-[#151521] border-b border-slate-700/50 text-xs uppercase tracking-wider text-slate-400 font-bold">
                       <th className="p-4">Registrant / Team</th>
                       <th className="p-4">Members</th>
                       <th className="p-4">Date Registered</th>
                       <th className="p-4 text-right">Status / Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-200">
+                  <tbody className="divide-y divide-slate-700/50">
                     {registrations.map(reg => (
-                      <tr key={reg._id} className="hover:bg-gray-50 transition">
+                      <tr key={reg._id} className="hover:bg-[#151521]/50 transition">
                         {/* Column 1: Primary Info */}
                         <td className="p-4">
                           {reg.registrationType === 'team' ? (
                             <div>
-                              <p className="font-bold text-gray-900 text-base">{reg.teamName}</p>
-                              <p className="text-xs text-blue-600 font-semibold mt-0.5">Captain: {reg.primaryStudent?.name}</p>
-                              <p className="text-xs text-gray-500">{reg.primaryStudent?.email}</p>
+                              <p className="font-bold text-white text-base">{reg.teamName}</p>
+                              <p className="text-xs text-indigo-400 font-semibold mt-0.5">Captain: {reg.primaryStudent?.name}</p>
+                              <p className="text-xs text-slate-400">{reg.primaryStudent?.email}</p>
                             </div>
                           ) : (
                             <div>
-                              <p className="font-bold text-gray-900 text-base">{reg.primaryStudent?.name}</p>
-                              <p className="text-xs text-gray-500">{reg.primaryStudent?.email}</p>
+                              <p className="font-bold text-white text-base">{reg.primaryStudent?.name}</p>
+                              <p className="text-xs text-slate-400">{reg.primaryStudent?.email}</p>
                             </div>
                           )}
                         </td>
@@ -272,19 +272,19 @@ export default function AdminEvents() {
                             <div className="space-y-1">
                               {reg.teamMembers?.length > 0 ? (
                                 reg.teamMembers.map(member => (
-                                  <p key={member._id} className="text-xs text-gray-600">• {member.name}</p>
+                                  <p key={member._id} className="text-xs text-slate-300">• {member.name}</p>
                                 ))
                               ) : (
-                                <p className="text-xs text-gray-400 italic">No extra members</p>
+                                <p className="text-xs text-slate-500 italic">No extra members</p>
                               )}
                             </div>
                           ) : (
-                            <span className="text-xs text-gray-400 italic">N/A (Solo)</span>
+                            <span className="text-xs text-slate-500 italic">N/A (Solo)</span>
                           )}
                         </td>
 
                         {/* Column 3: Date */}
-                        <td className="p-4 text-sm text-gray-600">
+                        <td className="p-4 text-sm text-slate-400">
                           {new Date(reg.createdAt).toLocaleDateString()}
                         </td>
 
@@ -293,11 +293,11 @@ export default function AdminEvents() {
                           <select 
                             value={reg.status}
                             onChange={(e) => handleUpdateRegistrationStatus(reg._id, e.target.value)}
-                            className={`px-3 py-1.5 text-xs font-bold rounded-lg border outline-none cursor-pointer ${
-                              reg.status === 'confirmed' ? 'bg-green-50 border-green-200 text-green-700' :
-                              reg.status === 'waitlisted' ? 'bg-yellow-50 border-yellow-200 text-yellow-700' :
-                              reg.status === 'cancelled' ? 'bg-red-50 border-red-200 text-red-700' :
-                              'bg-gray-50 border-gray-200 text-gray-700'
+                            className={`px-3 py-1.5 text-xs font-bold rounded-lg border outline-none cursor-pointer bg-[#151521] appearance-none text-center ${
+                              reg.status === 'confirmed' ? 'border-green-500/30 text-green-400' :
+                              reg.status === 'waitlisted' ? 'border-yellow-500/30 text-yellow-400' :
+                              reg.status === 'cancelled' ? 'border-red-500/30 text-red-400' :
+                              'border-slate-500/30 text-slate-300'
                             }`}
                           >
                             <option value="pending">Pending</option>
@@ -321,23 +321,36 @@ export default function AdminEvents() {
   // RENDER 2: MAIN EVENTS GRID (Default View)
   // =========================================================================
   return (
-      <div className="p-6 md:p-8 w-full max-w-7xl mx-auto space-y-6">
+      <div className="p-6 md:p-8 w-full max-w-7xl mx-auto space-y-6 text-slate-200">
         
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Event Management</h1>
-            <p className="text-gray-500 text-sm mt-1">Create and track university sports tournaments.</p>
+            <h1 className="text-3xl font-bold text-white tracking-tight">Event Management</h1>
+            <p className="text-slate-400 text-sm mt-1">Create and track university sports tournaments.</p>
           </div>
-          <button onClick={() => { resetForm(); setIsModalOpen(true); }} className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg font-medium transition shadow-sm">
+          <button 
+            onClick={() => { resetForm(); setIsModalOpen(true); }} 
+            className="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-lg font-medium transition shadow-lg shadow-indigo-500/20 border border-indigo-500/50"
+          >
             + Add New Event
           </button>
         </div>
 
         {/* Filters */}
-        <div className="flex flex-col sm:flex-row gap-4 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-          <input type="text" placeholder="Search by title or venue..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="flex-grow border border-gray-300 rounded-lg px-4 py-2 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" />
-          <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="border border-gray-300 rounded-lg px-4 py-2 bg-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 min-w-[180px]">
+        <div className="flex flex-col sm:flex-row gap-4 bg-[#1e1e2d] p-4 rounded-xl shadow-lg border border-slate-700/50">
+          <input 
+            type="text" 
+            placeholder="Search by title or venue..." 
+            value={searchQuery} 
+            onChange={(e) => setSearchQuery(e.target.value)} 
+            className="flex-grow bg-[#151521] border border-slate-700 text-white placeholder-slate-500 rounded-lg px-4 py-2 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500" 
+          />
+          <select 
+            value={filterStatus} 
+            onChange={(e) => setFilterStatus(e.target.value)} 
+            className="bg-[#151521] border border-slate-700 text-white rounded-lg px-4 py-2 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 min-w-[180px] appearance-none cursor-pointer"
+          >
             <option value="all">All Statuses</option>
             <option value="upcoming">Upcoming</option>
             <option value="ongoing">Ongoing</option>
@@ -349,63 +362,67 @@ export default function AdminEvents() {
         {/* EVENT GRID */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredEvents.length === 0 ? (
-            <div className="col-span-full py-12 text-center text-gray-500 bg-white rounded-xl border border-gray-100 shadow-sm">No events match your search criteria.</div>
+            <div className="col-span-full py-12 text-center text-slate-400 bg-[#1e1e2d] rounded-xl border border-slate-700/50 shadow-sm">
+              No events match your search criteria.
+            </div>
           ) : (
             filteredEvents.map(event => {
               const confirmedCount = event.confirmedCount || 0;
               const progressPct = event.maxParticipants > 0 ? Math.min(100, (confirmedCount / event.maxParticipants) * 100) : 0;
               
-              let statusBadgeColor = 'bg-gray-100 text-gray-800';
-              if (event.status === 'upcoming') statusBadgeColor = 'bg-blue-100 text-blue-800';
-              if (event.status === 'ongoing') statusBadgeColor = 'bg-green-100 text-green-800';
-              if (event.status === 'cancelled') statusBadgeColor = 'bg-red-100 text-red-800';
+              let statusBadgeColor = 'bg-slate-500/20 text-slate-300 border-slate-500/30';
+              if (event.status === 'upcoming') statusBadgeColor = 'bg-blue-500/20 text-blue-300 border-blue-500/30';
+              if (event.status === 'ongoing') statusBadgeColor = 'bg-green-500/20 text-green-300 border-green-500/30';
+              if (event.status === 'cancelled') statusBadgeColor = 'bg-red-500/20 text-red-300 border-red-500/30';
 
               return (
-                <div key={event._id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col hover:shadow-md transition">
-                  <div className="h-40 bg-gray-100 relative border-b border-gray-100">
+                <div key={event._id} className="bg-[#1e1e2d] rounded-xl border border-slate-700/50 overflow-hidden flex flex-col hover:border-indigo-500/50 hover:shadow-[0_0_15px_rgba(79,70,229,0.15)] transition duration-300">
+                  <div className="h-40 bg-[#151521] relative border-b border-slate-700/50 overflow-hidden group">
                     {event.imageUrl ? (
-                      <img src={`http://localhost:5000${event.imageUrl}`} alt={event.title} className="w-full h-full object-cover" />
+                      <img src={`http://localhost:5001${event.imageUrl}`} alt={event.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition duration-500 group-hover:scale-105" />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-400 font-medium text-sm">No Banner Image</div>
+                      <div className="w-full h-full flex items-center justify-center text-slate-500 font-medium text-sm">No Banner Image</div>
                     )}
-                    <span className={`absolute top-3 right-3 px-2.5 py-1 text-xs font-bold uppercase tracking-wide rounded shadow-sm ${statusBadgeColor}`}>{event.status}</span>
+                    <span className={`absolute top-3 right-3 px-2.5 py-1 text-xs font-bold uppercase tracking-wide rounded shadow-sm border backdrop-blur-md ${statusBadgeColor}`}>
+                      {event.status}
+                    </span>
                   </div>
 
                   <div className="p-5 flex flex-col flex-grow">
-                    <h3 className="text-xl font-bold text-gray-900 mb-1 leading-tight line-clamp-1">{event.title}</h3>
-                    <p className="text-sm font-semibold text-blue-600 mb-4">{event.sport?.name || 'General Event'}</p>
+                    <h3 className="text-xl font-bold text-white mb-1 leading-tight line-clamp-1">{event.title}</h3>
+                    <p className="text-sm font-semibold text-indigo-400 mb-4">{event.sport?.name || 'General Event'}</p>
                     
-                    <div className="text-sm text-gray-600 space-y-2 mb-4">
+                    <div className="text-sm text-slate-400 space-y-2 mb-4">
                       <p>📅 {new Date(event.startDate).toLocaleDateString()}</p>
                       <p className="truncate">📍 {event.venue}</p>
                     </div>
 
                     <div className="mb-4">
-                      <span className="inline-block bg-indigo-50 text-indigo-700 text-xs font-bold px-2 py-1 rounded">
-                        {event.eventType === 'team' ? `Team Event (${event.minTeamSize}-${event.maxTeamSize} members)` : 'Solo Event'}
+                      <span className="inline-block bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 text-xs font-bold px-2 py-1 rounded">
+                        {event.eventType === 'team' ? `🏆 Team Event (${event.minTeamSize}-${event.maxTeamSize} members)` : '👤 Solo Event'}
                       </span>
                     </div>
 
                     <div className="mt-auto mb-5 space-y-2">
-                      <div className="flex justify-between text-xs font-medium text-gray-700">
+                      <div className="flex justify-between text-xs font-medium text-slate-400">
                         <span>{event.eventType === 'team' ? 'Teams Registered' : 'Registrations'}</span>
-                        <span>{confirmedCount} / {event.maxParticipants}</span>
+                        <span className="text-white">{confirmedCount} / {event.maxParticipants}</span>
                       </div>
-                      <div className="w-full bg-gray-100 rounded-full h-2">
-                        <div className={`h-2 rounded-full transition-all ${progressPct >= 100 ? 'bg-red-500' : 'bg-blue-500'}`} style={{ width: `${progressPct}%` }}></div>
+                      <div className="w-full bg-[#151521] border border-slate-700/50 rounded-full h-2">
+                        <div className={`h-full rounded-full transition-all ${progressPct >= 100 ? 'bg-red-500' : 'bg-indigo-500'}`} style={{ width: `${progressPct}%` }}></div>
                       </div>
                     </div>
 
-                    <div className="flex justify-between items-center pt-4 border-t border-gray-100">
+                    <div className="flex justify-between items-center pt-4 border-t border-slate-700/50">
                         <div 
                           onClick={() => handleViewAttendees(event)}
-                          className="text-xs text-blue-600 font-semibold hover:underline cursor-pointer"
+                          className="text-xs text-indigo-400 font-semibold hover:text-indigo-300 cursor-pointer transition"
                         >
-                            View {confirmedCount} Attendees ➔ 
+                          View {confirmedCount} Attendees ➔ 
                         </div>
                         <div className="flex space-x-3">
-                            <button onClick={() => openEditModal(event)} className="text-sm font-medium text-gray-500 hover:text-blue-600 transition">Edit</button>
-                            <button onClick={() => handleDelete(event._id, event.status)} disabled={event.status === 'ongoing'} className="text-sm font-medium text-gray-500 hover:text-red-600 disabled:opacity-50 transition">Delete</button>
+                            <button onClick={() => openEditModal(event)} className="text-sm font-medium text-slate-400 hover:text-indigo-400 transition">Edit</button>
+                            <button onClick={() => handleDelete(event._id, event.status)} disabled={event.status === 'ongoing'} className="text-sm font-medium text-slate-400 hover:text-red-400 disabled:opacity-50 transition">Delete</button>
                         </div>
                     </div>
                   </div>
@@ -417,66 +434,78 @@ export default function AdminEvents() {
 
         {/* CREATE / EDIT MODAL */}
         {isModalOpen && (
-          <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl p-6 md:p-8 w-full max-w-2xl shadow-2xl max-h-[90vh] overflow-y-auto">
-              <h2 className="text-2xl font-bold mb-6 text-gray-900">{editingId ? 'Edit Event' : 'Create New Event'}</h2>
+          <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="bg-[#1e1e2d] border border-slate-700 rounded-2xl p-6 md:p-8 w-full max-w-2xl shadow-2xl max-h-[90vh] overflow-y-auto">
+              <h2 className="text-2xl font-bold mb-6 text-white">{editingId ? 'Edit Event' : 'Create New Event'}</h2>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">Event Title *</label>
-                    <input type="text" name="title" required value={formData.title} onChange={handleInputChange} className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none" />
+                    <label className="block text-sm font-semibold text-slate-300 mb-1">Event Title *</label>
+                    <input type="text" name="title" required value={formData.title} onChange={handleInputChange} className="w-full bg-[#151521] border border-slate-600 text-white placeholder-slate-500 rounded-lg px-4 py-2 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 outline-none" />
                   </div>
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">Description *</label>
-                    <textarea name="description" required rows={3} value={formData.description} onChange={handleInputChange} className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none" />
+                    <label className="block text-sm font-semibold text-slate-300 mb-1">Description *</label>
+                    <textarea name="description" required rows={3} value={formData.description} onChange={handleInputChange} className="w-full bg-[#151521] border border-slate-600 text-white placeholder-slate-500 rounded-lg px-4 py-2 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 outline-none" />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">Sport *</label>
-                    <select name="sport" required value={formData.sport} onChange={handleInputChange} className="w-full border border-gray-300 rounded-lg px-4 py-2 bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+                    <label className="block text-sm font-semibold text-slate-300 mb-1">Sport *</label>
+                    <select name="sport" required value={formData.sport} onChange={handleInputChange} className="w-full bg-[#151521] border border-slate-600 text-white rounded-lg px-4 py-2 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 outline-none appearance-none cursor-pointer">
                       <option value="" disabled>Select a Sport</option>
                       {sports.map(s => <option key={s._id} value={s._id}>{s.name}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">Venue *</label>
-                    <input type="text" name="venue" required value={formData.venue} onChange={handleInputChange} className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none" />
+                    <label className="block text-sm font-semibold text-slate-300 mb-1">Venue *</label>
+                    <input type="text" name="venue" required value={formData.venue} onChange={handleInputChange} className="w-full bg-[#151521] border border-slate-600 text-white placeholder-slate-500 rounded-lg px-4 py-2 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 outline-none" />
                   </div>
 
-                  <div className="md:col-span-2 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                    <label className="block text-sm font-semibold text-gray-900 mb-3">Registration Type *</label>
+                  <div className="md:col-span-2 p-4 bg-[#151521] rounded-lg border border-slate-700">
+                    <label className="block text-sm font-semibold text-slate-200 mb-3">Registration Type *</label>
                     <div className="flex gap-4 mb-4">
-                      <label className="flex items-center cursor-pointer">
-                        <input type="radio" name="eventType" value="solo" checked={formData.eventType === 'solo'} onChange={handleInputChange} className="mr-2 text-blue-600" /> Solo
+                      <label className="flex items-center cursor-pointer text-slate-300">
+                        <input type="radio" name="eventType" value="solo" checked={formData.eventType === 'solo'} onChange={handleInputChange} className="mr-2 accent-indigo-500" /> Solo
                       </label>
-                      <label className="flex items-center cursor-pointer">
-                        <input type="radio" name="eventType" value="team" checked={formData.eventType === 'team'} onChange={handleInputChange} className="mr-2 text-blue-600" /> Team
+                      <label className="flex items-center cursor-pointer text-slate-300">
+                        <input type="radio" name="eventType" value="team" checked={formData.eventType === 'team'} onChange={handleInputChange} className="mr-2 accent-indigo-500" /> Team
                       </label>
                     </div>
                     {formData.eventType === 'team' && (
-                      <div className="grid grid-cols-2 gap-4 pt-3 border-t border-gray-200">
+                      <div className="grid grid-cols-2 gap-4 pt-3 border-t border-slate-700/50">
                         <div>
-                          <label className="block text-sm text-gray-700 mb-1">Min Members</label>
-                          <input type="number" name="minTeamSize" min="2" value={formData.minTeamSize} onChange={handleInputChange} className="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-blue-500" />
+                          <label className="block text-sm text-slate-400 mb-1">Min Members</label>
+                          <input type="number" name="minTeamSize" min="2" value={formData.minTeamSize} onChange={handleInputChange} className="w-full bg-[#1e1e2d] border border-slate-600 text-white rounded-lg px-3 py-2 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500" />
                         </div>
                         <div>
-                          <label className="block text-sm text-gray-700 mb-1">Max Members</label>
-                          <input type="number" name="maxTeamSize" min={formData.minTeamSize} value={formData.maxTeamSize} onChange={handleInputChange} className="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-blue-500" />
+                          <label className="block text-sm text-slate-400 mb-1">Max Members</label>
+                          <input type="number" name="maxTeamSize" min={formData.minTeamSize} value={formData.maxTeamSize} onChange={handleInputChange} className="w-full bg-[#1e1e2d] border border-slate-600 text-white rounded-lg px-3 py-2 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500" />
                         </div>
                       </div>
                     )}
                   </div>
 
-                  <div><label className="block text-sm font-semibold text-gray-700 mb-1">Start Date *</label><input type="date" name="startDate" required value={formData.startDate} onChange={handleInputChange} className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none" /></div>
-                  <div><label className="block text-sm font-semibold text-gray-700 mb-1">End Date *</label><input type="date" name="endDate" required value={formData.endDate} onChange={handleInputChange} className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none" /></div>
-                  <div><label className="block text-sm font-semibold text-gray-700 mb-1">Deadline *</label><input type="date" name="registrationDeadline" required value={formData.registrationDeadline} onChange={handleInputChange} className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none" /></div>
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-300 mb-1">Start Date *</label>
+                    <input type="date" name="startDate" required value={formData.startDate} onChange={handleInputChange} className="w-full bg-[#151521] border border-slate-600 text-white rounded-lg px-4 py-2 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 outline-none [color-scheme:dark]" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-300 mb-1">End Date *</label>
+                    <input type="date" name="endDate" required value={formData.endDate} onChange={handleInputChange} className="w-full bg-[#151521] border border-slate-600 text-white rounded-lg px-4 py-2 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 outline-none [color-scheme:dark]" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-300 mb-1">Deadline *</label>
+                    <input type="date" name="registrationDeadline" required value={formData.registrationDeadline} onChange={handleInputChange} className="w-full bg-[#151521] border border-slate-600 text-white rounded-lg px-4 py-2 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 outline-none [color-scheme:dark]" />
+                  </div>
                   
-                  <div><label className="block text-sm font-semibold text-gray-700 mb-1">Max Capacity *</label><input type="number" name="maxParticipants" required min="1" value={formData.maxParticipants} onChange={handleInputChange} className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none" /></div>
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-300 mb-1">Max Capacity *</label>
+                    <input type="number" name="maxParticipants" required min="1" value={formData.maxParticipants} onChange={handleInputChange} className="w-full bg-[#151521] border border-slate-600 text-white rounded-lg px-4 py-2 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 outline-none" />
+                  </div>
                   
                   {/* THE EVENT STATUS DROPDOWN (Only visible when editing an existing event) */}
                   {editingId && (
                     <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-1">Event Status</label>
-                      <select name="status" value={formData.status} onChange={handleInputChange} className="w-full border border-gray-300 rounded-lg px-4 py-2 bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+                      <label className="block text-sm font-semibold text-slate-300 mb-1">Event Status</label>
+                      <select name="status" value={formData.status} onChange={handleInputChange} className="w-full bg-[#151521] border border-slate-600 text-white rounded-lg px-4 py-2 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 outline-none appearance-none cursor-pointer">
                         <option value="upcoming">Upcoming</option>
                         <option value="ongoing">Ongoing</option>
                         <option value="completed">Completed</option>
@@ -485,11 +514,15 @@ export default function AdminEvents() {
                     </div>
                   )}
 
-                  <div className="md:col-span-2"><label className="block text-sm font-semibold text-gray-700 mb-1">Banner Image</label><input type="file" accept="image/*" onChange={handleFileChange} className="w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 outline-none" /></div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-semibold text-slate-300 mb-1">Banner Image</label>
+                    <input type="file" accept="image/*" onChange={handleFileChange} className="w-full text-sm text-slate-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-500/10 file:text-indigo-400 hover:file:bg-indigo-500/20 hover:file:text-indigo-300 outline-none transition file:cursor-pointer" />
+                  </div>
                 </div>
-                <div className="flex justify-end space-x-3 mt-8 border-t border-gray-100 pt-5">
-                  <button type="button" onClick={resetForm} className="px-5 py-2.5 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition">Cancel</button>
-                  <button type="submit" className="px-5 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition">{editingId ? 'Save Changes' : 'Create Event'}</button>
+                
+                <div className="flex justify-end space-x-3 mt-8 border-t border-slate-700/50 pt-5">
+                  <button type="button" onClick={resetForm} className="px-5 py-2.5 border border-slate-600 rounded-lg text-slate-300 font-medium hover:bg-slate-800 transition">Cancel</button>
+                  <button type="submit" className="px-5 py-2.5 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-500 transition shadow-lg shadow-indigo-500/20">{editingId ? 'Save Changes' : 'Create Event'}</button>
                 </div>
               </form>
             </div>

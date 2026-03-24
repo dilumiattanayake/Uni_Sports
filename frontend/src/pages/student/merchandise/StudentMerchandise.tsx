@@ -118,7 +118,7 @@ export default function StudentMerchandise() {
                 {/* Image Section */}
                 <div className="h-56 bg-gray-100 relative">
                   {item.image && item.image !== 'no-photo.jpg' ? (
-                    <img src={`http://localhost:5000${item.image}`} alt={item.itemName} className="w-full h-full object-cover" />
+                    <img src={`http://localhost:5001${item.image}`} alt={item.itemName} className="w-full h-full object-cover" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-gray-400">No Image</div>
                   )}
@@ -176,7 +176,7 @@ export default function StudentMerchandise() {
               {/* Left Side: Image (Hidden on small mobile) */}
               <div className="w-full md:w-1/2 bg-gray-100 hidden md:block relative">
                 {selectedItem.image && selectedItem.image !== 'no-photo.jpg' ? (
-                  <img src={`http://localhost:5000${selectedItem.image}`} alt={selectedItem.itemName} className="w-full h-full object-cover absolute inset-0" />
+                  <img src={`http://localhost:5001${selectedItem.image}`} alt={selectedItem.itemName} className="w-full h-full object-cover absolute inset-0" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-gray-400 absolute inset-0">No Image</div>
                 )}
