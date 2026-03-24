@@ -333,36 +333,36 @@ export default function Checkout() {
 							<div className="grid gap-4 md:grid-cols-2">
 								<div className="space-y-1">
 									<label className="text-sm font-medium text-gray-700">Full Name</label>
-									<input className="w-full rounded-md border px-3 py-2" value={billingDetails.name} onChange={(e) => handleBillingChange("name", e.target.value)} />
+									<input className="text-black w-full rounded-md border px-3 py-2" value={billingDetails.name} onChange={(e) => handleBillingChange("name", e.target.value)} />
 									{errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
 								</div>
 								<div className="space-y-1">
 									<label className="text-sm font-medium text-gray-700">Email</label>
-									<input className="w-full rounded-md border px-3 py-2" value={billingDetails.email} onChange={(e) => handleBillingChange("email", e.target.value)} />
+									<input className="text-black w-full rounded-md border px-3 py-2" value={billingDetails.email} onChange={(e) => handleBillingChange("email", e.target.value)} />
 									{errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
 								</div>
 								<div className="space-y-1">
 									<label className="text-sm font-medium text-gray-700">Phone</label>
-									<input className="w-full rounded-md border px-3 py-2" value={billingDetails.phone} onChange={(e) => handleBillingChange("phone", e.target.value.replace(/\D/g, "").slice(0, 10))} />
+									<input className="text-black w-full rounded-md border px-3 py-2" value={billingDetails.phone} onChange={(e) => handleBillingChange("phone", e.target.value.replace(/\D/g, "").slice(0, 10))} />
 									{errors.phone && <p className="text-sm text-red-500">{errors.phone}</p>}
 								</div>
 								<div className="space-y-1">
 									<label className="text-sm font-medium text-gray-700">Phone 2 (Optional)</label>
-									<input className="w-full rounded-md border px-3 py-2" value={billingDetails.phone2} onChange={(e) => handleBillingChange("phone2", e.target.value.replace(/\D/g, "").slice(0, 10))} />
+									<input className="text-black w-full rounded-md border px-3 py-2" value={billingDetails.phone2} onChange={(e) => handleBillingChange("phone2", e.target.value.replace(/\D/g, "").slice(0, 10))} />
 								</div>
 								<div className="space-y-1 md:col-span-2">
 									<label className="text-sm font-medium text-gray-700">Address</label>
-									<input className="w-full rounded-md border px-3 py-2" value={billingDetails.address.street} onChange={(e) => handleBillingChange("address.street", e.target.value)} />
+									<input className="text-black w-full rounded-md border px-3 py-2" value={billingDetails.address.street} onChange={(e) => handleBillingChange("address.street", e.target.value)} />
 									{errors["address.street"] && <p className="text-sm text-red-500">{errors["address.street"]}</p>}
 								</div>
 								<div className="space-y-1">
 									<label className="text-sm font-medium text-gray-700">City</label>
-									<input className="w-full rounded-md border px-3 py-2" value={billingDetails.address.city} onChange={(e) => handleBillingChange("address.city", e.target.value)} />
+									<input className="text-black w-full rounded-md border px-3 py-2" value={billingDetails.address.city} onChange={(e) => handleBillingChange("address.city", e.target.value)} />
 									{errors["address.city"] && <p className="text-sm text-red-500">{errors["address.city"]}</p>}
 								</div>
 								<div className="space-y-1">
 									<label className="text-sm font-medium text-gray-700">District/Province</label>
-									<input className="w-full rounded-md border px-3 py-2" value={billingDetails.address.state} onChange={(e) => handleBillingChange("address.state", e.target.value)} />
+									<input className="text-black w-full rounded-md border px-3 py-2" value={billingDetails.address.state} onChange={(e) => handleBillingChange("address.state", e.target.value)} />
 									{errors["address.state"] && <p className="text-sm text-red-500">{errors["address.state"]}</p>}
 								</div>
 								<div className="space-y-1">
@@ -372,7 +372,7 @@ export default function Checkout() {
 								</div>
 								<div className="space-y-1">
 									<label className="text-sm font-medium text-gray-700">Country</label>
-									<input className="w-full rounded-md border px-3 py-2" value={billingDetails.address.country} onChange={(e) => handleBillingChange("address.country", e.target.value)} />
+									<input className="text-black w-full rounded-md border px-3 py-2" value={billingDetails.address.country} onChange={(e) => handleBillingChange("address.country", e.target.value)} />
 									{errors["address.country"] && <p className="text-sm text-red-500">{errors["address.country"]}</p>}
 								</div>
 							</div>
@@ -381,7 +381,7 @@ export default function Checkout() {
 								<div className="space-y-1">
 									<label className="text-sm font-medium text-gray-700">Bank Transaction Reference</label>
 									<input
-										className="w-full rounded-md border px-3 py-2"
+										className="text-black w-full rounded-md border px-3 py-2"
 										value={transactionRef}
 										onChange={(e) => {
 											setTransactionRef(e.target.value);

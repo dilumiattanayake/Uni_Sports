@@ -76,7 +76,7 @@ router.post(
       .notEmpty()
       .withMessage('Transaction reference is required'),
     body('receiptUrl')
-      .isURL()
+      .isURL({ require_tld: false })
       .withMessage('Valid receipt URL is required'),
     body('billingDetails.name')
       .trim()

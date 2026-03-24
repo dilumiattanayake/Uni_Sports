@@ -37,6 +37,42 @@ type BillingDetails = {
 
 type BillingErrors = Record<string, string>;
 
+type StoredUser = {
+  name?: string;
+  email?: string;
+};
+
+const getStoredUser = (): StoredUser => {
+  try {
+    const raw = localStorage.getItem("user");
+    if (!raw) return {};
+    const parsed = JSON.parse(raw) as StoredUser;
+    return {
+      name: parsed?.name || "",
+      email: parsed?.email || "",
+    };
+  } catch {
+    return {};
+  }
+};
+
+const mergeBillingWithUser = (details?: Partial<BillingDetails>): BillingDetails => {
+  const user = getStoredUser();
+  return {
+    name: user.name || details?.name || "",
+    email: user.email || details?.email || "",
+    phone: details?.phone || "",
+    phone2: details?.phone2 || "",
+    address: {
+      street: details?.address?.street || "",
+      city: details?.address?.city || "",
+      state: details?.address?.state || "",
+      zipCode: details?.address?.zipCode || "",
+      country: details?.address?.country || "Sri Lanka",
+    },
+  };
+};
+
 export default function StudentPayments() {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -91,11 +127,11 @@ export default function StudentPayments() {
   const pendingCount = payments.filter(p => p.status === "pending").length;
   const approvedCount = payments.filter(p => p.status === "approved" || p.status === "paid").length;
 
-  const [isEditing, setIsEditing] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
 
   const [billingDetails, setBillingDetails] = useState<BillingDetails>({
-    name: '',
-    email: '',
+    name: getStoredUser().name || '',
+    email: getStoredUser().email || '',
     phone: '',
     phone2: '',
     address: {
@@ -106,6 +142,10 @@ export default function StudentPayments() {
       country: 'Sri Lanka'
     }
   });
+
+  const [savedBillingDetails, setSavedBillingDetails] = useState<BillingDetails>(() =>
+    mergeBillingWithUser()
+  );
 
   const [errors, setErrors] = useState<BillingErrors>({});
 
@@ -122,8 +162,10 @@ export default function StudentPayments() {
       if (res.ok) {
         const data = await res.json();
         if (data?.data) {
-          setBillingDetails(data.data);
-          localStorage.setItem('billingDetails', JSON.stringify(data.data));
+          const merged = mergeBillingWithUser(data.data);
+          setBillingDetails(merged);
+          setSavedBillingDetails(merged);
+          localStorage.setItem('billingDetails', JSON.stringify(merged));
           return;
         }
       }
@@ -131,14 +173,34 @@ export default function StudentPayments() {
       // Fallback to local cache when backend has no billing profile yet
       const saved = localStorage.getItem('billingDetails');
       if (saved) {
-        setBillingDetails(JSON.parse(saved));
+        const parsed = JSON.parse(saved);
+        const merged = mergeBillingWithUser(parsed);
+        setBillingDetails(merged);
+        setSavedBillingDetails(merged);
+      } else {
+        const merged = mergeBillingWithUser();
+        setBillingDetails(merged);
+        setSavedBillingDetails(merged);
       }
     } catch (error) {
       const saved = localStorage.getItem('billingDetails');
       if (saved) {
-        setBillingDetails(JSON.parse(saved));
+        const parsed = JSON.parse(saved);
+        const merged = mergeBillingWithUser(parsed);
+        setBillingDetails(merged);
+        setSavedBillingDetails(merged);
+      } else {
+        const merged = mergeBillingWithUser();
+        setBillingDetails(merged);
+        setSavedBillingDetails(merged);
       }
     }
+  };
+
+  const handleCancelEdit = () => {
+    setBillingDetails(savedBillingDetails);
+    setErrors({});
+    setIsEditing(false);
   };
 
   const handleBillingChange = (field: string, value: string) => {
@@ -219,6 +281,7 @@ export default function StudentPayments() {
         }
 
         localStorage.setItem('billingDetails', JSON.stringify(billingDetails));
+        setSavedBillingDetails(billingDetails);
         setIsEditing(false);
         toast.success('Billing details saved successfully!');
       } catch (error) {
@@ -551,14 +614,20 @@ export default function StudentPayments() {
              </div>
              
             <div className="mt-2 flex w-full flex-col gap-3 md:col-span-2 md:mt-6 md:flex-row md:items-center">
-              <Button type="button" onClick={() => setIsEditing(true)} className="w-full bg-orange-400 text-white hover:bg-orange-500 md:w-auto">
-             Edit Billing Details
-            </Button>
-
-            <Button type="submit" className="w-full bg-indigo-950 text-white hover:bg-indigo-900 md:w-auto">
-             Save Billing Details
-            </Button>
-
+              {!isEditing ? (
+                <Button type="button" onClick={() => setIsEditing(true)} className="w-full bg-orange-400 text-white hover:bg-orange-500 md:w-auto">
+                  Edit Billing Details
+                </Button>
+              ) : (
+                <>
+                  <Button type="button" onClick={handleCancelEdit} variant="outline" className="w-full border-gray-300 text-gray-700 hover:bg-gray-100 md:w-auto">
+                    Cancel
+                  </Button>
+                  <Button type="submit" className="w-full bg-indigo-950 text-white hover:bg-indigo-900 md:w-auto">
+                    Save Billing Details
+                  </Button>
+                </>
+              )}
             </div>
              
          </form>
