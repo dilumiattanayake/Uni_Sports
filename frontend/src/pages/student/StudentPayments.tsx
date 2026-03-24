@@ -224,12 +224,12 @@ export default function StudentPayments() {
     }
   };
 
-   const validateEmail = (value: string) => value.endsWith("@my.sliit.lk");
+  const validateEmail = (value: string) => value.endsWith("@my.sliit.lk");
   const validateForm = () => {
     const newErrors: BillingErrors = {};
     if (!billingDetails.name.trim()) newErrors.name = 'Full name is required';
     if (!billingDetails.email.trim()) newErrors.email = 'Email is required';
-    else if (!validateEmail(billingDetails.email)) newErrors.email = 'Please use your student email';
+    else if (!validateEmail(billingDetails.email)) newErrors.email = 'Please use your valid student email';
     if (!billingDetails.phone.trim()) newErrors.phone = 'Phone number is required';
     else if (!/^\d{10}$/.test(billingDetails.phone)) newErrors.phone = 'Phone must be exactly 10 digits';
     if (!billingDetails.address.street.trim()) newErrors['address.street'] = 'Street address is required';
@@ -374,8 +374,8 @@ export default function StudentPayments() {
                 ) : (
                   <div className="w-full overflow-x-auto">
                   <Table>
-                    <TableHeader className="bg-orange-100">
-                      <TableRow>
+                    <TableHeader className="bg-slate-800">
+                      <TableRow className="text-slate-300">
                         <TableHead>Payment ID</TableHead>
                         <TableHead>Amount</TableHead>
                         <TableHead>Date</TableHead>
@@ -440,8 +440,8 @@ export default function StudentPayments() {
                 ) : (
                   <div className="w-full overflow-x-auto">
                   <Table>
-                    <TableHeader className="bg-orange-100">
-                      <TableRow>
+                    <TableHeader className="bg-slate-800">
+                      <TableRow className="text-slate-300">
                         <TableHead>Payment ID</TableHead>
                         <TableHead>Amount</TableHead>
                         <TableHead>Date</TableHead>
