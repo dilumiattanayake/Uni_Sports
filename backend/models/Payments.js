@@ -73,6 +73,30 @@ const paymentSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+
+    // Billing details (optional, for student payments)
+    billingDetails: {
+      name: {
+        type: String,
+        trim: true,
+      },
+      email: {
+        type: String,
+        trim: true,
+        lowercase: true,
+      },
+      phone: {
+        type: String,
+        trim: true,
+      },
+      address: {
+        street: { type: String, trim: true },
+        city: { type: String, trim: true },
+        state: { type: String, trim: true },
+        zipCode: { type: String, trim: true },
+        country: { type: String, trim: true },
+      },
+    },
   },
   {
     timestamps: true, // createdAt, updatedAt

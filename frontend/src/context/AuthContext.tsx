@@ -47,7 +47,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const updateProfile = async (data: any): Promise<{ success: boolean; message?: string }> => {
     const token = localStorage.getItem('token');
     try {
-      const res = await fetch('http://localhost:5000/api/auth/profile', {
+      const res = await fetch(`${API_BASE}/api/auth/profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -75,7 +75,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const changePassword = async (currentPassword: string, newPassword: string): Promise<{ success: boolean; message?: string }> => {
     const token = localStorage.getItem('token');
     try {
-      const res = await fetch('http://localhost:5000/api/auth/change-password', {
+      const res = await fetch(`${API_BASE}/api/auth/change-password`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -95,7 +95,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (!user?.id) return { success: false, message: 'User id missing.' };
     const token = localStorage.getItem('token');
     try {
-      const res = await fetch(`http://localhost:5000/api/users/${user.id}`, {
+      const res = await fetch(`${API_BASE}/api/users/${user.id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',

@@ -14,6 +14,7 @@ const sessionRoutes = require('./routes/sessionRoutes');
 const joinRequestRoutes = require('./routes/joinRequestRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
+const uploadRoutes = require('./routes/uploadRoutes');
 
 // Initialize app
 const app = express();
@@ -25,6 +26,9 @@ connectDB();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Serve static files from uploads folder
+app.use('/uploads', express.static('uploads'));
 
 // Logging middleware (only in development)
 if (process.env.NODE_ENV === 'development') {
@@ -49,11 +53,16 @@ app.use('/api/sessions', sessionRoutes);
 app.use('/api/join-requests', joinRequestRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/upload', uploadRoutes);
 
 
 // Placeholder routes for future modules
 // Uncomment and implement when Event Management module is ready
 // app.use('/api/events', eventRoutes);
+
+// Placeholder routes for future modules
+// Uncomment and implement when Payment Management module is ready
+// app.use('/api/payments', paymentRoutes);
 
 // 404 handler
 app.use((req, res, next) => {

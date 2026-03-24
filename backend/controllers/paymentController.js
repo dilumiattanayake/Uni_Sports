@@ -62,7 +62,7 @@ const getMyPayments = async (req, res, next) => {
  */
 const createPayment = async (req, res, next) => {
   try {
-    const { type, referenceId, amount, paymentMethod } = req.body;
+    const { type, referenceId, amount, paymentMethod, billingDetails } = req.body;
 
     const payment = await Payment.create({
       user: req.user.id,
@@ -71,6 +71,7 @@ const createPayment = async (req, res, next) => {
       amount,
       paymentMethod,
       status: type === 'item' ? 'paid' : 'pending',
+      billingDetails,
     });
 
     res.status(201).json({
@@ -90,7 +91,7 @@ const createPayment = async (req, res, next) => {
  */
 const submitManualPayment = async (req, res, next) => {
   try {
-    const { type, referenceId, amount, transactionRef, receiptUrl } = req.body;
+    const { type, referenceId, amount, transactionRef, receiptUrl, billingDetails } = req.body;
 
     const payment = await Payment.create({
       user: req.user.id,
@@ -101,6 +102,7 @@ const submitManualPayment = async (req, res, next) => {
       transactionRef,
       receiptUrl,
       status: 'pending',
+      billingDetails,
     });
 
     res.status(201).json({
