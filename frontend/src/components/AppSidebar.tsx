@@ -54,7 +54,7 @@ const userManagementLinks = [
 
 const paymentManagementLinks = [
   { title: "Payments", url: "/admin/payments", icon: DollarSign },
-  { title: "Verification", url: "/admin/payments/verify", icon: DollarSign },
+  { title: "Payment Details", url: "/admin/payments/verify", icon: DollarSign },
   { title: "Payment Reports", url: "/admin/payment/reports", icon: DollarSign },
 ];
 
