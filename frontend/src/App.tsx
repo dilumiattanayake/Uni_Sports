@@ -6,7 +6,7 @@ import StudentPayments from "./pages/student/StudentPayments.tsx"
 import StudentBrowseSports from "./pages/student/StudentBrowseSports"
 import StudentSessions from "./pages/student/StudentSessions"
 import StudentRequests from "./pages/student/StudentRequests"
-import AdminDashboard from "./pages/admin/AdminDashboard"
+import AdminDashboard from "./pages/admin/AdminDashboard.tsx"
 import AdminPayments from "./pages/admin/AdminPayments"
 import CoachDashboard from "./pages/coach/CoachDashboard"
 import CoachSessions from "./pages/coach/CoachSessions"
@@ -22,7 +22,7 @@ import Navbar from "./components/common/Navbar"
 import { DashboardLayout } from "./components/DashboardLayout"
 import { Navigate, Route, Routes, useLocation } from "react-router-dom"
 
-const NO_NAVBAR_PATH_PREFIXES = ["/admin", "/coach", "/student", "/auth/login", "/auth/register", "/StudentDashboard", "/CoachDashboard"]
+const NO_NAVBAR_PATH_PREFIXES = ["/admin", "/coach", "/student", "/auth/login", "/auth/register", "/AdminDashboard", "/StudentDashboard", "/CoachDashboard"]
 
 const App = () => {
   const { pathname } = useLocation()
@@ -54,6 +54,7 @@ const App = () => {
         <Route path="/student/requests" element={<DashboardLayout><StudentRequests /></DashboardLayout>} />
         <Route path="/student/payments" element={<StudentPayments />} />
 
+        <Route path="/AdminDashboard" element={<AdminDashboard />} />
         <Route path="/StudentDashboard" element={<StudentDashboard />} />
         <Route path="/CoachDashboard" element={<CoachDashboard />} />
         <Route path="/admin/settings" element={<SettingsPage />} />
