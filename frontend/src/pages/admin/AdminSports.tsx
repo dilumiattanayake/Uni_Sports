@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Search, Pencil, Trash2 } from "lucide-react";
+import { Download, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 interface SportData {
@@ -22,6 +22,8 @@ interface SportData {
 export default function AdminSports() {
   const [sports, setSports] = useState<SportData[]>([]);
   const [search, setSearch] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState<"all" | SportData["category"]>("all");
+  const [sortBy, setSortBy] = useState<"name-asc" | "name-desc" | "capacity-desc">("name-asc");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingSport, setEditingSport] = useState<SportData | null>(null);
   const [form, setForm] = useState({ name: "", description: "", category: "team", maxParticipants: 20 });
@@ -50,7 +52,43 @@ export default function AdminSports() {
     }
   };
 
-  const filtered = sports.filter(s => s.name.toLowerCase().includes(search.toLowerCase()));
+  const filtered = sports
+    .filter((sport) => {
+      const matchesSearch = [sport.name, sport.description].join(" ").toLowerCase().includes(search.toLowerCase());
+      const matchesCategory = categoryFilter === "all" ? true : sport.category === categoryFilter;
+      return matchesSearch && matchesCategory;
+    })
+    .sort((a, b) => {
+      if (sortBy === "name-asc") return a.name.localeCompare(b.name);
+      if (sortBy === "name-desc") return b.name.localeCompare(a.name);
+      return (b.maxParticipants || 0) - (a.maxParticipants || 0);
+    });
+
+  const resetFilters = () => {
+    setSearch("");
+    setCategoryFilter("all");
+    setSortBy("name-asc");
+  };
+
+  const exportVisibleSportsCsv = () => {
+    const rows = [
+      ["Name", "Category", "Max Participants", "Description"],
+      ...filtered.map((sport) => [sport.name, sport.category, String(sport.maxParticipants || 0), sport.description || ""]),
+    ];
+
+    const csv = rows
+      .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","))
+      .join("\n");
+
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "sports-management.csv";
+    link.click();
+    URL.revokeObjectURL(url);
+    toast.success("Sports list exported");
+  };
 
   const openAdd = () => {
     setEditingSport(null);
@@ -147,15 +185,19 @@ export default function AdminSports() {
   };
 
   return (
-    <div className="space-y-6 page-shell">
-      <PageHeader title="Sports Management" description="Add, edit, and manage university sports programs">
+    <div className="relative space-y-6 overflow-hidden page-shell">
+      <div className="pointer-events-none absolute -left-24 -top-24 h-72 w-72 rounded-full bg-cyan-500/10 blur-3xl" />
+      <div className="pointer-events-none absolute -right-24 top-28 h-72 w-72 rounded-full bg-indigo-500/10 blur-3xl" />
+
+      <div className="relative rounded-2xl border border-cyan-400/25 bg-gradient-to-br from-[#0f1e35] via-[#142844] to-[#1a2140] p-5 shadow-lg shadow-black/25">
+        <PageHeader title="Sports Management" description="Add, edit, and manage university sports programs">
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={openAdd} className="gap-2">
+            <Button onClick={openAdd} className="gap-2 bg-cyan-500 text-slate-950 hover:bg-cyan-400">
               <Plus className="h-4 w-4" /> Add Sport
             </Button>
           </DialogTrigger>
-          <DialogContent className="bg-slate-900 bg-opacity-95 border-slate-700">
+          <DialogContent className="border-cyan-500/30 bg-slate-950/95">
             <DialogHeader>
               <DialogTitle className="font-display">{editingSport ? "Edit Sport" : "Add New Sport"}</DialogTitle>
             </DialogHeader>
@@ -206,50 +248,114 @@ export default function AdminSports() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
-              <Button onClick={handleSave}>{editingSport ? "Save Changes" : "Add Sport"}</Button>
+              <Button className="bg-cyan-500 text-slate-950 hover:bg-cyan-400" onClick={handleSave}>{editingSport ? "Save Changes" : "Add Sport"}</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
-      </PageHeader>
+        </PageHeader>
 
-      <div className="relative max-w-sm">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          placeholder="Search sports..."
-          className="pl-9 bg-white text-black placeholder:text-gray-500"
-        />
+        <div className="relative mt-4 max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+          <Input
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Search sports..."
+            className="pl-9 bg-white text-black placeholder:text-gray-500"
+          />
+        </div>
+
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          <Badge className="border border-cyan-300/30 bg-cyan-400/15 text-cyan-100">Total Sports: {sports.length}</Badge>
+          <Badge className="border border-indigo-300/30 bg-indigo-400/15 text-indigo-100">Visible: {filtered.length}</Badge>
+        </div>
+
+        <div className="mt-4 grid gap-3 md:grid-cols-4">
+          <select
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value as "all" | SportData["category"])}
+            className="h-10 rounded-md border border-cyan-400/40 bg-slate-900/70 px-3 text-sm text-slate-100"
+          >
+            <option value="all">All categories</option>
+            <option value="team">Team</option>
+            <option value="individual">Individual</option>
+            <option value="indoor">Indoor</option>
+            <option value="outdoor">Outdoor</option>
+            <option value="water">Water</option>
+            <option value="combat">Combat</option>
+          </select>
+
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as "name-asc" | "name-desc" | "capacity-desc")}
+            className="h-10 rounded-md border border-indigo-400/40 bg-slate-900/70 px-3 text-sm text-slate-100"
+          >
+            <option value="name-asc">Sort: Name A-Z</option>
+            <option value="name-desc">Sort: Name Z-A</option>
+            <option value="capacity-desc">Sort: Capacity High-Low</option>
+          </select>
+
+          <Button type="button" variant="outline" className="border-cyan-400/40 bg-cyan-500/10 text-cyan-100 hover:bg-cyan-500/20" onClick={resetFilters}>
+            Reset Filters
+          </Button>
+
+          <Button type="button" variant="outline" className="gap-2 border-indigo-400/40 bg-indigo-500/10 text-indigo-100 hover:bg-indigo-500/20" onClick={exportVisibleSportsCsv}>
+            <Download className="h-4 w-4" /> Export CSV
+          </Button>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-cyan-200/80">Sports Showcase</h3>
+        <span className="text-xs text-slate-400">Hover cards for quick actions</span>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {loading ? (
           <div className="col-span-full text-center text-muted-foreground py-8">Loading sports...</div>
         ) : filtered.length === 0 ? (
-          <div className="col-span-full text-center text-muted-foreground py-8">No sports found</div>
+          <div className="col-span-full rounded-2xl border border-cyan-500/25 bg-cyan-500/5 py-10 text-center">
+            <p className="text-sm font-medium text-cyan-100">No sports found</p>
+            <p className="mt-1 text-xs text-slate-400">Try changing filters or add a new sport.</p>
+          </div>
         ) : (
-          filtered.map(sport => (
-            <div key={sport._id} className="surface-card p-5 animate-fade-in group">
+          filtered.map((sport, index) => (
+            <div
+              key={sport._id}
+              className="group rounded-2xl border border-cyan-400/25 bg-gradient-to-br from-slate-900/90 to-[#121e34] p-5 shadow-md shadow-black/20 transition duration-300 hover:-translate-y-1 hover:border-cyan-300/40 hover:shadow-cyan-500/15 animate-fade-in"
+              style={{ animationDelay: `${index * 45}ms` }}
+            >
               <div className="flex items-start justify-between">
                 <div>
-                  <h3 className="font-display font-bold">{sport.name}</h3>
-                  <p className="text-xs text-muted-foreground mt-0.5">{sport.description}</p>
+                  <h3 className="font-display text-base font-bold text-slate-100">{sport.name}</h3>
+                  <p className="mt-0.5 text-xs text-slate-300">{sport.description}</p>
                 </div>
                 <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(sport)}>
+                  <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-200 hover:bg-cyan-500/20" onClick={() => openEdit(sport)}>
                     <Pencil className="h-3.5 w-3.5" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => handleDelete(sport._id)}>
+                  <Button variant="ghost" size="icon" className="h-7 w-7 text-rose-300 hover:bg-rose-500/20" onClick={() => handleDelete(sport._id)}>
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>
                 </div>
               </div>
               <div className="flex items-center gap-2 mt-4">
-                <Badge variant="secondary" className="text-xs capitalize">{sport.category}</Badge>
-                <Badge variant="outline" className="text-xs">{sport.maxParticipants || 0} max</Badge>
+                <Badge className="text-xs capitalize border border-cyan-300/30 bg-cyan-400/15 text-cyan-100">{sport.category}</Badge>
+                <Badge className="text-xs border border-indigo-300/30 bg-indigo-400/15 text-indigo-100">{sport.maxParticipants || 0} max</Badge>
+              </div>
+              <div className="mt-3">
+                <div className="mb-1 flex items-center justify-between text-[11px] text-slate-400">
+                  <span>Capacity indicator</span>
+                  <span>{Math.min(100, sport.maxParticipants || 0)}%</span>
+                </div>
+                <div className="h-1.5 rounded-full bg-slate-700/80">
+                  <div
+                    className="h-1.5 rounded-full bg-gradient-to-r from-cyan-400 to-indigo-400 transition-all duration-500"
+                    style={{ width: `${Math.min(100, sport.maxParticipants || 0)}%` }}
+                  />
+                </div>
               </div>
               {sport.coaches && sport.coaches.length > 0 && (
-                <p className="text-xs text-muted-foreground mt-2">Coaches: {sport.coaches.map(c => c.name).join(", ")}</p>
+                <p className="mt-2 text-xs text-slate-300">Coaches: {sport.coaches.map(c => c.name).join(", ")}</p>
               )}
             </div>
           ))
