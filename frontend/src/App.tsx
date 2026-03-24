@@ -3,14 +3,11 @@ import Register from "./pages/Register"
 import Login from "./pages/Login"
 import StudentDashboard from "./pages/student/StudentDashboard"
 import StudentPayments from "./pages/student/StudentPayments.tsx"
-import Checkout from "./pages/student/Checkout"
 import StudentBrowseSports from "./pages/student/StudentBrowseSports"
 import StudentSessions from "./pages/student/StudentSessions"
 import StudentRequests from "./pages/student/StudentRequests"
 import AdminDashboard from "./pages/admin/AdminDashboard"
 import AdminPayments from "./pages/admin/AdminPayments"
-import PaymentVerification from "./pages/admin/PaymentVerification.tsx"
-import PaymentReports from "./pages/admin/PaymentReports.tsx"
 import CoachDashboard from "./pages/coach/CoachDashboard"
 import CoachSessions from "./pages/coach/CoachSessions"
 import CoachRequests from "./pages/coach/CoachRequests"
@@ -39,14 +36,12 @@ const App = () => {
         <Route path="/auth/register" element={<Register />} />
         <Route path="/auth/login" element={<Login />} />
         <Route path="/admin" element={<Navigate to="/admin/home" replace />} />
-        <Route path="/admin/home" element={<DashboardLayout><AdminDashboard /></DashboardLayout>} />
+        <Route path="/admin/home" element={<AdminDashboard />} />
         <Route path="/admin/sports" element={<DashboardLayout><AdminSports /></DashboardLayout>} />
         <Route path="/admin/coaches" element={<DashboardLayout><AdminCoaches /></DashboardLayout>} />
         <Route path="/admin/students" element={<DashboardLayout><AdminStudents /></DashboardLayout>} />
         <Route path="/admin/locations" element={<DashboardLayout><AdminLocations /></DashboardLayout>} />
         <Route path="/admin/payments" element={<DashboardLayout><AdminPayments /></DashboardLayout>} />
-        <Route path="/admin/payments/verify" element={<DashboardLayout><PaymentVerification /></DashboardLayout>} />
-        <Route path="/admin/payment/reports" element={<DashboardLayout><PaymentReports /></DashboardLayout>} />
 
         <Route path="/coach" element={<CoachDashboard />} />
         <Route path="/coach/sessions" element={<DashboardLayout><CoachSessions /></DashboardLayout>} />
@@ -57,8 +52,7 @@ const App = () => {
         <Route path="/student/sports" element={<DashboardLayout><StudentBrowseSports /></DashboardLayout>} />
         <Route path="/student/sessions" element={<DashboardLayout><StudentSessions /></DashboardLayout>} />
         <Route path="/student/requests" element={<DashboardLayout><StudentRequests /></DashboardLayout>} />
-        <Route path="/student/payments" element={<DashboardLayout><StudentPayments /></DashboardLayout>} />
-        <Route path="/student/checkout/:itemSlug" element={<DashboardLayout><Checkout /></DashboardLayout>} />
+        <Route path="/student/payments" element={<StudentPayments />} />
 
         <Route path="/StudentDashboard" element={<StudentDashboard />} />
         <Route path="/CoachDashboard" element={<CoachDashboard />} />
