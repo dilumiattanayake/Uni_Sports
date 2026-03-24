@@ -8,8 +8,11 @@ import {
   ChevronRight,
   ClipboardList,
   Dumbbell,
+  Medal,
   Trophy,
+  Users,
 } from "lucide-react"
+import { Value } from "@radix-ui/react-select"
 
 const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:5001"
 
@@ -19,9 +22,9 @@ const StudentDashboard = () => {
   const [eventsError, setEventsError] = useState("")
 
   const stats = [
-    { label: "Active sports", value: 2 },
-    { label: "Upcoming sessions", value: 3 },
-    { label: "Pending requests", value: 1 },
+    { label: "Active Sports", value: 2 },
+    { label: "Upcoming Sessions", value: 3 },
+    { label: "Registered Events", value: 1 },
   ]
 
   const upcomingSessions = [
@@ -29,11 +32,17 @@ const StudentDashboard = () => {
     { sport: "Basketball", date: "Mar 12, 2026", time: "6:00 PM", location: "Indoor Court" },
     { sport: "Cricket", date: "Mar 15, 2026", time: "4:30 PM", location: "Practice Nets" },
   ]
+  const upcomingEvents = [
+    { sport: "Showdown Cricket", date: "Mar 10, 2026", time: "5:30 PM", location: "Main Ground" },
+    { sport: "Freshers Badminton", date: "Mar 12, 2026", time: "6:00 PM", location: "Indoor Court" },
+    { sport: "Carrom Championship", date: "Mar 15, 2026", time: "4:30 PM", location: "F1301" },
+  ]
 
-  const recentRequests = [
-    { sport: "Football", status: "Approved" },
-    { sport: "Basketball", status: "Pending" },
-    { sport: "Volleyball", status: "Rejected" },
+  const itemCategory = [
+    { label: "Cricket", Value:"Official Jersey" },
+    { label: "Football", Value:"Practice Kit" },
+    { label: "Basketball", Value:"Wrist Band" },
+    { label: "Volleyball", Value:"Official Kit" },
   ]
 
   const getEventStartDate = (event) => {
@@ -45,7 +54,7 @@ const StudentDashboard = () => {
     return date
   }
 
-  const upcomingEvents = useMemo(() => {
+  {/*const upcomingEvents = useMemo(() => {
     const now = new Date()
     return (
       events
@@ -56,7 +65,7 @@ const StudentDashboard = () => {
         .filter((e) => e.startAt >= now)
         .sort((a, b) => a.startAt - b.startAt)
     )
-  }, [events])
+  }, [events])*/}
 
   useEffect(() => {
     const loadEvents = async () => {
@@ -93,17 +102,17 @@ const StudentDashboard = () => {
       bg: "bg-indigo-500/10",
     },
     {
-      title: "My Sessions",
-      description: "View your practice schedule",
-      icon: <CalendarDays className="h-5 w-5" aria-hidden="true" />,
-      href: "/student/sessions",
+      title: "Browse Merchandise",
+      description: "View available merchandise",
+      icon: <Trophy className="h-5 w-5" aria-hidden="true" />,
+      href: "",
       bg: "bg-orange-500/10",
     },
     {
-      title: "My Requests",
-      description: "Track join request status",
-      icon: <ClipboardList className="h-5 w-5" aria-hidden="true" />,
-      href: "/student/requests",
+      title: "View Tournaments",
+      description: "See upcoming sports events",
+      icon: <Medal className="h-5 w-5" aria-hidden="true" />,
+      href: "",
       bg: "bg-emerald-500/10",
     },
   ]
@@ -112,23 +121,50 @@ const StudentDashboard = () => {
     <DashboardLayout>
       <div className="space-y-6">
         <PageHeader
-          title="Dashboard"
+          title="My Dashboard"
           description="Manage your sports, sessions, and join requests in one place"
         />
 
         {/* Stats */}
         <section className="grid gap-4 sm:grid-cols-3">
-          {stats.map((s) => (
-            <div
-              key={s.label}
-              className="rounded-xl border border-border bg-card p-5 shadow-sm transition bg-indigo-100 hover:shadow-md"
-            >
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                {s.label}
-              </p>
-              <p className="mt-2 text-3xl font-bold text-foreground">{s.value}</p>
+          <div className="bg-gradient-to-br from-indigo-950 via-indigo-900 to-indigo-800 text-white p-6 rounded-2xl shadow-xl hover:shadow-2xl transition duration-300 transform hover:scale-105">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-sm opacity-80 font-medium">{stats[0].label}</p>
+                <p className="text-3xl font-bold mt-2">{stats[0].value}</p>
+              </div>
+              <div className="bg-indigo-500 bg-opacity-30 p-3 rounded-xl">
+                <Users className="h-6 w-6" />
+              </div>
             </div>
-          ))}
+            <p className="text-xs opacity-70 mt-3">Active sports programs</p>
+          </div>
+
+           <div className="bg-gradient-to-br from-green-500 via-green-400 to-emerald-400 text-white p-6 rounded-2xl shadow-xl hover:shadow-2xl transition duration-300 transform hover:scale-105">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-sm opacity-80 font-medium">{stats[1].label}</p>
+                <p className="text-3xl font-bold mt-2">{stats[1].value}</p>
+              </div>
+              <div className="bg-white bg-opacity-20 p-3 rounded-xl">
+                <CalendarDays className="h-6 w-6" />
+              </div>
+            </div>
+            <p className="text-xs opacity-70 mt-3">Scheduled this week</p>
+          </div>
+
+          <div className="bg-gradient-to-br from-orange-500 via-orange-400 to-yellow-400 text-white p-6 rounded-2xl shadow-xl hover:shadow-2xl transition duration-300 transform hover:scale-105">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-sm opacity-80 font-medium">{stats[2].label}</p>
+                <p className="text-3xl font-bold mt-2">{stats[2].value}</p>
+              </div>
+              <div className="bg-white bg-opacity-20 p-3 rounded-xl">
+                <Medal className="h-6 w-6" />
+              </div>
+            </div>
+            <p className="text-xs opacity-70 mt-3">In inventory</p>
+          </div>
         </section>
 
         {/* Quick actions */}
@@ -157,17 +193,17 @@ const StudentDashboard = () => {
         </section>
 
         <div className="grid gap-6 lg:grid-cols-3">
-          {/* Upcoming sessions */}
+          {/* Sports */}
           <section className="rounded-xl border border-border bg-card p-6 shadow-sm">
             <div className="mb-5 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground">
                   <CalendarDays className="h-4 w-4" aria-hidden="true" />
                 </div>
-                <h2 className="font-semibold text-foreground">Upcoming sessions</h2>
+                <h2 className="font-semibold text-foreground">Sports</h2>
               </div>
               <Link
-                to="/student/sessions"
+                to="/student/sports"
                 className="text-sm font-semibold text-primary hover:underline"
               >
                 View all
@@ -195,47 +231,44 @@ const StudentDashboard = () => {
             </div>
           </section>
 
-          {/* Recent requests */}
+          {/* Inventory */}
           <section className="rounded-xl border border-border bg-card p-6 shadow-sm">
             <div className="mb-5 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-orange-500/10 text-orange-600 dark:text-orange-400">
                   <Trophy className="h-4 w-4" aria-hidden="true" />
                 </div>
-                <h2 className="font-semibold text-foreground">Recent requests</h2>
+                <h2 className="font-semibold text-foreground">Inventory</h2>
               </div>
               <Link
                 to="/student/requests"
                 className="text-sm font-semibold text-primary hover:underline"
               >
-                Manage
+                Shop Now
               </Link>
             </div>
 
             <div className="space-y-3">
-              {recentRequests.map((req) => (
+              {itemCategory.map((req) => (
                 <div
-                  key={`${req.sport}-${req.status}`}
+                  key={`${req.label}-${req.Value}`}
                   className="flex items-center justify-between rounded-lg border border-border bg-muted/50 px-4 py-3"
                 >
-                  <p className="font-semibold text-foreground">{req.sport}</p>
+                  <p className="font-semibold text-foreground">{req.label}</p>
                   <span
                     className={
                       "rounded-full px-2.5 py-0.5 text-xs font-semibold " +
-                      (req.status === "Approved"
-                        ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                        : req.status === "Pending"
-                          ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
-                          : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400")
+                      (req.Value)
                     }
                   >
-                    {req.status}
+                    {req.Value}
                   </span>
                 </div>
               ))}
             </div>
           </section>
 
+          {/* Events */} 
            <section className="rounded-xl border border-border bg-card p-6 shadow-sm">
             <div className="mb-5 flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -252,40 +285,24 @@ const StudentDashboard = () => {
               </Link>
             </div>
 
-            <div className="space-y-3">
-              {eventsLoading ? (
-                <p className="text-sm text-muted-foreground">Loading events…</p>
-              ) : eventsError ? (
-                <p className="text-sm text-muted-foreground">{eventsError}</p>
-              ) : upcomingEvents.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center text-slate-500">No upcoming events yet.</p>
-              ) : (
-                upcomingEvents.slice(0, 5).map((event) => (
-                  <div
-                    key={event._id || event.id}
-                    className="flex items-center justify-between rounded-lg border border-border bg-muted/50 px-4 py-3"
-                  >
-                    <div>
-                      <p className="font-semibold text-foreground">{event.eventName}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(event.startAt).toLocaleDateString(undefined, {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        })}{" "}
-                        {new Date(event.startAt).toLocaleTimeString(undefined, {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <p className="text-xs text-muted-foreground">{event.location}</p>
-                      <ArrowRight className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-                    </div>
+             <div className="space-y-3">
+              {upcomingEvents.map((event) => (
+                <div
+                  key={`${event.sport}-${event.date}-${event.time}`}
+                  className="flex items-center justify-between rounded-lg border border-border bg-muted/50 px-4 py-4 text-sm transition hover:bg-muted/80"
+                >
+                  <div>
+                    <p className="font-semibold text-foreground">{event.sport}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {event.date} · {event.time}
+                    </p>
                   </div>
-                ))
-              )}
+                  <div className="flex items-center gap-2">
+                    <p className="text-xs text-muted-foreground">{event.location}</p>
+                    <ArrowRight className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                  </div>
+                </div>
+              ))}
             </div>
           </section>
 
