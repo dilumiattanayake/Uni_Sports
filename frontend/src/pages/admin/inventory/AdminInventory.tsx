@@ -9,7 +9,7 @@ export default function AdminInventory() {
   
   // Modal State
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [editingId, setEditingId] = useState(null); // NEW: Track if we are editing
+  const [editingId, setEditingId] = useState(null);
   
   // Form State
   const [formData, setFormData] = useState({
@@ -31,36 +31,38 @@ export default function AdminInventory() {
       const response = await inventoryService.getAll();
       setInventory(response.data);
       setError(null);
-    } catch (err) {
+    } catch (err: any) {
       setError(err.message || 'Failed to fetch inventory');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleFileChange = (e) => {
-    setFormData({ ...formData, image: e.target.files[0] });
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setFormData({ ...formData, image: e.target.files[0] as any });
+    }
   };
 
-  // NEW: Open Modal for Editing
-  const openEditModal = (item) => {
+  // Open Modal for Editing
+  const openEditModal = (item: any) => {
     setFormData({
       itemName: item.itemName,
-      sport: item.sport?._id || '', // Safely get ID if populated
-      location: item.location?._id || '', // Safely get ID if populated
+      sport: item.sport?._id || '', 
+      location: item.location?._id || '', 
       totalQuantity: item.totalQuantity,
-      image: null // Reset image so it doesn't upload a blank one
+      image: null 
     });
     setEditingId(item._id);
     setIsAddModalOpen(true);
   };
 
-  // NEW: Reset form helper
+  // Reset form helper
   const resetForm = () => {
     setFormData({ itemName: '', sport: '', location: '', totalQuantity: 0, image: null });
     setEditingId(null);
@@ -68,7 +70,7 @@ export default function AdminInventory() {
   };
 
   // Submit Equipment (Handles BOTH Add and Edit)
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       const submitData = new FormData();
@@ -81,7 +83,6 @@ export default function AdminInventory() {
         submitData.append('image', formData.image);
       }
 
-      // NEW: Check if we are updating or creating
       if (editingId) {
         await inventoryService.update(editingId, submitData);
       } else {
@@ -89,187 +90,203 @@ export default function AdminInventory() {
       }
       
       resetForm();
-      fetchInventory(); // Refresh the table
+      fetchInventory(); 
       
-    } catch (err) {
+    } catch (err: any) {
       alert(err.message || 'Failed to save equipment');
     }
   };
 
   // Delete Equipment
-  const handleDelete = async (id) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm('Are you sure you want to delete this item?')) {
       try {
         await inventoryService.delete(id);
-        fetchInventory(); // Refresh the table
-      } catch (err) {
+        fetchInventory(); 
+      } catch (err: any) {
         alert(err.message || 'Failed to delete item');
       }
     }
   };
 
-  if (loading) return <div className="p-8 text-center text-gray-500">Loading inventory...</div>;
-  if (error) return <div className="p-8 text-center text-red-500">Error: {error}</div>;
+  if (loading) return <DashboardLayout><div className="p-8 text-center text-slate-400 mt-20 font-medium">Loading inventory...</div></DashboardLayout>;
+  if (error) return <DashboardLayout><div className="p-8 text-center text-red-500 mt-20">Error: {error}</div></DashboardLayout>;
 
   return (
     <DashboardLayout>
-    <div className="p-8 w-full">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Inventory Management</h1>
-        <button 
-          onClick={() => { resetForm(); setIsAddModalOpen(true); }}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow transition"
-        >
-          + Add Equipment
-        </button>
-      </div>
-
-      {/* INVENTORY TABLE */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sport / Location</th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Available</th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {inventory.length === 0 ? (
-                <tr><td colSpan={6} className="px-6 py-4 text-center text-gray-500">No equipment found.</td></tr>            
-            ) : (
-              inventory.map((item) => (
-                <tr key={item._id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0 h-10 w-10 bg-gray-100 rounded flex items-center justify-center overflow-hidden">
-                        {item.image && item.image !== 'no-photo.jpg' ? (
-                          <img src={`http://localhost:5001${item.image}`} alt={item.itemName} className="h-full w-full object-cover" />
-                        ) : (
-                          <span className="text-gray-400 text-xs">No Img</span>
-                        )}
-                      </div>
-                      <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">{item.itemName}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{item.sport?.name || 'N/A'}</div>
-                    <div className="text-sm text-gray-500">{item.location?.name || 'N/A'}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium text-gray-900">
-                    {item.totalQuantity}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-                    <span className={`${item.availableQuantity === 0 ? 'text-red-600' : 'text-green-600'}`}>
-                      {item.availableQuantity}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-center">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      item.status === 'Available' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                    }`}>
-                      {item.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    {/* NEW: Bind the Edit button */}
-                    <button onClick={() => openEditModal(item)} className="text-indigo-600 hover:text-indigo-900 mr-4">Edit</button>
-                    <button onClick={() => handleDelete(item._id)} className="text-red-600 hover:text-red-900">Delete</button>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {/* ADD/EDIT EQUIPMENT MODAL */}
-      {isAddModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-8 w-full max-w-md shadow-xl">
-            {/* NEW: Dynamic Title */}
-            <h2 className="text-xl font-bold mb-4">{editingId ? 'Edit Equipment' : 'Add New Equipment'}</h2>
-            <form onSubmit={handleSubmit}>
-              
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Item Name</label>
-                <input 
-                  type="text" name="itemName" required
-                  value={formData.itemName} onChange={handleInputChange}
-                  className="w-full border border-gray-300 rounded px-3 py-2"
-                  placeholder="e.g. Cricket Bat"
-                />
-              </div>
-
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Sport ID</label>
-                <input 
-                  type="text" name="sport" required
-                  value={formData.sport} onChange={handleInputChange}
-                  className="w-full border border-gray-300 rounded px-3 py-2"
-                  placeholder="Paste Sport Object ID here"
-                />
-              </div>
-
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Location ID</label>
-                <input 
-                  type="text" name="location" required
-                  value={formData.location} onChange={handleInputChange}
-                  className="w-full border border-gray-300 rounded px-3 py-2"
-                  placeholder="Paste Location Object ID here"
-                />
-              </div>
-
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Total Quantity</label>
-                <input 
-                  type="number" name="totalQuantity" min="1" required
-                  value={formData.totalQuantity} onChange={handleInputChange}
-                  className="w-full border border-gray-300 rounded px-3 py-2"
-                />
-              </div>
-
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {/* NEW: Dynamic Image Label */}
-                  {editingId ? 'Update Image (Leave blank to keep current)' : 'Equipment Image'}
-                </label>
-                <input 
-                  type="file" accept="image/*"
-                  onChange={handleFileChange}
-                  className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                />
-              </div>
-
-              <div className="flex justify-end space-x-3">
-                <button 
-                  type="button" 
-                  onClick={resetForm}
-                  className="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50 transition"
-                >
-                  Cancel
-                </button>
-                <button 
-                  type="submit"
-                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-                >
-                  {/* NEW: Dynamic Button Text */}
-                  {editingId ? 'Save Changes' : 'Save Equipment'}
-                </button>
-              </div>
-
-            </form>
+      <div className="p-6 md:p-8 w-full max-w-7xl mx-auto space-y-6 text-slate-200">
+        
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-2">
+          <div>
+            <h1 className="text-3xl font-bold text-white tracking-tight">Inventory Management</h1>
+            <p className="text-slate-400 text-sm mt-1">Manage sports equipment, quantities, and availability.</p>
           </div>
+          <button 
+            onClick={() => { resetForm(); setIsAddModalOpen(true); }}
+            className="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-lg font-medium transition shadow-lg shadow-indigo-500/20 border border-indigo-500/50"
+          >
+            + Add Equipment
+          </button>
         </div>
-      )}
 
-    </div>
+        {/* INVENTORY TABLE */}
+        <div className="bg-[#1e1e2d] rounded-xl shadow-lg border border-slate-700/50 overflow-hidden w-full overflow-x-auto">
+          <table className="min-w-full divide-y divide-slate-700/50">
+            <thead className="bg-[#151521]">
+              <tr>
+                <th className="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Item</th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Sport / Location</th>
+                <th className="px-6 py-4 text-center text-xs font-bold text-slate-400 uppercase tracking-wider">Total</th>
+                <th className="px-6 py-4 text-center text-xs font-bold text-slate-400 uppercase tracking-wider">Available</th>
+                <th className="px-6 py-4 text-center text-xs font-bold text-slate-400 uppercase tracking-wider">Status</th>
+                <th className="px-6 py-4 text-right text-xs font-bold text-slate-400 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-700/50 bg-[#1e1e2d]">
+              {inventory.length === 0 ? (
+                  <tr><td colSpan={6} className="px-6 py-12 text-center text-slate-400">No equipment found.</td></tr>            
+              ) : (
+                inventory.map((item: any) => (
+                  <tr key={item._id} className="hover:bg-[#151521]/50 transition duration-200">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center gap-4">
+                        <div className="flex-shrink-0 h-12 w-12 bg-[#151521] border border-slate-700 rounded-lg flex items-center justify-center overflow-hidden">
+                          {item.image && item.image !== 'no-photo.jpg' ? (
+                            <img src={`http://localhost:5001${item.image}`} alt={item.itemName} className="h-full w-full object-cover" />
+                          ) : (
+                            <span className="text-slate-500 text-[10px] font-bold uppercase tracking-wider">No Img</span>
+                          )}
+                        </div>
+                        <div>
+                          <div className="text-sm font-bold text-white">{item.itemName}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-indigo-400 font-medium mb-0.5">{item.sport?.name || 'N/A'}</div>
+                      <div className="text-xs text-slate-500 font-medium">{item.location?.name || 'N/A'}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-bold text-white">
+                      {item.totalQuantity}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-bold">
+                      <span className={`${item.availableQuantity === 0 ? 'text-red-400' : 'text-green-400'}`}>
+                        {item.availableQuantity}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <span className={`px-3 py-1 inline-flex text-xs font-bold uppercase tracking-wide rounded-full border ${
+                        item.status === 'Available' ? 'bg-green-500/20 text-green-300 border-green-500/30' : 'bg-red-500/20 text-red-300 border-red-500/30'
+                      }`}>
+                        {item.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <div className="flex justify-end gap-3">
+                        <button 
+                          onClick={() => openEditModal(item)} 
+                          className="text-indigo-400 hover:text-indigo-300 transition"
+                        >
+                          Edit
+                        </button>
+                        <button 
+                          onClick={() => handleDelete(item._id)} 
+                          className="text-red-400 hover:text-red-300 transition"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* ADD/EDIT EQUIPMENT MODAL */}
+        {isAddModalOpen && (
+          <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="bg-[#1e1e2d] rounded-2xl p-6 md:p-8 w-full max-w-md shadow-2xl border border-slate-700">
+              <h2 className="text-2xl font-bold mb-6 text-white border-b border-slate-700/50 pb-4">
+                {editingId ? 'Edit Equipment' : 'Add New Equipment'}
+              </h2>
+              
+              <form onSubmit={handleSubmit} className="space-y-4">
+                
+                <div>
+                  <label className="block text-sm font-bold text-slate-300 mb-2">Item Name</label>
+                  <input 
+                    type="text" name="itemName" required
+                    value={formData.itemName} onChange={handleInputChange}
+                    className="w-full bg-[#151521] border border-slate-600 text-white placeholder-slate-500 rounded-lg px-4 py-2.5 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                    placeholder="e.g. Cricket Bat"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-slate-300 mb-2">Sport ID</label>
+                  <input 
+                    type="text" name="sport" required
+                    value={formData.sport} onChange={handleInputChange}
+                    className="w-full bg-[#151521] border border-slate-600 text-white placeholder-slate-500 rounded-lg px-4 py-2.5 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                    placeholder="Paste Sport Object ID here"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-slate-300 mb-2">Location ID</label>
+                  <input 
+                    type="text" name="location" required
+                    value={formData.location} onChange={handleInputChange}
+                    className="w-full bg-[#151521] border border-slate-600 text-white placeholder-slate-500 rounded-lg px-4 py-2.5 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                    placeholder="Paste Location Object ID here"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-slate-300 mb-2">Total Quantity</label>
+                  <input 
+                    type="number" name="totalQuantity" min="1" required
+                    value={formData.totalQuantity} onChange={handleInputChange}
+                    className="w-full bg-[#151521] border border-slate-600 text-white rounded-lg px-4 py-2.5 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                  />
+                </div>
+
+                <div className="mb-6">
+                  <label className="block text-sm font-bold text-slate-300 mb-2">
+                    {editingId ? 'Update Image (Leave blank to keep current)' : 'Equipment Image'}
+                  </label>
+                  <input 
+                    type="file" accept="image/*"
+                    onChange={handleFileChange}
+                    className="w-full text-sm text-slate-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-indigo-500/10 file:text-indigo-400 hover:file:bg-indigo-500/20 hover:file:text-indigo-300 outline-none transition file:cursor-pointer"
+                  />
+                </div>
+
+                <div className="flex justify-end space-x-3 pt-4 border-t border-slate-700/50">
+                  <button 
+                    type="button" 
+                    onClick={resetForm}
+                    className="px-5 py-2.5 border border-slate-600 rounded-lg text-slate-300 font-medium hover:bg-slate-800 transition"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    type="submit"
+                    className="px-5 py-2.5 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-500 transition shadow-lg shadow-indigo-500/20"
+                  >
+                    {editingId ? 'Save Changes' : 'Save Equipment'}
+                  </button>
+                </div>
+
+              </form>
+            </div>
+          </div>
+        )}
+
+      </div>
     </DashboardLayout>
   );
 }

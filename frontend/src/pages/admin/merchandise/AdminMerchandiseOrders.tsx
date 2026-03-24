@@ -59,23 +59,23 @@ export default function AdminMerchandiseOrders() {
     }
   };
 
-  // --- Badge Styling Helpers ---
+  // --- Badge Styling Helpers (Dark Theme Adapted) ---
   const getPaymentBadge = (status: string) => {
     const styles: Record<string, string> = {
-      'Pending': 'bg-yellow-100 text-yellow-800',
-      'Paid': 'bg-green-100 text-green-800',
-      'Free Issue': 'bg-blue-100 text-blue-800',
+      'Pending': 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/30',
+      'Paid': 'bg-green-500/20 text-green-300 border border-green-500/30',
+      'Free Issue': 'bg-blue-500/20 text-blue-300 border border-blue-500/30',
     };
-    return `px-2 py-1 text-xs font-bold rounded shadow-sm ${styles[status] || 'bg-gray-100 text-gray-800'}`;
+    return `px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider rounded ${styles[status] || 'bg-slate-500/20 text-slate-300 border border-slate-500/30'}`;
   };
 
   const getFulfillmentBadge = (status: string) => {
     const styles: Record<string, string> = {
-      'Processing': 'bg-orange-100 text-orange-800 border-orange-200',
-      'Ready for Pickup': 'bg-blue-100 text-blue-800 border-blue-200',
-      'Delivered/Handed Over': 'bg-green-100 text-green-800 border-green-200',
+      'Processing': 'bg-orange-500/20 text-orange-300 border-orange-500/30',
+      'Ready for Pickup': 'bg-blue-500/20 text-blue-300 border-blue-500/30',
+      'Delivered/Handed Over': 'bg-green-500/20 text-green-300 border-green-500/30',
     };
-    return `px-3 py-1 text-xs font-semibold rounded-full border ${styles[status] || 'bg-gray-100 text-gray-800 border-gray-200'}`;
+    return `px-3 py-1 text-xs font-bold uppercase tracking-wide rounded-full border ${styles[status] || 'bg-slate-500/20 text-slate-300 border-slate-500/30'}`;
   };
 
   // --- Handlers ---
@@ -100,104 +100,114 @@ export default function AdminMerchandiseOrders() {
 
       alert("Order status updated successfully!");
       setIsModalOpen(false);
-      fetchOrders(); // Refresh table
+      fetchOrders(); 
     } catch (err: any) {
       alert(err.message || 'Failed to update order status.');
     }
   };
 
-  if (loading) return <DashboardLayout><div className="p-8 text-center text-gray-500">Loading orders...</div></DashboardLayout>;
-  if (error) return <DashboardLayout><div className="p-8 text-center text-red-500">Error: {error}</div></DashboardLayout>;
+  if (loading) return <DashboardLayout><div className="p-8 text-center text-slate-400 mt-20 font-medium">Loading orders...</div></DashboardLayout>;
+  if (error) return <DashboardLayout><div className="p-8 text-center text-red-500 mt-20">Error: {error}</div></DashboardLayout>;
 
   return (
     <DashboardLayout>
-      <div className="p-8 w-full max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">Student Merchandise Orders</h1>
-          <div className="bg-white px-4 py-2 rounded shadow-sm border border-gray-200 text-sm font-medium text-gray-600">
-            Total Orders: {orders.length}
+      <div className="p-6 md:p-8 w-full max-w-7xl mx-auto space-y-6 text-slate-200">
+        
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-2">
+          <div>
+            <h1 className="text-3xl font-bold text-white tracking-tight">Student Merchandise Orders</h1>
+            <p className="text-slate-400 text-sm mt-1">Track payments and manage order fulfillments.</p>
+          </div>
+          
+          <div className="bg-[#1e1e2d] px-4 py-2.5 rounded-lg shadow-lg border border-slate-700/50 text-sm font-medium text-slate-300 flex items-center gap-2">
+            <span className="text-indigo-400">Total Orders:</span> 
+            <span className="text-white font-bold">{orders.length}</span>
           </div>
         </div>
 
+        {/* Orders Table Area */}
         {orders.length === 0 ? (
-          <div className="bg-white rounded-lg shadow p-8 text-center border border-gray-100">
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No Orders Found</h3>
-            <p className="text-gray-500">Students have not placed any merchandise orders yet.</p>
+          <div className="bg-[#1e1e2d] rounded-xl shadow-lg p-12 text-center border border-slate-700/50 flex flex-col items-center">
+            <span className="text-5xl mb-4 opacity-40">🛍️</span>
+            <h3 className="text-xl font-bold text-white mb-2">No Orders Found</h3>
+            <p className="text-slate-400 max-w-md">Students have not placed any merchandise orders yet.</p>
           </div>
         ) : (
-          <div className="bg-white rounded-lg shadow overflow-hidden w-full overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+          <div className="bg-[#1e1e2d] rounded-xl shadow-lg border border-slate-700/50 overflow-hidden w-full overflow-x-auto">
+            <table className="min-w-full divide-y divide-slate-700/50">
+              <thead className="bg-[#151521]">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date / Student</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item Details</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Due</th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Payment</th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Fulfillment</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  <th className="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Date / Student</th>
+                  <th className="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Item Details</th>
+                  <th className="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Total Due</th>
+                  <th className="px-6 py-4 text-center text-xs font-bold text-slate-400 uppercase tracking-wider">Payment</th>
+                  <th className="px-6 py-4 text-center text-xs font-bold text-slate-400 uppercase tracking-wider">Fulfillment</th>
+                  <th className="px-6 py-4 text-right text-xs font-bold text-slate-400 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="divide-y divide-slate-700/50 bg-[#1e1e2d]">
                 {orders.map((order) => (
-                  <tr key={order._id} className="hover:bg-gray-50">
+                  <tr key={order._id} className="hover:bg-[#151521]/50 transition duration-200">
                     
                     {/* Date & Student */}
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
+                    <td className="px-6 py-5 whitespace-nowrap">
+                      <div className="text-sm font-bold text-white mb-1">
                         {new Date(order.createdAt).toLocaleDateString()}
                       </div>
-                      <div className="text-sm text-gray-500 mt-1">
+                      <div className="text-xs text-indigo-400 font-medium">
                         {order.student?.name || order.student?.email || 'Unknown Student'}
                       </div>
                     </td>
                     
                     {/* Item Details */}
-                    <td className="px-6 py-4">
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0 h-10 w-10 bg-gray-100 rounded border flex items-center justify-center overflow-hidden">
+                    <td className="px-6 py-5">
+                      <div className="flex items-center gap-4">
+                        <div className="flex-shrink-0 h-12 w-12 bg-[#151521] rounded-lg border border-slate-700 flex items-center justify-center overflow-hidden">
                           {order.merchandise?.image && order.merchandise.image !== 'no-photo.jpg' ? (
                             <img src={`http://localhost:5001${order.merchandise.image}`} alt={order.merchandise.itemName} className="h-full w-full object-cover" />
                           ) : (
-                            <span className="text-gray-400 text-xs">No Img</span>
+                            <span className="text-slate-500 text-[10px] font-bold uppercase tracking-wider">No Img</span>
                           )}
                         </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-bold text-gray-900">
+                        <div>
+                          <div className="text-sm font-bold text-white mb-1">
                             {order.merchandise?.itemName || 'Item Deleted'}
                           </div>
-                          <div className="text-xs text-gray-500 mt-1">
-                            Size: <span className="font-semibold">{order.selectedSize}</span> | Qty: <span className="font-semibold">{order.quantity}</span>
+                          <div className="text-xs text-slate-400 flex items-center gap-2">
+                            <span className="bg-[#151521] px-2 py-0.5 rounded border border-slate-700/50">Size: <strong className="text-slate-200">{order.selectedSize}</strong></span> 
+                            <span className="bg-[#151521] px-2 py-0.5 rounded border border-slate-700/50">Qty: <strong className="text-slate-200">{order.quantity}</strong></span>
                           </div>
                         </div>
                       </div>
                     </td>
 
                     {/* Total Price */}
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-bold text-gray-900">
-                        {order.totalPrice === 0 ? 'Free' : `Rs. ${order.totalPrice}`}
+                    <td className="px-6 py-5 whitespace-nowrap">
+                      <div className="text-sm font-bold text-white">
+                        {order.totalPrice === 0 ? <span className="text-green-400 bg-green-500/10 px-2 py-1 rounded border border-green-500/20 text-xs">Free Issue</span> : `Rs. ${order.totalPrice}`}
                       </div>
                     </td>
 
                     {/* Payment Status */}
-                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                    <td className="px-6 py-5 whitespace-nowrap text-center">
                       <span className={getPaymentBadge(order.paymentStatus)}>
                         {order.paymentStatus}
                       </span>
                     </td>
 
                     {/* Fulfillment Status */}
-                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                    <td className="px-6 py-5 whitespace-nowrap text-center">
                       <span className={getFulfillmentBadge(order.fulfillmentStatus)}>
                         {order.fulfillmentStatus}
                       </span>
                     </td>
 
                     {/* Actions */}
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <td className="px-6 py-5 whitespace-nowrap text-right">
                       <button 
                         onClick={() => openUpdateModal(order)}
-                        className="text-blue-600 hover:text-blue-900 bg-blue-50 px-3 py-1 rounded border border-blue-200 hover:bg-blue-100 transition"
+                        className="text-xs font-bold text-indigo-400 hover:text-white bg-indigo-500/10 px-4 py-2 rounded-lg border border-indigo-500/20 hover:bg-indigo-600 hover:border-indigo-500 transition shadow-sm"
                       >
                         Process Order
                       </button>
@@ -211,33 +221,33 @@ export default function AdminMerchandiseOrders() {
 
         {/* PROCESS ORDER MODAL */}
         {isModalOpen && selectedOrder && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-xl">
-              <h2 className="text-xl font-bold mb-4 border-b pb-2">Process Student Order</h2>
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-[#1e1e2d] rounded-2xl p-6 md:p-8 w-full max-w-md shadow-2xl border border-slate-700">
+              <h2 className="text-xl font-bold mb-4 text-white border-b border-slate-700/50 pb-4">Process Student Order</h2>
               
-              <div className="mb-6 bg-gray-50 p-4 rounded border text-sm flex justify-between items-center">
+              <div className="mb-6 bg-[#151521] p-4 rounded-lg border border-slate-700/50 text-sm flex justify-between items-center">
                 <div>
-                  <p className="text-gray-500 mb-1">Total Due</p>
-                  <p className="text-xl font-bold text-gray-900">
-                    {selectedOrder.totalPrice === 0 ? 'Free Issue' : `Rs. ${selectedOrder.totalPrice}`}
+                  <p className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Total Due</p>
+                  <p className="text-xl font-bold text-white">
+                    {selectedOrder.totalPrice === 0 ? <span className="text-green-400 text-lg">Free Issue</span> : `Rs. ${selectedOrder.totalPrice}`}
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-gray-500 mb-1">Student</p>
-                  <p className="font-medium text-gray-900">{selectedOrder.student?.name || selectedOrder.student?.email}</p>
+                  <p className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Student</p>
+                  <p className="font-semibold text-indigo-400">{selectedOrder.student?.name || selectedOrder.student?.email}</p>
                 </div>
               </div>
 
               <form onSubmit={handleUpdateSubmit}>
                 
                 {/* Payment Status (Disabled if Free Issue) */}
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Payment Status</label>
+                <div className="mb-5">
+                  <label className="block text-sm font-bold text-slate-300 mb-2">Payment Status</label>
                   <select 
                     value={updateData.paymentStatus}
                     onChange={(e) => setUpdateData({...updateData, paymentStatus: e.target.value})}
                     disabled={selectedOrder.totalPrice === 0}
-                    className="w-full border border-gray-300 rounded px-3 py-2 bg-white disabled:bg-gray-100 disabled:text-gray-500"
+                    className="w-full bg-[#151521] border border-slate-600 text-white rounded-lg px-4 py-2.5 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <option value="Pending">Pending (Not Paid)</option>
                     <option value="Paid">Paid (Cash/Transfer Received)</option>
@@ -246,12 +256,12 @@ export default function AdminMerchandiseOrders() {
                 </div>
 
                 {/* Fulfillment Status */}
-                <div className="mb-6">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Fulfillment Status</label>
+                <div className="mb-8">
+                  <label className="block text-sm font-bold text-slate-300 mb-2">Fulfillment Status</label>
                   <select 
                     value={updateData.fulfillmentStatus}
                     onChange={(e) => setUpdateData({...updateData, fulfillmentStatus: e.target.value})}
-                    className="w-full border border-gray-300 rounded px-3 py-2 bg-white"
+                    className="w-full bg-[#151521] border border-slate-600 text-white rounded-lg px-4 py-2.5 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 appearance-none cursor-pointer"
                   >
                     <option value="Processing">Processing (Preparing Item)</option>
                     <option value="Ready for Pickup">Ready for Pickup</option>
@@ -259,17 +269,17 @@ export default function AdminMerchandiseOrders() {
                   </select>
                 </div>
 
-                <div className="flex justify-end space-x-3">
+                <div className="flex justify-end space-x-3 pt-4 border-t border-slate-700/50">
                   <button 
                     type="button" 
                     onClick={() => setIsModalOpen(false)}
-                    className="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50 transition"
+                    className="px-5 py-2.5 border border-slate-600 rounded-lg text-slate-300 font-medium hover:bg-slate-800 transition"
                   >
                     Cancel
                   </button>
                   <button 
                     type="submit"
-                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+                    className="px-5 py-2.5 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-500 transition shadow-lg shadow-indigo-500/20"
                   >
                     Save Status
                   </button>

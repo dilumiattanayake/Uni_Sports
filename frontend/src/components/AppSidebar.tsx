@@ -58,10 +58,16 @@ const paymentManagementLinks = [
 
 const inventoryManagementLinks = [
   { title: "Inventory", url: "/admin/inventory", icon: Package },
+  { title: "Equipment Requests", url: "/admin/requests", icon: UserCheck },
 ];
 
 const eventManagementLinks = [
   { title: "Events", url: "/admin/events", icon: Medal },
+];
+
+const merchandiseManagementLinks = [
+  { title: "Merchandise", url: "/admin/merchandise", icon: BookOpen },
+  { title: "Orders", url: "/admin/orders", icon: DollarSign },
 ];
 
 const coachLinks = [
@@ -398,6 +404,33 @@ export function AppSidebar() {
                   {inventoryMenuOpen && !collapsed && (
                     <div className="mt-1 space-y-1 pl-8">
                       {inventoryManagementLinks.map((item) => (
+                        <NavLink
+                          key={item.title}
+                          to={item.url}
+                          className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                          activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
+                        >
+                          <item.icon className="h-4 w-4 shrink-0" />
+                          <span>{item.title}</span>
+                        </NavLink>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Merchandise Management */}
+                <div>
+                  <button
+                    onClick={toggleMerchandiseMenu}
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                  >
+                    <Package className="h-4 w-4 shrink-0" />
+                    <span className="flex-1 text-left">Merch Management</span>
+                    {merchandiseMenuOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                  </button>
+                  {merchandiseMenuOpen && !collapsed && (
+                    <div className="mt-1 space-y-1 pl-8">
+                      {merchandiseManagementLinks.map((item) => (
                         <NavLink
                           key={item.title}
                           to={item.url}
