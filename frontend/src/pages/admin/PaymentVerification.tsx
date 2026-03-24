@@ -196,7 +196,7 @@ export default function PaymentVerification() {
 	return (
 		<div className="space-y-6">
 			<PageHeader
-				title="Payment Verification"
+				title="Payment Details"
 				description="View all payment transactions and verify pending payments manually."
 			/>
 

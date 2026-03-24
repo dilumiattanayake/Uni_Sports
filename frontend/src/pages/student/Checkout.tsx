@@ -332,46 +332,46 @@ export default function Checkout() {
 						<form onSubmit={handlePlaceOrder} className="space-y-6">
 							<div className="grid gap-4 md:grid-cols-2">
 								<div className="space-y-1">
-									<label className="text-sm font-medium text-gray-700">Full Name</label>
+									<label className="text-sm font-medium text-white">Full Name</label>
 									<input className="text-black w-full rounded-md border px-3 py-2" value={billingDetails.name} onChange={(e) => handleBillingChange("name", e.target.value)} />
 									{errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
 								</div>
 								<div className="space-y-1">
-									<label className="text-sm font-medium text-gray-700">Email</label>
+									<label className="text-sm font-medium text-white">Email</label>
 									<input className="text-black w-full rounded-md border px-3 py-2" value={billingDetails.email} onChange={(e) => handleBillingChange("email", e.target.value)} />
 									{errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
 								</div>
 								<div className="space-y-1">
-									<label className="text-sm font-medium text-gray-700">Phone</label>
+									<label className="text-sm font-medium text-white">Phone</label>
 									<input className="text-black w-full rounded-md border px-3 py-2" value={billingDetails.phone} onChange={(e) => handleBillingChange("phone", e.target.value.replace(/\D/g, "").slice(0, 10))} />
 									{errors.phone && <p className="text-sm text-red-500">{errors.phone}</p>}
 								</div>
 								<div className="space-y-1">
-									<label className="text-sm font-medium text-gray-700">Phone 2 (Optional)</label>
+									<label className="text-sm font-medium text-white">Phone 2 (Optional)</label>
 									<input className="text-black w-full rounded-md border px-3 py-2" value={billingDetails.phone2} onChange={(e) => handleBillingChange("phone2", e.target.value.replace(/\D/g, "").slice(0, 10))} />
 								</div>
 								<div className="space-y-1 md:col-span-2">
-									<label className="text-sm font-medium text-gray-700">Address</label>
+									<label className="text-sm font-medium text-white">Address</label>
 									<input className="text-black w-full rounded-md border px-3 py-2" value={billingDetails.address.street} onChange={(e) => handleBillingChange("address.street", e.target.value)} />
 									{errors["address.street"] && <p className="text-sm text-red-500">{errors["address.street"]}</p>}
 								</div>
 								<div className="space-y-1">
-									<label className="text-sm font-medium text-gray-700">City</label>
+									<label className="text-sm font-medium text-white">City</label>
 									<input className="text-black w-full rounded-md border px-3 py-2" value={billingDetails.address.city} onChange={(e) => handleBillingChange("address.city", e.target.value)} />
 									{errors["address.city"] && <p className="text-sm text-red-500">{errors["address.city"]}</p>}
 								</div>
 								<div className="space-y-1">
-									<label className="text-sm font-medium text-gray-700">District/Province</label>
+									<label className="text-sm font-medium text-white">District/Province</label>
 									<input className="text-black w-full rounded-md border px-3 py-2" value={billingDetails.address.state} onChange={(e) => handleBillingChange("address.state", e.target.value)} />
 									{errors["address.state"] && <p className="text-sm text-red-500">{errors["address.state"]}</p>}
 								</div>
 								<div className="space-y-1">
-									<label className="text-sm font-medium text-gray-700">Postal Code</label>
+									<label className="text-sm font-medium text-white">Postal Code</label>
 									<input className="text-black w-full rounded-md border px-3 py-2" value={billingDetails.address.zipCode} onChange={(e) => handleBillingChange("address.zipCode", e.target.value)} />
 									{errors["address.zipCode"] && <p className="text-sm text-red-500">{errors["address.zipCode"]}</p>}
 								</div>
 								<div className="space-y-1">
-									<label className="text-sm font-medium text-gray-700">Country</label>
+									<label className="text-sm font-medium text-white">Country</label>
 									<input className="text-black w-full rounded-md border px-3 py-2" value={billingDetails.address.country} onChange={(e) => handleBillingChange("address.country", e.target.value)} />
 									{errors["address.country"] && <p className="text-sm text-red-500">{errors["address.country"]}</p>}
 								</div>
@@ -379,7 +379,7 @@ export default function Checkout() {
 
 							<div className="grid gap-4 md:grid-cols-2">
 								<div className="space-y-1">
-									<label className="text-sm font-medium text-gray-700">Bank Transaction Reference</label>
+									<label className="text-sm font-medium text-white">Bank Transaction Reference</label>
 									<input
 										className="text-black w-full rounded-md border px-3 py-2"
 										value={transactionRef}
@@ -393,7 +393,7 @@ export default function Checkout() {
 								</div>
 
 								<div className="space-y-1">
-									<label className="text-sm font-medium text-gray-700">Upload Receipt (JPG/PNG/PDF)</label>
+									<label className="text-sm font-medium text-white">Upload Receipt (JPG/PNG/PDF)</label>
 									<input
 										type="file"
 										accept="image/png,image/jpeg,application/pdf"
@@ -410,7 +410,7 @@ export default function Checkout() {
 							</div>
 
 							<div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-								<Button type="submit" disabled={placingOrder || uploading} className="sm:w-auto">
+								<Button type="submit" disabled={placingOrder || uploading} className="sm:w-auto border-orange-500 bg-orange-500 hover:bg-orange-600">
 									{(placingOrder || uploading) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
 									{placingOrder ? "Placing Order..." : uploading ? "Uploading Receipt..." : "Place Order"}
 								</Button>
