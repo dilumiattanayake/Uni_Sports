@@ -261,6 +261,54 @@ const assignSportsToCoach = async (req, res, next) => {
   }
 };
 
+/**
+ * @desc    Get logged-in user's billing details
+ * @route   GET /api/users/me/billing-details
+ * @access  Private/Student
+ */
+const getMyBillingDetails = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user.id).select('billingDetails');
+
+    if (!user) {
+      return next(new ErrorResponse('User not found', 404));
+    }
+
+    res.status(200).json({
+      success: true,
+      data: user.billingDetails || null,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @desc    Update logged-in user's billing details
+ * @route   PUT /api/users/me/billing-details
+ * @access  Private/Student
+ */
+const updateMyBillingDetails = async (req, res, next) => {
+  try {
+    const { billingDetails } = req.body;
+
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return next(new ErrorResponse('User not found', 404));
+    }
+
+    user.billingDetails = billingDetails;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Billing details updated successfully',
+      data: user.billingDetails,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 module.exports = {
   getUsers,
@@ -269,4 +317,6 @@ module.exports = {
   updateUser,
   deleteUser,
   assignSportsToCoach,
+  getMyBillingDetails,
+  updateMyBillingDetails,
 };

@@ -1,5 +1,4 @@
 import { StatCard } from "@/components/common/StatCard";
-import { PageHeader } from "@/components/common/PageHeader";
 import { mockSports, mockSessions, mockJoinRequests, mockStudents, mockLocations, mockCoaches } from "@/data/mockData";
 import { useAuth } from "@/context/AuthContext";
 import { Calendar, Users, UserCheck, Trophy, Clock, AlertTriangle } from "lucide-react";
@@ -45,14 +44,13 @@ export default function CoachDashboard() {
   return (
     <DashboardLayout>
     <div className="space-y-6">
-      <PageHeader title="Coach Dashboard" description={`Welcome back, ${user.name}`} />
 
       {/* Stats */}
         <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {stats.map((s) => (
             <div
               key={s.label}
-              className="rounded-xl border border-border bg-card p-5 shadow-sm transition bg-indigo-100 hover:shadow-md"
+              className="rounded-xl border border-slate-700/80 bg-slate-900/70 p-5 shadow-sm transition hover:shadow-md"
             >
               <div className="flex items-center gap-2">
                 {s.icon}
@@ -70,7 +68,7 @@ export default function CoachDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* My Sessions */}
-        <div className="rounded-xl border border-zinc-400 bg-card p-5 shadow-sm">
+        <div className="rounded-xl border border-slate-700/80 bg-slate-900/70 p-5 shadow-sm">
           <h2 className="font-display font-bold text-lg mb-4">My Sessions</h2>
           <div className="space-y-3">
             {mySessions.map(session => {
@@ -82,7 +80,7 @@ export default function CoachDashboard() {
                 s.startTime < session.endTime && s.endTime > session.startTime
               );
               return (
-                <div key={session.id} className={`p-3 rounded-lg border transition-colors ${clash ? "border-destructive/50 bg-destructive/5" : "border-border bg-muted/30 hover:bg-muted/50"}`}>
+                <div key={session.id} className={`p-3 rounded-lg border transition-colors ${clash ? "border-destructive/50 bg-destructive/10" : "border-slate-700/70 bg-slate-800/40 hover:bg-slate-800/55"}`}>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span className="text-xl">{sport?.icon}</span>
@@ -111,14 +109,14 @@ export default function CoachDashboard() {
         </div>
 
         {/* Pending Join Requests */}
-        <div className="rounded-xl border border-zinc-400 bg-card p-5 shadow-sm">
+        <div className="rounded-xl border border-slate-700/80 bg-slate-900/70 p-5 shadow-sm">
           <h2 className="font-display font-bold text-lg mb-4">Join Requests</h2>
           <div className="space-y-3">
             {myRequests.map(req => {
               const student = mockStudents.find(s => s.id === req.studentId);
               const sport = mockSports.find(s => s.id === req.sportId);
               return (
-                <div key={req.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+                <div key={req.id} className="flex items-center justify-between rounded-lg bg-slate-800/40 p-3 transition-colors hover:bg-slate-800/55">
                   <div className="flex items-center gap-3">
                     <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-display font-bold text-xs">
                       {student?.name?.split(" ").map(n => n[0]).join("")}

@@ -65,6 +65,38 @@ const NO_NAVBAR_PATHS = [
 const App = () => {
   const { pathname } = useLocation();
   const shouldHideNavbar = NO_NAVBAR_PATHS.some((p) => pathname === p || pathname.startsWith(p + "/"));
+import HomePage from "./pages/HomePage"
+import Register from "./pages/Register"
+import Login from "./pages/Login"
+import StudentDashboard from "./pages/student/StudentDashboard"
+import StudentPayments from "./pages/student/StudentPayments.tsx"
+import StudentBrowseSports from "./pages/student/StudentBrowseSports"
+import StudentSessions from "./pages/student/StudentSessions"
+import StudentRequests from "./pages/student/StudentRequests"
+import AdminDashboard from "./pages/admin/AdminDashboard.tsx"
+import AdminPayments from "./pages/admin/AdminPayments"
+import CoachDashboard from "./pages/coach/CoachDashboard"
+import CoachSessions from "./pages/coach/CoachSessions"
+import CoachRequests from "./pages/coach/CoachRequests"
+import CoachPayments from "./pages/coach/CoachPayments"
+import AdminSports from "./pages/admin/AdminSports"
+import AdminCoaches from "./pages/admin/AdminCoaches"
+import AdminStudents from "./pages/admin/AdminStudents"
+import AdminLocations from "./pages/admin/AdminLocations"
+import SettingsPage from "./pages/ProfileSettings.tsx"
+import NotFound from "./pages/NotFound"
+import Navbar from "./components/common/Navbar"
+import { DashboardLayout } from "./components/DashboardLayout"
+import { Navigate, Route, Routes, useLocation } from "react-router-dom"
+import PaymentVerification from "./pages/admin/PaymentVerification"
+import PaymentReports from "./pages/admin/PaymentReports"
+import Checkout from "./pages/student/Checkout.tsx"
+
+const NO_NAVBAR_PATH_PREFIXES = ["/admin", "/coach", "/student", "/auth/login", "/auth/register", "/AdminDashboard", "/StudentDashboard", "/CoachDashboard"]
+
+const App = () => {
+  const { pathname } = useLocation()
+  const shouldHideNavbar = NO_NAVBAR_PATH_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + "/"))
 
   return (
     <div>
@@ -78,6 +110,8 @@ const App = () => {
         {/* ----------------- ADMIN ROUTES ----------------- */}
         <Route path="/admin" element={<DashboardLayout><AdminDashboard /></DashboardLayout>} />
         <Route path="/admin/home" element={<AdminHome />} />
+        <Route path="/admin" element={<Navigate to="/admin/home" replace />} />
+        <Route path="/admin/home" element={<AdminDashboard />} />
         <Route path="/admin/sports" element={<DashboardLayout><AdminSports /></DashboardLayout>} />
         <Route path="/admin/coaches" element={<DashboardLayout><AdminCoaches /></DashboardLayout>} />
         <Route path="/admin/students" element={<DashboardLayout><AdminStudents /></DashboardLayout>} />
@@ -90,6 +124,25 @@ const App = () => {
         <Route path="/admin/requests" element={<AdminEquipmentRequests />} />
         <Route path="/admin/merchandise" element={<AdminMerchandise />} />
         <Route path="/admin/orders" element={<AdminMerchandiseOrders />} />
+        <Route path="/admin/payments" element={<DashboardLayout><AdminPayments /></DashboardLayout>} />
+        <Route path="/admin/payment/transaction" element={<DashboardLayout><PaymentVerification /></DashboardLayout>} />
+        <Route path="/admin/payment/report" element={<DashboardLayout><PaymentReports /></DashboardLayout>} />
+
+        <Route path="/coach" element={<CoachDashboard />} />
+        <Route path="/coach/sessions" element={<DashboardLayout><CoachSessions /></DashboardLayout>} />
+        <Route path="/coach/requests" element={<DashboardLayout><CoachRequests /></DashboardLayout>} />
+        <Route path="/coach/payments" element={<DashboardLayout><CoachPayments /></DashboardLayout>} />
+
+        <Route path="/student" element={<StudentDashboard />} />
+        <Route path="/student/sports" element={<DashboardLayout><StudentBrowseSports /></DashboardLayout>} />
+        <Route path="/student/sessions" element={<DashboardLayout><StudentSessions /></DashboardLayout>} />
+        <Route path="/student/requests" element={<DashboardLayout><StudentRequests /></DashboardLayout>} />
+        <Route path="/student/payments" element={<StudentPayments />} />
+        <Route path="/student/checkout/:itemSlug" element={<Checkout />} />
+
+        <Route path="/AdminDashboard" element={<AdminDashboard />} />
+        <Route path="/StudentDashboard" element={<StudentDashboard />} />
+        <Route path="/CoachDashboard" element={<CoachDashboard />} />
         <Route path="/admin/settings" element={<SettingsPage />} />
 
         {/* ----------------- COACH ROUTES ----------------- */}
@@ -117,6 +170,8 @@ const App = () => {
         <Route path="/student/settings" element={<SettingsPage />} />
 
         {/* 404 Not Found (Must be at the very bottom) */}
+        <Route path="/student/settings" element={<SettingsPage />} />
+
         <Route path="*" element={<NotFound />} />
       </Routes>
     </div>

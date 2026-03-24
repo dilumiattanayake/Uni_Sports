@@ -75,6 +75,39 @@ router.post(
     body('transactionRef')
       .notEmpty()
       .withMessage('Transaction reference is required'),
+    body('receiptUrl')
+      .isURL({ require_tld: false })
+      .withMessage('Valid receipt URL is required'),
+    body('billingDetails.name')
+      .trim()
+      .notEmpty()
+      .withMessage('Billing name is required'),
+    body('billingDetails.email')
+      .isEmail()
+      .withMessage('Valid billing email is required'),
+    body('billingDetails.phone')
+      .matches(/^\d{10}$/)
+      .withMessage('Billing phone must be exactly 10 digits'),
+    body('billingDetails.address.street')
+      .trim()
+      .notEmpty()
+      .withMessage('Street address is required'),
+    body('billingDetails.address.city')
+      .trim()
+      .notEmpty()
+      .withMessage('City is required'),
+    body('billingDetails.address.state')
+      .trim()
+      .notEmpty()
+      .withMessage('District/Province is required'),
+    body('billingDetails.address.zipCode')
+      .trim()
+      .notEmpty()
+      .withMessage('Postal code is required'),
+    body('billingDetails.address.country')
+      .trim()
+      .notEmpty()
+      .withMessage('Country is required'),
   ],
   validate,
   paymentController.submitManualPayment

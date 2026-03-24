@@ -19,6 +19,8 @@ const inventoryRoutes = require('./routes/inventoryRoutes');
 const equipmentRequestRoutes = require('./routes/equipmentRequestRoutes');
 const merchandiseRoutes = require('./routes/merchandiseRoutes');
 const registrationRoutes = require('./routes/registrationRoute');
+const paymentRoutes = require('./routes/paymentRoutes');
+const uploadRoutes = require('./routes/uploadRoutes');
 
 // Initialize app
 const app = express();
@@ -31,6 +33,9 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
+
+// Serve static files from uploads folder
+app.use('/uploads', express.static('uploads'));
 
 // Logging middleware (only in development)
 if (process.env.NODE_ENV === 'development') {
@@ -59,6 +64,8 @@ app.use('/api/inventory', inventoryRoutes);
 app.use('/api/equipment-requests', equipmentRequestRoutes);
 app.use('/api/merchandise', merchandiseRoutes);
 app.use('/api/registrations', registrationRoutes);
+app.use('/api/payments', paymentRoutes);
+app.use('/api/upload', uploadRoutes);
 
 
 // Placeholder routes for future modules

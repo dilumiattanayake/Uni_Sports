@@ -9,10 +9,10 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const roleLabel = role === "admin" ? "Admin" : role === "coach" ? "Coach" : "Student";
 
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full">
+    <SidebarProvider defaultOpen={true}>
+      <div className="min-h-screen flex w-full overflow-hidden gap-6">
         <AppSidebar />
-        <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex-1 flex flex-col min-w-0 w-full mr-6">
           <header className="h-14 flex items-center justify-between border-b border-border bg-card lg:px-6 shrink-0 px-4 py-5">
             <div className="flex items-center gap-2">
               <SidebarTrigger className="text-muted-foreground hover:text-foreground" />
