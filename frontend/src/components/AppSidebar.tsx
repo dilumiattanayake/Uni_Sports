@@ -6,7 +6,7 @@ import { NavLink } from "@/components/NavLink";
 import {
   LayoutDashboard, Trophy, Users, MapPin, Calendar, UserCheck, BookOpen, Settings,
   ChevronLeft, Medal, DollarSign, Package, Home, CalendarDays, CreditCard, Boxes,
-  Dumbbell, ChevronDown, ChevronRight, LogOut,
+  Dumbbell, ChevronDown, ChevronRight, LogOut, Wallet, BarChart,
 } from "lucide-react";
 import {
   Sidebar,
@@ -51,6 +51,8 @@ const userManagementLinks = [
 
 const paymentManagementLinks = [
   { title: "Payments", url: "/admin/payments", icon: DollarSign },
+  { title: "Transaction", url: "/admin/transaction", icon: Wallet },
+  { title: "Reports", url: "/admin/reports", icon: BarChart },
 ];
 
 const inventoryManagementLinks = [

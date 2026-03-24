@@ -343,7 +343,7 @@ export default function AdminDashboard() {
                     <h2 className="text-xl font-bold text-slate-100">Payment Summary</h2>
                     <p className="mt-1 text-sm text-slate-300">Quick finance overview</p>
                   </div>
-                  <Link to="/admin/payments">
+                  <Link to="/admin/reports">
                     <Button className="gap-2 border-slate-400/40 bg-transparent text-slate-100 hover:bg-slate-100/10" variant="outline">
                       Payments
                       <ArrowRight className="h-4 w-4" />

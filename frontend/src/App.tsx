@@ -21,6 +21,8 @@ import NotFound from "./pages/NotFound"
 import Navbar from "./components/common/Navbar"
 import { DashboardLayout } from "./components/DashboardLayout"
 import { Navigate, Route, Routes, useLocation } from "react-router-dom"
+import PaymentVerification from "./pages/admin/PaymentVerification"
+import PaymentReports from "./pages/admin/PaymentReports"
 
 const NO_NAVBAR_PATH_PREFIXES = ["/admin", "/coach", "/student", "/auth/login", "/auth/register", "/AdminDashboard", "/StudentDashboard", "/CoachDashboard"]
 
@@ -42,6 +44,8 @@ const App = () => {
         <Route path="/admin/students" element={<DashboardLayout><AdminStudents /></DashboardLayout>} />
         <Route path="/admin/locations" element={<DashboardLayout><AdminLocations /></DashboardLayout>} />
         <Route path="/admin/payments" element={<DashboardLayout><AdminPayments /></DashboardLayout>} />
+        <Route path="/admin/payment/transaction" element={<DashboardLayout><PaymentVerification /></DashboardLayout>} />
+        <Route path="/admin/payment/report" element={<DashboardLayout><PaymentReports /></DashboardLayout>} />
 
         <Route path="/coach" element={<CoachDashboard />} />
         <Route path="/coach/sessions" element={<DashboardLayout><CoachSessions /></DashboardLayout>} />
