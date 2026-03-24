@@ -51,8 +51,8 @@ const userManagementLinks = [
 
 const paymentManagementLinks = [
   { title: "Payments", url: "/admin/payments", icon: DollarSign },
-  { title: "Transaction", url: "/admin/transaction", icon: Wallet },
-  { title: "Reports", url: "/admin/reports", icon: BarChart },
+  { title: "Transaction", url: "/admin/payment/transaction", icon: Wallet },
+  { title: "Reports", url: "/admin/payment/report", icon: BarChart },
 ];
 
 const inventoryManagementLinks = [
