@@ -124,7 +124,7 @@ const createSession = async (req, res, next) => {
       new Date(endTime)
     );
     if (locationClash.hasClash) {
-      return next(new ErrorResponse(locationClash.message, 409));
+      return next(new ErrorResponse(`⚠ Time Conflict Detected: ${locationClash.message}`, 409));
     }
 
     // Check for coach clash
@@ -134,7 +134,7 @@ const createSession = async (req, res, next) => {
       new Date(endTime)
     );
     if (coachClash.hasClash) {
-      return next(new ErrorResponse(coachClash.message, 409));
+      return next(new ErrorResponse(`⚠ Time Conflict Detected: ${coachClash.message}`, 409));
     }
 
     // Verify coach is assigned to the sport
@@ -161,6 +161,16 @@ const createSession = async (req, res, next) => {
       .populate('sport', 'name category')
       .populate('coach', 'name email')
       .populate('location', 'name type address');
+
+    if (session.enrolledStudents.length > 0) {
+      const studentIds = session.enrolledStudents.map((enrollment) => enrollment.student);
+      await notificationService.notifyNewSessionAvailable(studentIds, {
+        sessionId: session._id,
+        sportId: session.sport,
+        sport: populatedSession.sport.name,
+        startTime: new Date(session.startTime).toLocaleString(),
+      });
+    }
 
     res.status(201).json({
       success: true,
@@ -224,7 +234,7 @@ const updateSession = async (req, res, next) => {
         session._id
       );
       if (locationClash.hasClash) {
-        return next(new ErrorResponse(locationClash.message, 409));
+        return next(new ErrorResponse(`⚠ Time Conflict Detected: ${locationClash.message}`, 409));
       }
 
       // Check for coach clash
@@ -235,7 +245,28 @@ const updateSession = async (req, res, next) => {
         session._id
       );
       if (coachClash.hasClash) {
-        return next(new ErrorResponse(coachClash.message, 409));
+        return next(new ErrorResponse(`⚠ Time Conflict Detected: ${coachClash.message}`, 409));
+      }
+
+      if (session.enrolledStudents.length > 0) {
+        const enrolledIds = session.enrolledStudents.map((enrollment) => enrollment.student.toString());
+        for (const studentId of enrolledIds) {
+          const studentClash = await clashDetectionService.checkStudentClash(
+            studentId,
+            newStart,
+            newEnd,
+            session._id
+          );
+
+          if (studentClash.hasClash) {
+            return next(
+              new ErrorResponse(
+                `⚠ Time Conflict Detected: One or more enrolled students have overlapping sessions.`,
+                409
+              )
+            );
+          }
+        }
       }
     }
 

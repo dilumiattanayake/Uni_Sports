@@ -1,31 +1,111 @@
-import { useState } from "react";
-import { mockNotifications } from "@/data/mockData";
-import { Notification } from "@/types";
+import { useEffect, useMemo, useState } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Bell, Check, CheckCheck, Info, AlertTriangle, CheckCircle2, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const typeConfig: Record<Notification["type"], { icon: typeof Info; className: string }> = {
-  info: { icon: Info, className: "text-info bg-info/10" },
-  success: { icon: CheckCircle2, className: "text-success bg-success/10" },
-  warning: { icon: AlertTriangle, className: "text-warning bg-warning/10" },
-  destructive: { icon: XCircle, className: "text-destructive bg-destructive/10" },
+const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:5001";
+
+type ApiNotificationType =
+  | "session_time_change"
+  | "join_request_accepted"
+  | "join_request_rejected"
+  | "session_cancelled"
+  | "new_session_available"
+  | "other";
+
+interface ApiNotification {
+  _id: string;
+  type: ApiNotificationType;
+  title: string;
+  message: string;
+  isRead: boolean;
+  createdAt: string;
+}
+
+const typeConfig: Record<ApiNotificationType, { icon: typeof Info; className: string }> = {
+  session_time_change: { icon: AlertTriangle, className: "text-warning bg-warning/10" },
+  join_request_accepted: { icon: CheckCircle2, className: "text-success bg-success/10" },
+  join_request_rejected: { icon: XCircle, className: "text-destructive bg-destructive/10" },
+  session_cancelled: { icon: XCircle, className: "text-destructive bg-destructive/10" },
+  new_session_available: { icon: Info, className: "text-info bg-info/10" },
+  other: { icon: Info, className: "text-info bg-info/10" },
 };
 
 export function NotificationsDropdown() {
-  const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
+  const [notifications, setNotifications] = useState<ApiNotification[]>([]);
   const [open, setOpen] = useState(false);
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const token = localStorage.getItem("token");
 
-  const markAsRead = (id: string) => {
-    setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+  const fetchNotifications = async () => {
+    if (!token) return;
+    try {
+      const response = await fetch(`${API_BASE}/api/notifications?limit=20`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) return;
+      const data = await response.json();
+      setNotifications(data.data ?? []);
+    } catch (error) {
+      console.error("Failed to load notifications", error);
+    }
   };
 
-  const markAllAsRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+  useEffect(() => {
+    fetchNotifications();
+  }, [token]);
+
+  useEffect(() => {
+    if (!token) return;
+    const interval = setInterval(fetchNotifications, 30000);
+    return () => clearInterval(interval);
+  }, [token]);
+
+  const unreadCount = useMemo(
+    () => notifications.filter((notification) => !notification.isRead).length,
+    [notifications],
+  );
+
+  const markAsRead = async (id: string) => {
+    if (!token) return;
+    try {
+      await fetch(`${API_BASE}/api/notifications/${id}/read`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setNotifications((prev) =>
+        prev.map((notification) =>
+          notification._id === id ? { ...notification, isRead: true } : notification,
+        ),
+      );
+    } catch (error) {
+      console.error("Failed to mark notification as read", error);
+    }
+  };
+
+  const markAllAsRead = async () => {
+    if (!token) return;
+    try {
+      await fetch(`${API_BASE}/api/notifications/read-all`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setNotifications((prev) => prev.map((notification) => ({ ...notification, isRead: true })));
+    } catch (error) {
+      console.error("Failed to mark all notifications as read", error);
+    }
   };
 
   const timeAgo = (dateStr: string) => {
@@ -63,16 +143,16 @@ export function NotificationsDropdown() {
             <p className="text-sm text-muted-foreground text-center py-8">No notifications</p>
           ) : (
             <div className="divide-y divide-border">
-              {notifications.map(notif => {
+              {notifications.map((notif) => {
                 const config = typeConfig[notif.type];
                 const Icon = config.icon;
                 return (
                   <button
-                    key={notif.id}
-                    onClick={() => markAsRead(notif.id)}
+                    key={notif._id}
+                    onClick={() => markAsRead(notif._id)}
                     className={cn(
                       "w-full text-left px-4 py-3 flex gap-3 hover:bg-muted/50 transition-colors",
-                      !notif.read && "bg-muted/30"
+                      !notif.isRead && "bg-muted/30"
                     )}
                   >
                     <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5", config.className)}>
@@ -80,8 +160,8 @@ export function NotificationsDropdown() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2">
-                        <p className={cn("text-sm font-medium", !notif.read && "font-semibold")}>{notif.title}</p>
-                        {!notif.read && <span className="h-2 w-2 rounded-full bg-secondary shrink-0 mt-1.5" />}
+                        <p className={cn("text-sm font-medium", !notif.isRead && "font-semibold")}>{notif.title}</p>
+                        {!notif.isRead && <span className="h-2 w-2 rounded-full bg-secondary shrink-0 mt-1.5" />}
                       </div>
                       <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{notif.message}</p>
                       <p className="text-[10px] text-muted-foreground/60 mt-1">{timeAgo(notif.createdAt)}</p>
