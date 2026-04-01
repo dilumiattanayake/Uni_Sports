@@ -1,4 +1,4 @@
-import { Sport, Coach, Student, PracticeSession, JoinRequest, Location, Notification } from "@/types";
+import { Sport, Coach, Student, PracticeSession, JoinRequest, Location, Notification ,Event} from "@/types";
 
 export const mockLocations: Location[] = [
   { id: "loc-1", name: "University Main Ground", type: "ground", capacity: 200 },
@@ -10,7 +10,7 @@ export const mockLocations: Location[] = [
 ];
 
 export const mockSports: Sport[] = [
-  { id: "sp-1", name: "Football", description: "University football team training and matches", coachIds: ["coach-1"], maxStudents: 30, icon: "⚽" },
+  { id: "69bfcf0bbb00bd9a6e867073", name: "Football", description: "University football team training and matches", coachIds: ["coach-1"], maxStudents: 30, icon: "⚽" },
   { id: "sp-2", name: "Basketball", description: "Basketball practice and inter-university competitions", coachIds: ["coach-2"], maxStudents: 20, icon: "🏀" },
   { id: "sp-3", name: "Tennis", description: "Individual and doubles tennis training", coachIds: ["coach-3"], maxStudents: 15, icon: "🎾" },
   { id: "sp-4", name: "Swimming", description: "Competitive swimming and water polo", coachIds: ["coach-1", "coach-4"], maxStudents: 25, icon: "🏊" },
@@ -60,4 +60,89 @@ export const mockNotifications: Notification[] = [
   { id: "notif-2", title: "Request Accepted", message: "Your request to join Football has been accepted", type: "success", read: false, createdAt: "2026-03-01T14:30:00Z" },
   { id: "notif-3", title: "New Join Request", message: "Daniel Lee wants to join Basketball", type: "info", read: true, createdAt: "2026-03-01T10:00:00Z" },
   { id: "notif-4", title: "Session Cancelled", message: "Tennis practice on Mar 4 has been cancelled", type: "destructive", read: true, createdAt: "2026-02-28T16:00:00Z" },
+];
+
+export const mockEvents: Event[] = [
+  {
+    id: "ev-1",
+    title: "Inter-Faculty Cricket Tournament",
+    description: "Annual inter-faculty cricket tournament with knockout rounds.",
+    sportId: "sp-5",
+    startDate: "2026-03-28",
+    endDate: "2026-04-05",
+    registrationDeadline: "2026-03-25",
+    venue: "University Main Ground",
+    maxParticipants: 64,
+    registrationFormUrl: "https://forms.google.com/cricket-2026",
+    status: "upcoming",
+    registrations: [
+      { studentId: "stu-3", status: "confirmed", registeredAt: "2026-03-10" },
+      { studentId: "stu-8", status: "confirmed", registeredAt: "2026-03-11" },
+    ],
+  },
+  {
+    id: "ev-2",
+    title: "Football League 2026",
+    description: "Semester football league open to all faculties.",
+    sportId: "sp-1",
+    startDate: "2026-04-20",
+    endDate: "2026-05-10",
+    registrationDeadline: "2026-04-15",
+    venue: "University Main Ground",
+    maxParticipants: 100,
+    registrationFormUrl: "https://forms.google.com/football-2026",
+    status: "upcoming",
+    registrations: [
+      { studentId: "stu-1", status: "confirmed", registeredAt: "2026-03-15" },
+      { studentId: "stu-7", status: "confirmed", registeredAt: "2026-03-16" },
+    ],
+  },
+  {
+    id: "ev-3",
+    title: "Badminton Open",
+    description: "Singles and doubles badminton open tournament.",
+    sportId: "sp-6",
+    startDate: "2026-04-10",
+    endDate: "2026-04-12",
+    registrationDeadline: "2026-04-05",
+    venue: "Indoor Sports Complex",
+    maxParticipants: 32,
+    registrationFormUrl: "https://forms.google.com/badminton-2026",
+    status: "upcoming",
+    registrations: [
+      { studentId: "stu-5", status: "confirmed", registeredAt: "2026-03-20" },
+      { studentId: "stu-8", status: "waitlisted", registeredAt: "2026-03-21" },
+    ],
+  },
+  {
+    id: "ev-4",
+    title: "Swimming Championship",
+    description: "Annual swimming gala with multiple event categories.",
+    sportId: "sp-4",
+    startDate: "2026-03-15",
+    endDate: "2026-03-16",
+    registrationDeadline: "2026-03-10",
+    venue: "Swimming Pool",
+    maxParticipants: 50,
+    registrationFormUrl: "https://forms.google.com/swimming-2026",
+    status: "ongoing",
+    registrations: [
+      { studentId: "stu-4", status: "confirmed", registeredAt: "2026-03-01" },
+      { studentId: "stu-6", status: "confirmed", registeredAt: "2026-03-02" },
+    ],
+  },
+  {
+    id: "ev-5",
+    title: "3x3 Basketball Cup",
+    description: "Fast-paced 3x3 basketball tournament.",
+    sportId: "sp-2",
+    startDate: "2026-05-01",
+    endDate: "2026-05-03",
+    registrationDeadline: "2026-04-25",
+    venue: "Basketball Court",
+    maxParticipants: 40,
+    registrationFormUrl: "https://forms.google.com/basketball-2026",
+    status: "upcoming",
+    registrations: [],
+  },
 ];

@@ -13,7 +13,7 @@ Create a `.env` file in the backend directory (already created with your MongoDB
 
 ```env
 NODE_ENV=development
-PORT=5000
+PORT=5001
 MONGO_URI=mongodb+srv://diluattanayake05_db_user:V63jTFURNHyWTJKu@itpm.xuxxnmn.mongodb.net/unisports?retryWrites=true&w=majority&appName=ITPM
 JWT_SECRET=unisports_jwt_secret_key_2024_change_in_production
 JWT_EXPIRE=7d
@@ -66,18 +66,18 @@ npm run dev
 npm start
 ```
 
-The server will start on `http://localhost:5000`
+The server will start on `http://localhost:5001`
 
 ## Step 5: Test the API
 
 ### Health Check
 ```bash
-curl http://localhost:5000/api/health
+curl http://localhost:5001/api/health
 ```
 
 ### Login
 ```bash
-curl -X POST http://localhost:5000/api/auth/login \
+curl -X POST http://localhost:5001/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "email": "admin@unisports.com",
@@ -89,12 +89,12 @@ Copy the token from the response and use it in subsequent requests:
 
 ### Get All Sports (Public)
 ```bash
-curl http://localhost:5000/api/sports
+curl http://localhost:5001/api/sports
 ```
 
 ### Get My Profile (Protected)
 ```bash
-curl http://localhost:5000/api/auth/me \
+curl http://localhost:5001/api/auth/me \
   -H "Authorization: Bearer YOUR_TOKEN_HERE"
 ```
 
@@ -170,7 +170,7 @@ You can test the API using:
 - Change the `PORT` in `.env` file
 - Or kill the process using the port:
   ```bash
-  lsof -ti:5000 | xargs kill -9
+  lsof -ti:5001 | xargs kill -9
   ```
 
 ### Module Not Found Error

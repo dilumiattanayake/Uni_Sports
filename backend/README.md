@@ -70,7 +70,7 @@ backend/
    npm start
    ```
 
-The server will start on `http://localhost:5000` (or the port specified in `.env`)
+The server will start on `http://localhost:5001` (or the port specified in `.env`)
 
 ## 📡 API Endpoints
 
@@ -226,7 +226,7 @@ A Postman collection can be created with sample requests.
 
 ```env
 NODE_ENV=development
-PORT=5000
+PORT=5001
 MONGO_URI=your_mongodb_connection_string
 JWT_SECRET=your_jwt_secret_key
 JWT_EXPIRE=7d
