@@ -45,8 +45,7 @@ const sportsManagementLinks = [
 ];
 
 const userManagementLinks = [
-  { title: "Students", url: "/admin/students", icon: UserCheck },
-  { title: "Coaches", url: "/admin/coaches", icon: Users },
+  { title: "All Users", url: "/admin/user/:userId", icon: UserCheck },
 ];
 
 const paymentManagementLinks = [
