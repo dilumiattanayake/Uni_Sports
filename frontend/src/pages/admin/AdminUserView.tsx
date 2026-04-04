@@ -249,11 +249,11 @@ export default function AdminUserView() {
                           onClick={() => handleToggleActive(user.id!, user.isActive)}
                           className={`px-3 py-1 text-xs ${
                             user.isActive
-                              ? 'bg-success hover:opacity-90 text-success-foreground'
-                              : 'bg-destructive hover:opacity-90 text-destructive-foreground'
+                              ? 'bg-red-600 hover:bg-red-700 text-white'
+                              : 'bg-green-600 hover:bg-green-700 text-white'
                           }`}
                         >
-                          {user.isActive ? 'Active' : 'Inactive'}
+                          {user.isActive ? 'Deactivate' : 'Activate'}
                         </Button>
                       </td>
                     </tr>

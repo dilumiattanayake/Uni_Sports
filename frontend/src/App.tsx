@@ -25,6 +25,7 @@ import AdminMerchandiseOrders from "./pages/admin/merchandise/AdminMerchandiseOr
 import AdminPayments from "./pages/admin/AdminPayments";
 import PaymentVerification from "./pages/admin/PaymentVerification";
 import PaymentReports from "./pages/admin/PaymentReports";
+import AdminUserView from "./pages/admin/AdminUserView";
 
 // Coach Pages
 import CoachDashboard from "./pages/coach/CoachDashboard";
@@ -83,6 +84,7 @@ const App = () => {
               <AdminDashboard />
           }
         />
+        <Route path="/admin/users" element={<DashboardLayout><AdminUserView /></DashboardLayout>} />
         <Route path="/admin/sports" element={<DashboardLayout><AdminSports /></DashboardLayout>} />
         <Route path="/admin/coaches" element={<DashboardLayout><AdminCoaches /></DashboardLayout>} />
         <Route path="/admin/students" element={<DashboardLayout><AdminStudents /></DashboardLayout>} />

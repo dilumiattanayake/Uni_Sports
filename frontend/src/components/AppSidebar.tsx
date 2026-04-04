@@ -46,7 +46,7 @@ const sportsManagementLinks = [
 ];
 
 const userManagementLinks = [
-  { title: "All Users", url: "/admin/user/:userId", icon: UserCheck },
+  { title: "All Users", url: "/admin/users", icon: UserCheck },
 ];
 
 const paymentManagementLinks = [
