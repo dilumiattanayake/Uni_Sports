@@ -24,7 +24,6 @@ import { Button } from "@/components/ui/button";
 import logo from "@/assets/Logo.jpg";
 import logoos from "@/assets/Logoos.jpg";
 
-
 const adminLinks = [
   { title: "Home", url: "/admin/home", icon: Home },
   { title: "Dashboard", url: "/AdminDashboard", icon: LayoutDashboard },
@@ -32,10 +31,12 @@ const adminLinks = [
   { title: "Coaches", url: "/admin/coaches", icon: Users },
   { title: "Students", url: "/admin/students", icon: UserCheck },
   { title: "Locations", url: "/admin/locations", icon: MapPin },
-  { title: "Events", url: "/admin/events", icon:  Medal },
-  { title: "Inventory", url: "/admin/inventory", icon:  Package },
-  { title: "Payments", url: "/admin/payments", icon:  DollarSign },
-  
+  { title: "Events", url: "/admin/events", icon: Medal },
+  { title: "Orders", url: "/admin/orders", icon: DollarSign },
+  { title: "Inventory", url: "/admin/inventory", icon: Package },
+  { title: "Equipment Requests", url: "/admin/requests", icon: UserCheck },
+  { title: "Merchandise", url: "/admin/merchandise", icon: BookOpen },
+  { title: "Payments", url: "/admin/payments", icon: DollarSign },
 ];
 
 const sportsManagementLinks = [
@@ -56,10 +57,16 @@ const paymentManagementLinks = [
 
 const inventoryManagementLinks = [
   { title: "Inventory", url: "/admin/inventory", icon: Package },
+  { title: "Equipment Requests", url: "/admin/requests", icon: UserCheck },
 ];
 
 const eventManagementLinks = [
   { title: "Events", url: "/admin/events", icon: Medal },
+];
+
+const merchandiseManagementLinks = [
+  { title: "Merchandise", url: "/admin/merchandise", icon: BookOpen },
+  { title: "Orders", url: "/admin/orders", icon: DollarSign },
 ];
 
 const coachLinks = [
@@ -70,10 +77,41 @@ const coachLinks = [
 ];
 
 const studentLinks = [
-  { title: "Dashboard", url: "/student", icon: LayoutDashboard },
+  { title: "Dashboard", url: "/StudentDashboard", icon: LayoutDashboard },
+  { title: "Shop Merchandise", url: "/student/merchandise", icon: Package },
+  { title: "My Orders", url: "/student/merchandise/my-orders", icon: Package },
+  { title: "My Requests", url: "/student/inventory/my-requests", icon: UserCheck },
+  { title: "Browse Events", url: "/student/events", icon: Medal },
+  { title: "My Events", url: "/student/events/my-events", icon: Trophy },
+  { title: "Inventory", url: "/student/inventory", icon: Package },
+  { title: "My Payements", url: "/student/payments", icon: DollarSign },
+  { title: "Browse Sports", url: "/student/sports", icon: BookOpen },
+  { title: "My Sessions", url: "/student/sessions", icon: Calendar },
+  { title: "Payments", url: "/student/payments", icon: CreditCard },
+];
+
+const studentSportsLinks = [
   { title: "Browse Sports", url: "/student/sports", icon: BookOpen },
   { title: "My Sessions", url: "/student/sessions", icon: Calendar },
   { title: "My Requests", url: "/student/requests", icon: UserCheck },
+];
+
+const studentEventLinks = [
+  { title: "Browse Events", url: "/student/events", icon: Medal },
+  { title: "My Events", url: "/student/events/my-events", icon: Trophy },
+];
+
+const studentInventoryLinks = [
+  { title: "Inventory", url: "/student/inventory", icon: Package },
+  { title: "My Requests", url: "/student/inventory/my-requests", icon: Boxes },
+];
+
+const studentMerchandiseLinks = [
+  { title: "Shop Merchandise", url: "/student/merchandise", icon: Package },
+  { title: "My Orders", url: "/student/merchandise/my-orders", icon: DollarSign },
+];
+
+const studentPaymentLinks = [
   { title: "Payments", url: "/student/payments", icon: CreditCard },
 ];
 
@@ -96,11 +134,13 @@ export function AppSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const config = role !== "admin" ? roleConfig[role] : undefined;
+  
   const [sportsMenuOpen, setSportsMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [paymentMenuOpen, setPaymentMenuOpen] = useState(false);
   const [inventoryMenuOpen, setInventoryMenuOpen] = useState(false);
   const [eventMenuOpen, setEventMenuOpen] = useState(false);
+  const [merchandiseMenuOpen, setMerchandiseMenuOpen] = useState(false);
 
   const toggleSportsMenu = () => {
     setSportsMenuOpen((prev) => {
@@ -110,6 +150,7 @@ export function AppSidebar() {
         setEventMenuOpen(false);
         setPaymentMenuOpen(false);
         setInventoryMenuOpen(false);
+        setMerchandiseMenuOpen(false);
       }
       return next;
     });
@@ -123,6 +164,7 @@ export function AppSidebar() {
         setEventMenuOpen(false);
         setPaymentMenuOpen(false);
         setInventoryMenuOpen(false);
+        setMerchandiseMenuOpen(false);
       }
       return next;
     });
@@ -136,6 +178,7 @@ export function AppSidebar() {
         setUserMenuOpen(false);
         setPaymentMenuOpen(false);
         setInventoryMenuOpen(false);
+        setMerchandiseMenuOpen(false);
       }
       return next;
     });
@@ -149,6 +192,7 @@ export function AppSidebar() {
         setUserMenuOpen(false);
         setEventMenuOpen(false);
         setInventoryMenuOpen(false);
+        setMerchandiseMenuOpen(false);
       }
       return next;
     });
@@ -162,6 +206,21 @@ export function AppSidebar() {
         setUserMenuOpen(false);
         setEventMenuOpen(false);
         setPaymentMenuOpen(false);
+        setMerchandiseMenuOpen(false);
+      }
+      return next;
+    });
+  };
+
+  const toggleMerchandiseMenu = () => {
+    setMerchandiseMenuOpen((prev) => {
+      const next = !prev;
+      if (next) {
+        setSportsMenuOpen(false);
+        setUserMenuOpen(false);
+        setEventMenuOpen(false);
+        setPaymentMenuOpen(false);
+        setInventoryMenuOpen(false);
       }
       return next;
     });
@@ -175,9 +234,7 @@ export function AppSidebar() {
                      location.pathname.includes("/admin/coaches");
 
   const hasPaymentPath = location.pathname.includes("/admin/payments");
-  
   const hasInventoryPath = location.pathname.includes("/admin/inventory");
-  
   const hasEventPath = location.pathname.includes("/admin/events");
 
   const handleLogoClick = () => {
@@ -195,7 +252,10 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon" className="border-r-0">
-      <div className="flex items-center gap-3 px-4 py-5 border-b border-sidebar-border">
+      <div 
+        className="flex items-center gap-3 px-4 py-5 border-b border-sidebar-border cursor-pointer hover:bg-sidebar-accent/50 transition-colors" 
+        onClick={handleLogoClick}
+      >
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground font-display font-bold text-sm">
           <Dumbbell className="h-5 w-5" />
         </div>
@@ -209,7 +269,10 @@ export function AppSidebar() {
             variant="ghost"
             size="icon"
             className="ml-auto h-7 w-7 text-sidebar-foreground/50 hover:text-sidebar-foreground"
-            onClick={toggleSidebar}
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleSidebar();
+            }}
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
@@ -226,6 +289,7 @@ export function AppSidebar() {
           <SidebarGroupContent>
             {role === "admin" ? (
               <div className="space-y-1">
+                {/* Sports Management */}
                 <div>
                   <button
                     onClick={toggleSportsMenu}
@@ -252,6 +316,7 @@ export function AppSidebar() {
                   )}
                 </div>
 
+                {/* User Management */}
                 <div>
                   <button
                     onClick={toggleUserMenu}
@@ -278,6 +343,7 @@ export function AppSidebar() {
                   )}
                 </div>
 
+                {/* Event Management */}
                 <div>
                   <button
                     onClick={toggleEventMenu}
@@ -304,6 +370,7 @@ export function AppSidebar() {
                   )}
                 </div>
 
+                {/* Payment Management */}
                 <div>
                   <button
                     onClick={togglePaymentMenu}
@@ -330,6 +397,7 @@ export function AppSidebar() {
                   )}
                 </div>
 
+                {/* Inventory Management */}
                 <div>
                   <button
                     onClick={toggleInventoryMenu}
@@ -342,6 +410,170 @@ export function AppSidebar() {
                   {inventoryMenuOpen && !collapsed && (
                     <div className="mt-1 space-y-1 pl-8">
                       {inventoryManagementLinks.map((item) => (
+                        <NavLink
+                          key={item.title}
+                          to={item.url}
+                          className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                          activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
+                        >
+                          <item.icon className="h-4 w-4 shrink-0" />
+                          <span>{item.title}</span>
+                        </NavLink>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Merchandise Management */}
+                <div>
+                  <button
+                    onClick={toggleMerchandiseMenu}
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                  >
+                    <Package className="h-4 w-4 shrink-0" />
+                    <span className="flex-1 text-left">Merch Management</span>
+                    {merchandiseMenuOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                  </button>
+                  {merchandiseMenuOpen && !collapsed && (
+                    <div className="mt-1 space-y-1 pl-8">
+                      {merchandiseManagementLinks.map((item) => (
+                        <NavLink
+                          key={item.title}
+                          to={item.url}
+                          className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                          activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
+                        >
+                          <item.icon className="h-4 w-4 shrink-0" />
+                          <span>{item.title}</span>
+                        </NavLink>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : role === "student" ? (
+              <div className="space-y-1">
+                {/* Sports */}
+                <div>
+                  <button
+                    onClick={toggleSportsMenu}
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                  >
+                    <BookOpen className="h-4 w-4 shrink-0" />
+                    <span className="flex-1 text-left">Sports</span>
+                    {sportsMenuOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                  </button>
+                  {sportsMenuOpen && !collapsed && (
+                    <div className="mt-1 space-y-1 pl-8">
+                      {studentSportsLinks.map((item) => (
+                        <NavLink
+                          key={item.title}
+                          to={item.url}
+                          className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                          activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
+                        >
+                          <item.icon className="h-4 w-4 shrink-0" />
+                          <span>{item.title}</span>
+                        </NavLink>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Events */}
+                <div>
+                  <button
+                    onClick={toggleEventMenu}
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                  >
+                    <Medal className="h-4 w-4 shrink-0" />
+                    <span className="flex-1 text-left">Events</span>
+                    {eventMenuOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                  </button>
+                  {eventMenuOpen && !collapsed && (
+                    <div className="mt-1 space-y-1 pl-8">
+                      {studentEventLinks.map((item) => (
+                        <NavLink
+                          key={item.title}
+                          to={item.url}
+                          className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                          activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
+                        >
+                          <item.icon className="h-4 w-4 shrink-0" />
+                          <span>{item.title}</span>
+                        </NavLink>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Inventory */}
+                <div>
+                  <button
+                    onClick={toggleInventoryMenu}
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                  >
+                    <Package className="h-4 w-4 shrink-0" />
+                    <span className="flex-1 text-left">Inventory</span>
+                    {inventoryMenuOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                  </button>
+                  {inventoryMenuOpen && !collapsed && (
+                    <div className="mt-1 space-y-1 pl-8">
+                      {studentInventoryLinks.map((item) => (
+                        <NavLink
+                          key={item.title}
+                          to={item.url}
+                          className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                          activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
+                        >
+                          <item.icon className="h-4 w-4 shrink-0" />
+                          <span>{item.title}</span>
+                        </NavLink>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Merchandise */}
+                <div>
+                  <button
+                    onClick={toggleMerchandiseMenu}
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                  >
+                    <Package className="h-4 w-4 shrink-0" />
+                    <span className="flex-1 text-left">Merchandise</span>
+                    {merchandiseMenuOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                  </button>
+                  {merchandiseMenuOpen && !collapsed && (
+                    <div className="mt-1 space-y-1 pl-8">
+                      {studentMerchandiseLinks.map((item) => (
+                        <NavLink
+                          key={item.title}
+                          to={item.url}
+                          className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                          activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
+                        >
+                          <item.icon className="h-4 w-4 shrink-0" />
+                          <span>{item.title}</span>
+                        </NavLink>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Payments */}
+                <div>
+                  <button
+                    onClick={togglePaymentMenu}
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                  >
+                    <CreditCard className="h-4 w-4 shrink-0" />
+                    <span className="flex-1 text-left">Payments</span>
+                    {paymentMenuOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                  </button>
+                  {paymentMenuOpen && !collapsed && (
+                    <div className="mt-1 space-y-1 pl-8">
+                      {studentPaymentLinks.map((item) => (
                         <NavLink
                           key={item.title}
                           to={item.url}
@@ -383,15 +615,15 @@ export function AppSidebar() {
         {!collapsed && (
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-full bg-sidebar-primary/20 flex items-center justify-center text-sidebar-primary font-display font-bold text-xs">
-                {user.name
-                  .split(" ")
+              <div className="h-8 w-8 rounded-full bg-sidebar-primary/20 flex items-center justify-center text-sidebar-primary font-display font-bold text-xs uppercase">
+                {user?.name
+                  ?.split(" ")
                   .map((namePart) => namePart[0])
-                  .join("")}
+                  .join("") || "?"}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-medium text-sidebar-foreground truncate">{user.name}</p>
-                <p className="text-[10px] text-sidebar-foreground/50 truncate">{user.email}</p>
+                <p className="text-xs font-medium text-sidebar-foreground truncate">{user?.name || "Loading..."}</p>
+                <p className="text-[10px] text-sidebar-foreground/50 truncate">{user?.email || ""}</p>
               </div>
             </div>
             <Button

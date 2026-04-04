@@ -14,7 +14,6 @@ import { Search, Users, UserCheck } from "lucide-react";
 import { UserRole } from "@/types";
 
 const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:5001";
-const MAIN_ADMIN_EMAIL = "admin@my.sliit.lk";
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem("token");
