@@ -244,6 +244,13 @@ export function AppSidebar() {
     else if (role === "student") navigate("/StudentDashboard");
   };
 
+  const getSettingsPath = () => {
+    if (role === "admin") return "/admin/settings";
+    if (role === "coach") return "/coach/settings";
+    if (role === "student") return "/student/settings";
+    return "/";
+  };
+
   return (
     <Sidebar collapsible="icon" className="border-r-0">
       <div 
@@ -622,11 +629,11 @@ export function AppSidebar() {
             </div>
             <Button
               variant="outline"
-              className="w-full justify-start bg-transparent border-sidebar-border text-sidebar-foreground hover:bg-sidebar-accent"
-              onClick={() => navigate("/")}
+              className="w-full justify-center bg-orange-400 border-sidebar-border text-sidebar-foreground hover:bg-orange-500"
+              onClick={() => navigate(getSettingsPath())}
             >
-              <LogOut className="mr-2 h-4 w-4 shrink-0" />
-              Sign Out
+              <Settings className=" justify-center mr-2 h-4 w-4" />
+              Profile Settings
             </Button>
           </div>
         )}
