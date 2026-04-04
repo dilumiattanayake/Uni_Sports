@@ -201,7 +201,7 @@ export default function ProfileSettings() {
   };
 
   return (
-    <DashboardLayout>
+    
       <div className="space-y-6 page-shell">
         <PageHeader title="Profile Settings" description="Manage your account, security, and visual identity." />
 
@@ -412,6 +412,6 @@ export default function ProfileSettings() {
           </Button>
         </div>
       </div>
-    </DashboardLayout>
+    
   );
 }

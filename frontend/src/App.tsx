@@ -9,6 +9,7 @@ import Register from "./pages/Register";
 import Login from "./pages/Login";
 import SettingsPage from "./pages/ProfileSettings";
 import { DashboardLayout } from "./components/DashboardLayout";
+import ProfileSettings from "./pages/ProfileSettings";
 
 // Admin Pages
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -85,6 +86,7 @@ const App = () => {
           }
         />
         <Route path="/admin/users" element={<DashboardLayout><AdminUserView /></DashboardLayout>} />
+        <Route path="/admin/settings" element={<DashboardLayout><ProfileSettings /></DashboardLayout>} />
         <Route path="/admin/sports" element={<DashboardLayout><AdminSports /></DashboardLayout>} />
         <Route path="/admin/coaches" element={<DashboardLayout><AdminCoaches /></DashboardLayout>} />
         <Route path="/admin/students" element={<DashboardLayout><AdminStudents /></DashboardLayout>} />
@@ -107,7 +109,7 @@ const App = () => {
         <Route path="/coach/sessions" element={<DashboardLayout><CoachSessions /></DashboardLayout>} />
         <Route path="/coach/requests" element={<DashboardLayout><CoachRequests /></DashboardLayout>} />
         <Route path="/coach/payments" element={<DashboardLayout><CoachPayments /></DashboardLayout>} />
-        <Route path="/coach/settings" element={<SettingsPage />} />
+        <Route path="/coach/settings" element={<DashboardLayout><ProfileSettings/></DashboardLayout>} />
 
         {/* ---------------- STUDENT ---------------- */}
         <Route path="/student" element={<DashboardLayout><StudentDashboard /></DashboardLayout>} />
@@ -118,13 +120,13 @@ const App = () => {
         <Route path="/student/events/my-events" element={<DashboardLayout><StudentMyEvents /></DashboardLayout>} />
         <Route path="/student/payments" element={<StudentPayments />} />
         <Route path="/student/checkout/:itemSlug" element={<Checkout />} />
+        <Route path="/student/settings" element={<DashboardLayout><ProfileSettings/></DashboardLayout>} />
 
         {/* Student Inventory & Merch */}
         <Route path="/student/inventory" element={<StudentInventory />} />
         <Route path="/student/inventory/my-requests" element={<StudentMyRequest />} />
         <Route path="/student/merchandise" element={<StudentMerchandise />} />
         <Route path="/student/merchandise/my-orders" element={<StudentMyOrders />} />
-        <Route path="/student/settings" element={<SettingsPage />} />
 
         {/* Backward Compatibility */}
         <Route path="/AdminDashboard" element={<AdminDashboard />} />
