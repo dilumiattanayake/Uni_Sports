@@ -39,6 +39,10 @@ const adminLinks = [
   { title: "Payments", url: "/admin/payments", icon: DollarSign },
 ];
 
+const adminLinksNew = [
+  { title: "Dashboard", url: "/AdminDashboard", icon: LayoutDashboard },
+];
+
 const sportsManagementLinks = [
   { title: "Sports", url: "/admin/sports", icon: Trophy },
   { title: "Coaches", url: "/admin/coaches", icon: Users },
@@ -88,6 +92,10 @@ const studentLinks = [
   { title: "Browse Sports", url: "/student/sports", icon: BookOpen },
   { title: "My Sessions", url: "/student/sessions", icon: Calendar },
   { title: "Payments", url: "/student/payments", icon: CreditCard },
+];
+
+const studentLinksNew = [
+   { title: "Dashboard", url: "/StudentDashboard", icon: LayoutDashboard },
 ];
 
 const studentSportsLinks = [
@@ -289,6 +297,16 @@ export function AppSidebar() {
           <SidebarGroupContent>
             {role === "admin" ? (
               <div className="space-y-1">
+                {adminLinksNew.map((item) => (
+                  <NavLink
+                     key={item.title}
+                     to={item.url}
+                     className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                     activeClassName="bg-sidebar-accent text-sidebar-primary font-medium">
+                     <item.icon className="h-4 w-4 shrink-0" />
+                      <span>{item.title}</span>
+                  </NavLink>
+                ))}
                 {/* Sports Management */}
                 <div>
                   <button
@@ -453,6 +471,18 @@ export function AppSidebar() {
               </div>
             ) : role === "student" ? (
               <div className="space-y-1">
+
+                {studentLinksNew.map((item) => (
+                  <NavLink
+                     key={item.title}
+                     to={item.url}
+                     className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                     activeClassName="bg-sidebar-accent text-sidebar-primary font-medium">
+                     <item.icon className="h-4 w-4 shrink-0" />
+                      <span>{item.title}</span>
+                  </NavLink>
+                ))}
+
                 {/* Sports */}
                 <div>
                   <button
