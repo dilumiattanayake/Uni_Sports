@@ -1,9 +1,54 @@
+import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
 import { DashboardLayout } from "@/components/DashboardLayout"
 import { PageHeader } from "@/components/common/PageHeader"
+import { Button } from "@/components/ui/button"
+import sportsImage from "@/assets/sports.jpeg"
+import sportsEvents from "@/assets/events.jpg"
+import sportsItems from "@/assets/sports items.jpg"
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+  type CarouselApi,
+} from "@/components/ui/carousel"
 import { ArrowRight, Boxes, CalendarDays, ChevronRight, Dumbbell, Medal, Users } from "lucide-react"
 
 const StudentDashboard = () => {
+  const [carouselApi, setCarouselApi] = useState<CarouselApi>()
+  const [currentSlide, setCurrentSlide] = useState(0)
+
+  useEffect(() => {
+    if (!carouselApi) return
+
+    const timer = window.setInterval(() => {
+      if (carouselApi.canScrollNext()) {
+        carouselApi.scrollNext()
+      } else {
+        carouselApi.scrollTo(0)
+      }
+    }, 4000)
+
+    return () => window.clearInterval(timer)
+  }, [carouselApi])
+
+  useEffect(() => {
+    if (!carouselApi) return
+
+    setCurrentSlide(carouselApi.selectedScrollSnap())
+
+    const onSelect = () => setCurrentSlide(carouselApi.selectedScrollSnap())
+    carouselApi.on("select", onSelect)
+    carouselApi.on("reInit", onSelect)
+
+    return () => {
+      carouselApi.off("select", onSelect)
+      carouselApi.off("reInit", onSelect)
+    }
+  }, [carouselApi])
+
   const stats = [
     {
       label: "Active Sports",
@@ -74,6 +119,41 @@ const StudentDashboard = () => {
     },
   ]
 
+  const dashboardSlides = [
+    {
+      title: "Sports",
+      description: "Explore university sports and join teams.",
+      actionLabel: "Explore Sports",
+      href: "/student/sports",
+      bgClass: "from-indigo-600 to-blue-500",
+      image: sportsImage,
+    },
+    {
+      title: "Events",
+      description: "Find upcoming tournaments and campus events.",
+      actionLabel: "View Events",
+      href: "/student/sessions",
+      bgClass: "from-emerald-600 to-green-500",
+      image: sportsEvents,
+    },
+    {
+      title: "Borrow Sports Items",
+      description: "Request and borrow sports equipment quickly.",
+      actionLabel: "Borrow Now",
+      href: "/student/requests",
+      bgClass: "from-amber-500 to-orange-500",
+      image: sportsItems,
+    },
+    {
+      title: "Merchandise",
+      description: "Shop jerseys, kits, and official items.",
+      actionLabel: "Shop Now",
+      href: "/student/payments",
+      bgClass: "from-pink-600 to-rose-500",
+      image: "",
+    },
+  ]
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -81,6 +161,58 @@ const StudentDashboard = () => {
           title="Student Dashboard"
           description="Manage your sports, inventory items, and upcoming events in one place"
         />
+
+        <section className="rounded-2xl border border-border bg-card p-2 shadow-sm sm:p-3">
+          <Carousel opts={{ loop: true }} setApi={setCarouselApi}>
+            <CarouselContent>
+              {dashboardSlides.map((slide) => (
+                <CarouselItem key={slide.title}>
+                  <div className="relative overflow-hidden rounded-2xl border border-cyan-500/40">
+                    {slide.image ? (
+                      <img src={slide.image} alt={slide.title} className="absolute inset-0 h-full w-full object-cover" />
+                    ) : (
+                      <div className={`absolute inset-0 bg-gradient-to-br ${slide.bgClass}`} />
+                    )}
+
+                    <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/75 to-black/10" />
+                    <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/45 to-transparent" />
+
+                    <div className="relative min-h-[260px] p-6 text-white sm:min-h-[300px] sm:max-w-[56%] sm:p-10">
+                      <p className="text-xs font-semibold uppercase tracking-[0.28em] text-orange-500">UniSport</p>
+                      <h3 className="mt-3 text-3xl font-extrabold uppercase leading-tight tracking-wide sm:text-5xl">
+                        {slide.title}
+                      </h3>
+                      <p className="mt-3 max-w-md text-sm font-medium text-white/90 sm:text-lg">{slide.description}</p>
+
+                      <div className="mt-6">
+                        <Button asChild className="h-10 rounded-xl bg-orange-400 px-7 text-sm font-semibold uppercase tracking-wide text-white hover:bg-orange-500">
+                          <Link to={slide.href}>{slide.actionLabel}</Link>
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+
+            <CarouselPrevious className="left-2 top-1/2 z-20 -translate-y-1/2 border-slate-300/30 bg-black/45 text-white hover:bg-black/65" />
+            <CarouselNext className="right-2 top-1/2 z-20 -translate-y-1/2 border-slate-300/30 bg-black/45 text-white hover:bg-black/65" />
+
+            <div className="absolute inset-x-0 bottom-4 z-20 flex items-center justify-center gap-2">
+              {dashboardSlides.map((slide, index) => (
+                <button
+                  key={slide.title}
+                  type="button"
+                  onClick={() => carouselApi?.scrollTo(index)}
+                  className={`h-2.5 rounded-full transition-all ${
+                    currentSlide === index ? "w-8 bg-white" : "w-2.5 bg-white/55 hover:bg-white/80"
+                  }`}
+                  aria-label={`Go to ${slide.title} slide`}
+                />
+              ))}
+            </div>
+          </Carousel>
+        </section>
 
         <section className="grid gap-4 sm:grid-cols-3">
           {stats.map((s) => (

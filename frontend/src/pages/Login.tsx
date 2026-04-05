@@ -126,11 +126,11 @@ function Login() {
         </form>
 
         {/* Register Link */}
-        <p className="text-center text-sm mt-4">
+        <p className="text-center text-sm text-gray-500 mt-6">
           Don't have an account?{" "}
           <Link
             to="/auth/register"
-            className="text-indigo-950 font-semibold hover:underline"
+            className="text-indigo-900 font-medium hover:underline"
           >
             Register here
           </Link>

@@ -39,6 +39,10 @@ const adminLinks = [
   { title: "Payments", url: "/admin/payments", icon: DollarSign },
 ];
 
+const adminLinksNew = [
+  { title: "Dashboard", url: "/AdminDashboard", icon: LayoutDashboard },
+];
+
 const sportsManagementLinks = [
   { title: "Sports", url: "/admin/sports", icon: Trophy },
   { title: "Coaches", url: "/admin/coaches", icon: Users },
@@ -46,8 +50,7 @@ const sportsManagementLinks = [
 ];
 
 const userManagementLinks = [
-  { title: "Students", url: "/admin/students", icon: UserCheck },
-  { title: "Coaches", url: "/admin/coaches", icon: Users },
+  { title: "All Users", url: "/admin/users", icon: UserCheck },
 ];
 
 const paymentManagementLinks = [
@@ -89,6 +92,10 @@ const studentLinks = [
   { title: "Browse Sports", url: "/student/sports", icon: BookOpen },
   { title: "My Sessions", url: "/student/sessions", icon: Calendar },
   { title: "Payments", url: "/student/payments", icon: CreditCard },
+];
+
+const studentLinksNew = [
+   { title: "Dashboard", url: "/StudentDashboard", icon: LayoutDashboard },
 ];
 
 const studentSportsLinks = [
@@ -244,6 +251,13 @@ export function AppSidebar() {
     else if (role === "student") navigate("/StudentDashboard");
   };
 
+  const getSettingsPath = () => {
+    if (role === "admin") return "/admin/settings";
+    if (role === "coach") return "/coach/settings";
+    if (role === "student") return "/student/settings";
+    return "/";
+  };
+
   return (
     <Sidebar collapsible="icon" className="border-r-0">
       <div 
@@ -283,6 +297,16 @@ export function AppSidebar() {
           <SidebarGroupContent>
             {role === "admin" ? (
               <div className="space-y-1">
+                {adminLinksNew.map((item) => (
+                  <NavLink
+                     key={item.title}
+                     to={item.url}
+                     className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                     activeClassName="bg-sidebar-accent text-sidebar-primary font-medium">
+                     <item.icon className="h-4 w-4 shrink-0" />
+                      <span>{item.title}</span>
+                  </NavLink>
+                ))}
                 {/* Sports Management */}
                 <div>
                   <button
@@ -447,6 +471,18 @@ export function AppSidebar() {
               </div>
             ) : role === "student" ? (
               <div className="space-y-1">
+
+                {studentLinksNew.map((item) => (
+                  <NavLink
+                     key={item.title}
+                     to={item.url}
+                     className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                     activeClassName="bg-sidebar-accent text-sidebar-primary font-medium">
+                     <item.icon className="h-4 w-4 shrink-0" />
+                      <span>{item.title}</span>
+                  </NavLink>
+                ))}
+
                 {/* Sports */}
                 <div>
                   <button
@@ -622,11 +658,11 @@ export function AppSidebar() {
             </div>
             <Button
               variant="outline"
-              className="w-full justify-start bg-transparent border-sidebar-border text-sidebar-foreground hover:bg-sidebar-accent"
-              onClick={() => navigate("/")}
+              className="w-full justify-center bg-orange-400 border-sidebar-border text-sidebar-foreground hover:bg-orange-500"
+              onClick={() => navigate(getSettingsPath())}
             >
-              <LogOut className="mr-2 h-4 w-4 shrink-0" />
-              Sign Out
+              <Settings className=" justify-center mr-2 h-4 w-4" />
+              Profile Settings
             </Button>
           </div>
         )}

@@ -29,8 +29,9 @@ type ProfileData = {
 };
 
 export default function ProfileSettings() {
-  const { user, role, logout } = useAuth();
+  const { user, role, logout, updateProfile } = useAuth();
   const navigate = useNavigate();
+  const API_BASE = import.meta.env.VITE_API_URL ?? "";
 
   const [profile, setProfile] = useState<ProfileData>({
     name: "",
@@ -107,20 +108,21 @@ export default function ProfileSettings() {
         privateProfile,
       };
 
-      const resp = await fetch("/api/users/me", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(userPayload),
-      });
-
-      if (!resp.ok) throw new Error("Unable to save profile settings");
+      const profileResult = await updateProfile(userPayload);
+      if (!profileResult.success) {
+        throw new Error(profileResult.message || "Unable to save profile settings");
+      }
 
       if (photoFile) {
+        const token = localStorage.getItem("token");
         const formData = new FormData();
         formData.append("avatar", photoFile);
 
-        const photoResp = await fetch("/api/users/me/avatar", {
+        const photoResp = await fetch(`${API_BASE}/api/users/me/avatar`, {
           method: "PUT",
+          headers: {
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
           body: formData,
         });
 
@@ -199,38 +201,38 @@ export default function ProfileSettings() {
   };
 
   return (
-    <DashboardLayout>
-      <div className="space-y-6">
+    
+      <div className="space-y-6 page-shell">
         <PageHeader title="Profile Settings" description="Manage your account, security, and visual identity." />
 
         {successMessage && (
-          <div className="rounded-xl border border-green-200 bg-green-50 p-4 flex items-center gap-3">
-            <CheckCircle2 className="text-green-600" size={18} />
-            <p className="text-sm text-green-800 font-medium">{successMessage}</p>
+          <div className="rounded-xl border border-emerald-500/40 bg-emerald-500/10 p-4 flex items-center gap-3">
+            <CheckCircle2 className="text-emerald-300" size={18} />
+            <p className="text-sm text-emerald-100 font-medium">{successMessage}</p>
           </div>
         )}
         {errorMessage && (
-          <div className="rounded-xl border border-red-200 bg-red-50 p-4 flex items-center gap-3">
-            <AlertCircle className="text-red-600" size={18} />
-            <p className="text-sm text-red-800 font-medium">{errorMessage}</p>
+          <div className="rounded-xl border border-destructive/50 bg-destructive/15 p-4 flex items-center gap-3">
+            <AlertCircle className="text-destructive" size={18} />
+            <p className="text-sm text-destructive-foreground font-medium">{errorMessage}</p>
           </div>
         )}
 
         <div className="grid gap-6 xl:grid-cols-4">
-          <section className="xl:col-span-3 bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+          <section className="xl:col-span-3 surface-card rounded-2xl p-6">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-5 mb-6">
               <div className="flex items-center gap-4">
                 <div className="relative">
-                  <div className="h-24 w-24 rounded-full overflow-hidden border-2 border-indigo-300 shadow-sm bg-indigo-100">
+                  <div className="h-24 w-24 rounded-full overflow-hidden border-2 border-border shadow-sm bg-muted">
                     {photoPreview ? (
                       <img src={photoPreview} alt="Profile" className="h-full w-full object-cover" />
                     ) : (
-                      <div className="h-full w-full flex items-center justify-center text-indigo-700 text-3xl font-bold">
+                      <div className="h-full w-full flex items-center justify-center text-primary text-3xl font-bold">
                         {profile.name.charAt(0) || "U"}
                       </div>
                     )}
                   </div>
-                  <label className="absolute -bottom-1 -right-1 bg-indigo-700 text-white p-2 rounded-full shadow transition hover:bg-indigo-800 cursor-pointer">
+                  <label className="absolute -bottom-1 -right-1 bg-primary text-primary-foreground p-2 rounded-full shadow transition hover:opacity-90 cursor-pointer">
                     <Camera className="h-3.5 w-3.5" />
                     <input type="file" onChange={handlePhotoUpload} className="hidden" accept="image/*" />
                   </label>
@@ -242,14 +244,14 @@ export default function ProfileSettings() {
                         type="text"
                         value={profile.name}
                         onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-                        className="mb-2 text-2xl font-bold"
+                        className="mb-2 text-2xl text-black font-bold"
                         placeholder="Enter your name"
                         autoFocus
                       />
                       <div className="flex gap-2">
                         <Button
                           onClick={() => setIsEditingName(false)}
-                          className="bg-indigo-800 hover:bg-indigo-950 text-white text-xs px-3 py-1"
+                          className="bg-primary hover:opacity-90 text-primary-foreground text-xs px-3 py-1"
                         >
                           Done
                         </Button>
@@ -268,16 +270,16 @@ export default function ProfileSettings() {
                   ) : (
                     <div>
                       <div className="flex items-center gap-2">
-                        <h1 className="text-2xl font-bold text-slate-900">{profile.name || "Your Name"}</h1>
+                        <h1 className="text-2xl font-bold text-foreground">{profile.name || "Your Name"}</h1>
                         <button
                           onClick={() => setIsEditingName(true)}
-                          className="p-1 hover:bg-slate-100 rounded transition"
+                          className="p-1 hover:bg-muted rounded transition"
                           title="Edit name"
                         >
-                          <Edit2 size={18} className="text-slate-600" />
+                          <Edit2 size={18} className="text-muted-foreground" />
                         </button>
                       </div>
-                      <p className="text-sm text-slate-500">{profile.email || "your.email@my.sliit.lk"}</p>
+                      <p className="text-sm text-muted-foreground">{profile.email || "your.email@my.sliit.lk"}</p>
                     </div>
                   )}
                 </div>
@@ -286,7 +288,7 @@ export default function ProfileSettings() {
                 <Button
                   onClick={handleSaveProfile}
                   disabled={loading || profile.name === originalName}
-                  className="bg-indigo-800 hover:bg-indigo-950 text-white px-5 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className=" border border-spacing-10 bg-orange-400 hover:opacity-90 hover:bg-orange-500 text-primary-foreground px-5 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? "Saving..." : "Save Changes"}
                 </Button>
@@ -299,104 +301,104 @@ export default function ProfileSettings() {
               <div className={`grid gap-4 mb-6 ${role === "student" ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1 md:grid-cols-2"}`}>
                 {role === "student" && (
                   <>
-                    <div className="rounded-2xl border border-slate-200 p-4 bg-slate-50 text-center">
-                      <p className="text-xs uppercase tracking-wider text-slate-500">Registered Sports</p>
-                      <p className="text-3xl font-bold text-indigo-700">{profile.registeredSports}</p>
+                    <div className="rounded-2xl border border-border p-4 bg-muted/40 text-center">
+                      <p className="text-xs uppercase tracking-wider text-muted-foreground">Registered Sports</p>
+                      <p className="text-3xl font-bold text-primary">{profile.registeredSports}</p>
                     </div>
-                    <div className="rounded-2xl border border-slate-200 p-4 bg-slate-50 text-center">
-                      <p className="text-xs uppercase tracking-wider text-slate-500">Active Sessions</p>
-                      <p className="text-3xl font-bold text-emerald-700">{profile.activeSessions}</p>
+                    <div className="rounded-2xl border border-border p-4 bg-muted/40 text-center">
+                      <p className="text-xs uppercase tracking-wider text-muted-foreground">Active Sessions</p>
+                      <p className="text-3xl font-bold text-secondary">{profile.activeSessions}</p>
                     </div>
                   </>
                 )}
                 {role === "coach" && (
                   <>
-                    <div className="rounded-2xl border border-slate-200 p-4 bg-slate-50 text-center">
-                      <p className="text-xs uppercase tracking-wider text-slate-500">Assigned Sports</p>
-                      <p className="text-3xl font-bold text-cyan-700">{profile.assignedSports}</p>
+                    <div className="rounded-2xl border border-border p-4 bg-muted/40 text-center">
+                      <p className="text-xs uppercase tracking-wider text-muted-foreground">Assigned Sports</p>
+                      <p className="text-3xl font-bold text-primary">{profile.assignedSports}</p>
                     </div>
-                    <div className="rounded-2xl border border-slate-200 p-4 bg-slate-50 text-center">
-                      <p className="text-xs uppercase tracking-wider text-slate-500">Active Sessions</p>
-                      <p className="text-3xl font-bold text-emerald-700">{profile.activeSessions}</p>
+                    <div className="rounded-2xl border border-border p-4 bg-muted/40 text-center">
+                      <p className="text-xs uppercase tracking-wider text-muted-foreground">Active Sessions</p>
+                      <p className="text-3xl font-bold text-secondary">{profile.activeSessions}</p>
                     </div>
                   </>
                 )}
               </div>
             )}
 
-            <div className="rounded-2xl border border-slate-200 p-5 bg-slate-50">
-              <h2 className="text-lg font-semibold text-slate-900 mb-3">Account Preferences</h2>
+            <div className="rounded-2xl border border-border p-5 bg-muted/30">
+              <h2 className="text-lg font-semibold text-foreground mb-3">Account Preferences</h2>
               <div className="grid gap-3 md:grid-cols-2">
-                <label className="flex items-center justify-between border border-slate-200 px-3 py-3 rounded-lg bg-white">
+                <label className="flex items-center justify-between border border-border px-3 py-3 rounded-lg bg-card">
                   <div>
-                    <p className="text-sm font-medium">Email Notifications</p>
-                    <p className="text-xs text-slate-500">Receive all activity updates</p>
+                    <p className="text-sm font-medium text-foreground">Email Notifications</p>
+                    <p className="text-xs text-muted-foreground">Receive all activity updates</p>
                   </div>
-                  <input type="checkbox" checked={notifications} onChange={() => setNotifications(!notifications)} className="form-checkbox h-4 w-4 text-indigo-600" />
+                  <input type="checkbox" checked={notifications} onChange={() => setNotifications(!notifications)} className="form-checkbox h-4 w-4 text-primary" />
                 </label>
-                <label className="flex items-center justify-between border border-slate-200 px-3 py-3 rounded-lg bg-white">
+                <label className="flex items-center justify-between border border-border px-3 py-3 rounded-lg bg-card">
                   <div>
-                    <p className="text-sm font-medium">2FA Security</p>
-                    <p className="text-xs text-slate-500">Protect account login</p>
+                    <p className="text-sm font-medium text-foreground">2FA Security</p>
+                    <p className="text-xs text-muted-foreground">Protect account login</p>
                   </div>
-                  <input type="checkbox" checked={twoFactor} onChange={() => setTwoFactor(!twoFactor)} className="form-checkbox h-4 w-4 text-emerald-600" />
+                  <input type="checkbox" checked={twoFactor} onChange={() => setTwoFactor(!twoFactor)} className="form-checkbox h-4 w-4 text-secondary" />
                 </label>
-                <label className="flex items-center justify-between border border-slate-200 px-3 py-3 rounded-lg bg-white">
+                <label className="flex items-center justify-between border border-border px-3 py-3 rounded-lg bg-card">
                   <div>
-                    <p className="text-sm font-medium">Private Profile</p>
-                    <p className="text-xs text-slate-500">Hide profile from others</p>
+                    <p className="text-sm font-medium text-foreground">Private Profile</p>
+                    <p className="text-xs text-muted-foreground">Hide profile from others</p>
                   </div>
-                  <input type="checkbox" checked={privateProfile} onChange={() => setPrivateProfile(!privateProfile)} className="form-checkbox h-4 w-4 text-teal-600" />
+                  <input type="checkbox" checked={privateProfile} onChange={() => setPrivateProfile(!privateProfile)} className="form-checkbox h-4 w-4 text-primary" />
                 </label>
-                <label className="flex items-center justify-between border border-slate-200 px-3 py-3 rounded-lg bg-white">
+                <label className="flex items-center justify-between border border-border px-3 py-3 rounded-lg bg-card">
                   <div>
-                    <p className="text-sm font-medium">Auto Logout</p>
-                    <p className="text-xs text-slate-500">Auto sign out after inactivity</p>
+                    <p className="text-sm font-medium text-foreground">Auto Logout</p>
+                    <p className="text-xs text-muted-foreground">Auto sign out after inactivity</p>
                   </div>
-                  <input type="checkbox" checked={false} disabled className="form-checkbox h-4 w-4 text-indigo-600" />
+                  <input type="checkbox" checked={false} disabled className="form-checkbox h-4 w-4 text-primary" />
                 </label>
               </div>
             </div>
           </section>
 
-          <section className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
-            <h2 className="text-lg font-semibold text-slate-900 mb-4">Security Settings</h2>
+          <section className="surface-card rounded-2xl p-6">
+            <h2 className="text-lg font-semibold text-foreground mb-4">Security Settings</h2>
             <div className="space-y-4">
               <div>
-                <label className="text-xs uppercase tracking-wider ">Current Password</label>
+                <label className="text-xs uppercase tracking-wider text-muted-foreground">Current Password</label>
                 <Input 
                 type="password" 
                 placeholder="Current password" 
                 value={password.currentPassword} 
                 onChange={(e) => setPassword({ ...password, currentPassword: e.target.value })} 
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-950" />
+                className="w-full bg-background/70 border-border" />
               </div>
               <div>
-                <label className="text-xs uppercase tracking-wider ">New Password</label>
+                <label className="text-xs uppercase tracking-wider text-muted-foreground">New Password</label>
                 <Input 
                 type="password" 
                 placeholder="New password" 
                 value={password.newPassword} 
                 onChange={(e) => setPassword({ ...password, newPassword: e.target.value })} 
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-950" />
+                className="w-full bg-background/70 border-border" />
               </div>
               <div>
-                <label className="text-xs uppercase tracking-wider">Confirm New Password</label>
+                <label className="text-xs uppercase tracking-wider text-muted-foreground">Confirm New Password</label>
                 <Input 
                 type="password" 
                 placeholder="Confirm password" 
                 value={password.confirmPassword} 
                 onChange={(e) => setPassword({ ...password, confirmPassword: e.target.value })} 
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-950" />
+                className="w-full bg-background/70 border-border" />
               </div>
 
-              <Button onClick={handlePasswordUpdate} disabled={loading} className="w-full bg-indigo-800 hover:bg-indigo-950 text-white py-2">
+              <Button onClick={handlePasswordUpdate} disabled={loading} className="w-full bg-primary hover:opacity-90 text-primary-foreground py-2">
                 {loading ? "Updating password..." : "Update Password"}
               </Button>
 
-              <div className="border border-slate-200 rounded-xl p-4 bg-indigo-50 text-slate-700">
+              <div className="border border-border rounded-xl p-4 bg-muted/40 text-muted-foreground">
                 <div className="flex items-center gap-2">
-                  <ShieldCheck className="h-4 w-4 text-indigo-700" />
+                  <ShieldCheck className="h-4 w-4 text-primary" />
                   <p className="text-sm">Secure your account with 2FA and regular password changes.</p>
                 </div>
               </div>
@@ -405,11 +407,11 @@ export default function ProfileSettings() {
         </div>
 
         <div className="flex justify-end">
-          <Button onClick={() => { logout(); navigate("/"); }} className="bg-red-700 hover:bg-red-800 text-white px-5 py-2 rounded-lg">
+          <Button onClick={() => { logout(); navigate("/"); }} variant="destructive" className="px-5 py-2 rounded-lg border-2 border-red-600 bg-red-600 hover:bg-red-700 hover:border-red-700">
             <LogOut size={16} /> Logout
           </Button>
         </div>
       </div>
-    </DashboardLayout>
+    
   );
 }
