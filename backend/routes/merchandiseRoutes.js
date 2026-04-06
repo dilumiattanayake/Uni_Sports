@@ -6,6 +6,7 @@ const {
   createMerchandise, 
   updateMerchandise, 
   getAllMerchandise, 
+  getMerchandiseById,
   deleteMerchandise,
   createOrder, 
   updateOrderStatus,
@@ -44,6 +45,7 @@ router.route('/orders')
   .get(protect, authorize('admin', 'coach'), getAllOrders);
 
 router.route('/:id')
+  .get(protect, getMerchandiseById)
   .put(
     protect, 
     authorize('admin'), 

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { merchandiseService } from '../../../services/merchandiseService';
 import { DashboardLayout } from "@/components/DashboardLayout";
 
@@ -19,6 +20,7 @@ interface MerchandiseItem {
 }
 
 export default function StudentMerchandise() {
+  const navigate = useNavigate();
   const [merchandise, setMerchandise] = useState<MerchandiseItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -74,26 +76,25 @@ export default function StudentMerchandise() {
     setIsOrderModalOpen(true);
   };
 
-  const handleOrderSubmit = async (e: React.FormEvent) => {
+  const handleOrderSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedItem) return;
     if (!orderData.selectedSize) return alert("Please select a size.");
 
-    try {
-      await merchandiseService.createOrder(selectedItem._id, {
-        quantity: orderData.quantity,
-        selectedSize: orderData.selectedSize
-      });
-      
-      alert("Order placed successfully!");
-      
-      setIsOrderModalOpen(false);
-      setSelectedItem(null);
-      fetchMerchandise(); // Refresh stock numbers
-      
-    } catch (err: any) {
-      alert(err.message || 'Failed to place order.');
-    }
+    const checkoutState = {
+      itemId: selectedItem._id,
+      quantity: orderData.quantity,
+      selectedSize: orderData.selectedSize,
+    };
+
+    sessionStorage.setItem('checkoutOrderContext', JSON.stringify(checkoutState));
+
+    setIsOrderModalOpen(false);
+    setSelectedItem(null);
+
+    navigate(`/student/checkout/${selectedItem._id}`, {
+      state: checkoutState,
+    });
   };
 
   if (loading) return <DashboardLayout><div className="p-8 text-center text-slate-400 mt-20 font-medium">Loading shop...</div></DashboardLayout>;
@@ -290,7 +291,7 @@ export default function StudentMerchandise() {
                       disabled={!orderData.selectedSize}
                       className="w-full py-3 bg-indigo-600 text-white rounded-lg font-bold hover:bg-indigo-500 disabled:opacity-50 disabled:bg-slate-700 disabled:text-slate-400 transition shadow-lg shadow-indigo-500/20"
                     >
-                      {selectedItem.price === 0 ? 'Confirm Free Claim' : 'Place Order'}
+                      {selectedItem.price === 0 ? 'Confirm Free Claim' : 'Checkout'}
                     </button>
                   </div>
 

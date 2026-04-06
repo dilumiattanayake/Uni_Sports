@@ -5,6 +5,10 @@ export const merchandiseService = {
   getAll: async () => {
     return fetchWithAuth(`/merchandise`);
   },
+
+  getById: async (id: string) => {
+    return fetchWithAuth(`/merchandise/${id}`);
+  },
   
   // Uses FormData to handle the image upload
   create: async (formData: FormData) => {

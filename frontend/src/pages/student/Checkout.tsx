@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { ArrowLeft, FileUp, Loader2, ShieldCheck } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { merchandiseService } from "@/services/merchandiseService";
+import { DashboardLayout } from "@/components/DashboardLayout";
 
 type BillingDetails = {
 	name: string;
@@ -22,89 +24,20 @@ type BillingDetails = {
 type BillingErrors = Record<string, string>;
 
 type CheckoutItem = {
-	id: string;
-	slug: string;
-	name: string;
+	_id: string;
+	itemName: string;
 	price: number;
 	image: string;
-	sku: string;
-	description: string;
+	category: string;
+	sport?: { _id: string; name: string };
+	variants: Array<{ size: string; stockQuantity: number }>;
 };
 
-const ITEM_CATALOG: CheckoutItem[] = [
-	{
-		id: "661111111111111111111111",
-		slug: "cricket",
-		name: "Cricket Jersey",
-		price: 3200,
-		image: "https://images.unsplash.com/photo-1521412644187-c49fa049e84d?w=1200",
-		sku: "UNI-CRK-001",
-		description: "Official UniSports cricket jersey with breathable training fabric.",
-	},
-	{
-		id: "662222222222222222222222",
-		slug: "football",
-		name: "Football Jersey",
-		price: 3000,
-		image: "https://images.unsplash.com/photo-1560272564-c83b66b1ad12?w=1200",
-		sku: "UNI-FTB-001",
-		description: "Lightweight football jersey made for match-day comfort.",
-	},
-	{
-		id: "663333333333333333333333",
-		slug: "volleyball",
-		name: "Volleyball Jersey",
-		price: 2900,
-		image: "https://images.unsplash.com/photo-1592656094267-764a45160876?w=1200",
-		sku: "UNI-VBL-001",
-		description: "Stretch-fit volleyball jersey with moisture control panels.",
-	},
-	{
-		id: "664444444444444444444444",
-		slug: "badminton",
-		name: "Badminton Tee",
-		price: 2600,
-		image: "https://images.unsplash.com/photo-1613918455609-4f9f8c6f7f27?w=1200",
-		sku: "UNI-BDM-001",
-		description: "Quick-dry badminton tee for training and tournaments.",
-	},
-	{
-		id: "665555555555555555555555",
-		slug: "rugby",
-		name: "Rugby Jersey",
-		price: 3500,
-		image: "https://images.unsplash.com/photo-1517466787929-bc90951d0974?w=1200",
-		sku: "UNI-RGB-001",
-		description: "Durable rugby jersey with reinforced stitching.",
-	},
-	{
-		id: "666666666666666666666666",
-		slug: "tennis",
-		name: "Tennis Polo",
-		price: 2800,
-		image: "https://images.unsplash.com/photo-1542144582-1ba00456b5e3?w=1200",
-		sku: "UNI-TNS-001",
-		description: "Classic tennis polo with lightweight performance fabric.",
-	},
-	{
-		id: "667777777777777777777777",
-		slug: "netball",
-		name: "Netball Kit",
-		price: 2750,
-		image: "https://images.unsplash.com/photo-1517649763962-0c623066013b?w=1200",
-		sku: "UNI-NTB-001",
-		description: "Team-ready netball kit with breathable side mesh.",
-	},
-	{
-		id: "668888888888888888888888",
-		slug: "carrom",
-		name: "Carrom Team Tee",
-		price: 2200,
-		image: "https://images.unsplash.com/photo-1512418490979-92798cec1380?w=1200",
-		sku: "UNI-CRM-001",
-		description: "Comfortable cotton blend team tee for indoor events.",
-	},
-];
+type CheckoutNavigationState = {
+	itemId?: string;
+	selectedSize?: string;
+	quantity?: number;
+};
 
 const emptyBillingDetails: BillingDetails = {
 	name: "",
@@ -122,7 +55,23 @@ const emptyBillingDetails: BillingDetails = {
 
 export default function Checkout() {
 	const navigate = useNavigate();
+	const location = useLocation();
 	const { itemSlug } = useParams<{ itemSlug: string }>();
+	const navigationState = (location.state as CheckoutNavigationState | null) || null;
+	const storedCheckoutState = (() => {
+		try {
+			const raw = sessionStorage.getItem("checkoutOrderContext");
+			return raw ? (JSON.parse(raw) as CheckoutNavigationState) : null;
+		} catch {
+			return null;
+		}
+	})();
+	const checkoutContext = navigationState || storedCheckoutState;
+	const [item, setItem] = useState<CheckoutItem | null>(null);
+	const [itemLoading, setItemLoading] = useState(true);
+	const [itemError, setItemError] = useState<string | null>(null);
+	const [selectedSize, setSelectedSize] = useState(checkoutContext?.selectedSize || "");
+	const [quantity, setQuantity] = useState(checkoutContext?.quantity && checkoutContext.quantity > 0 ? checkoutContext.quantity : 1);
 
 	const [billingDetails, setBillingDetails] = useState<BillingDetails>(emptyBillingDetails);
 	const [errors, setErrors] = useState<BillingErrors>({});
@@ -134,10 +83,104 @@ export default function Checkout() {
 
 	const getToken = () => localStorage.getItem("token") || "";
 
-	const item = useMemo(
-		() => ITEM_CATALOG.find((entry) => entry.slug === itemSlug),
-		[itemSlug]
-	);
+	const isMongoObjectId = (value: string) => /^[a-f\d]{24}$/i.test(value);
+
+	const toSlug = (value: string) =>
+		value
+			.toLowerCase()
+			.trim()
+			.replace(/[^a-z0-9\s-]/g, "")
+			.replace(/\s+/g, "-");
+
+	const stockForSelectedSize = useMemo(() => {
+		if (!item || !selectedSize) return 0;
+		const variant = item.variants.find((entry) => entry.size === selectedSize);
+		return variant ? variant.stockQuantity : 0;
+	}, [item, selectedSize]);
+
+	const totalAmount = useMemo(() => {
+		if (!item) return 0;
+		return item.price * quantity;
+	}, [item, quantity]);
+
+	useEffect(() => {
+		const loadItem = async () => {
+			if (!itemSlug) {
+				setItem(null);
+				setItemError("No merchandise reference provided.");
+				setItemLoading(false);
+				return;
+			}
+
+			setItemLoading(true);
+			setItemError(null);
+
+			try {
+				if (isMongoObjectId(itemSlug)) {
+					const byId = await merchandiseService.getById(itemSlug);
+					setItem(byId.data);
+					return;
+				}
+
+				const all = await merchandiseService.getAll();
+				const matched = all.data.find((entry: CheckoutItem) => {
+					const itemNameSlug = toSlug(entry.itemName);
+					const sportSlug = entry.sport?.name ? toSlug(entry.sport.name) : "";
+					return (
+						itemNameSlug === itemSlug ||
+						sportSlug === itemSlug ||
+						itemNameSlug.includes(itemSlug)
+					);
+				});
+
+				if (!matched) {
+					setItem(null);
+					setItemError("The selected item is not available for checkout.");
+					return;
+				}
+
+				setItem(matched);
+			} catch (error) {
+				const message = error instanceof Error ? error.message : "Failed to load item details";
+				setItem(null);
+				setItemError(message);
+			} finally {
+				setItemLoading(false);
+			}
+		};
+
+		loadItem();
+	}, [itemSlug]);
+
+	useEffect(() => {
+		if (!item) return;
+
+		if (checkoutContext?.itemId && checkoutContext.itemId !== item._id) {
+			sessionStorage.removeItem("checkoutOrderContext");
+		}
+
+		if (checkoutContext?.selectedSize) {
+			const selectedVariant = item.variants.find((variant) => variant.size === checkoutContext.selectedSize);
+			if (selectedVariant && selectedVariant.stockQuantity > 0) {
+				setSelectedSize(checkoutContext.selectedSize);
+				setQuantity(Math.max(1, Math.min(checkoutContext.quantity || 1, selectedVariant.stockQuantity)));
+				return;
+			}
+		}
+
+		if (selectedSize && stockForSelectedSize > 0) {
+			if (quantity > stockForSelectedSize) {
+				setQuantity(stockForSelectedSize);
+			}
+			return;
+		}
+
+		const firstAvailable = item.variants.find((variant) => variant.stockQuantity > 0);
+		if (firstAvailable) {
+			setSelectedSize(firstAvailable.size);
+			setQuantity(1);
+		}
+	}, [item, selectedSize, quantity, stockForSelectedSize]);
 
 	useEffect(() => {
 		const loadBilling = async () => {
@@ -184,9 +227,17 @@ export default function Checkout() {
 	const validate = () => {
 		const next: BillingErrors = {};
 
+		if (!item) next.item = "Item is not available";
+		if (!selectedSize.trim()) next.selectedSize = "Please select a size";
+		if (!Number.isInteger(quantity) || quantity < 1) next.quantity = "Quantity must be at least 1";
+		if (stockForSelectedSize > 0 && quantity > stockForSelectedSize) {
+			next.quantity = `Only ${stockForSelectedSize} item(s) available for selected size`;
+		}
+
 		if (!billingDetails.name.trim()) next.name = "Full name is required";
-		if (!billingDetails.email.trim()) next.email = "Email is required";
-		else if (!billingDetails.email.endsWith("@my.sliit.lk")) next.email = "Use your student email";
+		const normalizedEmail = billingDetails.email.trim().toLowerCase();
+		if (!normalizedEmail) next.email = "Email is required";
+		else if (!normalizedEmail.endsWith("@my.sliit.lk")) next.email = "Use your student email";
 		if (!/^\d{10}$/.test(billingDetails.phone)) next.phone = "Phone must be exactly 10 digits";
 		if (!billingDetails.address.street.trim()) next["address.street"] = "Street address is required";
 		if (!billingDetails.address.city.trim()) next["address.city"] = "City is required";
@@ -195,6 +246,10 @@ export default function Checkout() {
 		if (!billingDetails.address.country.trim()) next["address.country"] = "Country is required";
 		if (!transactionRef.trim()) next.transactionRef = "Transaction reference is required";
 		if (!selectedFile && !receiptUrl) next.receipt = "Payment receipt is required";
+
+		if (next.selectedSize || next.quantity) {
+			toast.error("Order details are missing. Please return to Merchandise and checkout again.");
+		}
 
 		setErrors(next);
 		return Object.keys(next).length === 0;
@@ -250,8 +305,8 @@ export default function Checkout() {
 				},
 				body: JSON.stringify({
 					type: "item",
-					referenceId: item.id,
-					amount: item.price,
+					referenceId: item._id,
+					amount: totalAmount,
 					transactionRef,
 					receiptUrl: finalReceiptUrl,
 					billingDetails,
@@ -280,6 +335,7 @@ export default function Checkout() {
 			}
 
 			localStorage.setItem("billingDetails", JSON.stringify(billingDetails));
+			sessionStorage.removeItem("checkoutOrderContext");
 			toast.success("Order placed successfully. Payment is pending verification.");
 			navigate("/student/payments");
 		} catch (error) {
@@ -290,25 +346,45 @@ export default function Checkout() {
 		}
 	};
 
+	if (itemLoading) {
+		return (
+			<DashboardLayout>
+				<div className="mx-auto w-full max-w-3xl space-y-6 px-4 py-6">
+					<Card>
+						<CardHeader>
+							<CardTitle>Loading Checkout</CardTitle>
+						</CardHeader>
+						<CardContent>
+							<p className="text-sm text-gray-600">Please wait while we load your item details.</p>
+						</CardContent>
+					</Card>
+				</div>
+			</DashboardLayout>
+		);
+	}
+
 	if (!item) {
 		return (
-			<div className="mx-auto w-full max-w-3xl space-y-6 px-4 py-6">
-				<Card className="border-red-200">
-					<CardHeader>
-						<CardTitle>Item Not Found</CardTitle>
-					</CardHeader>
-					<CardContent className="space-y-4">
-						<p className="text-sm text-gray-600">The selected item is not available for checkout.</p>
-						<Button asChild>
-							<Link to="/student/payments">Back to Payments</Link>
-						</Button>
-					</CardContent>
-				</Card>
-			</div>
+			<DashboardLayout>
+				<div className="mx-auto w-full max-w-3xl space-y-6 px-4 py-6">
+					<Card className="border-red-200">
+						<CardHeader>
+							<CardTitle>Item Not Found</CardTitle>
+						</CardHeader>
+						<CardContent className="space-y-4">
+							<p className="text-sm text-gray-600">{itemError || "The selected item is not available for checkout."}</p>
+							<Button asChild>
+								<Link to="/student/payments">Back to Payments</Link>
+							</Button>
+						</CardContent>
+					</Card>
+				</div>
+			</DashboardLayout>
 		);
 	}
 
 	return (
+		<DashboardLayout>
 		<div className="mx-auto w-full max-w-7xl space-y-6 px-4 py-6">
 			<div className="flex items-center justify-between">
 				<div>
@@ -428,22 +504,26 @@ export default function Checkout() {
 						<CardTitle>Order Summary</CardTitle>
 					</CardHeader>
 					<CardContent className="space-y-4">
-						<img src={item.image} alt={item.name} className="h-44 w-full rounded-lg object-cover" />
+						<img src={item.image ? `http://localhost:5001${item.image}` : ""} alt={item.itemName} className="h-44 w-full rounded-lg object-cover" />
 						<div>
-							<p className="text-lg font-semibold">{item.name}</p>
-							<p className="text-xs uppercase tracking-wide text-gray-500">SKU: {item.sku}</p>
+							<p className="text-lg font-semibold">{item.itemName}</p>
+							<p className="text-xs uppercase tracking-wide text-gray-500">{item.category} • {item.sport?.name || "All Sports"}</p>
 						</div>
-						<p className="text-sm text-gray-600">{item.description}</p>
 
 						<div className="rounded-lg border bg-gray-50 p-3">
 							<div className="flex items-center justify-between text-sm">
-								<span>Item Price</span>
-								<span className="font-semibold">LKR {item.price.toLocaleString()}</span>
+								<span className="font-semibold text-indigo-900">Selected Size</span>
+								<span className="font-semibold text-indigo-900">{selectedSize || "-"}</span>
 							</div>
-							<div className="mt-2 flex items-center justify-between border-t pt-2 text-sm">
-								<span>Total</span>
-								<span className="text-lg font-bold text-indigo-900">LKR {item.price.toLocaleString()}</span>
+							<div className="mt-2 flex items-center justify-between text-sm border-t pt-2">
+								<span className="font-semibold text-indigo-900">Quantity</span>
+								<span className="font-semibold text-indigo-900">{quantity}</span>
 							</div>
+						</div>
+
+						<div className="h-20 rounded-lg border bg-gray-50 px-4 flex items-center justify-between">
+							<span className="text-2xl font-bold text-indigo-900">Total Price :</span>
+							<span className="text-2xl font-bold text-indigo-900">LKR {totalAmount.toLocaleString()}</span>
 						</div>
 
 						<div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
@@ -457,5 +537,6 @@ export default function Checkout() {
 				</Card>
 			</div>
 		</div>
+		</DashboardLayout>
 	);
 }
