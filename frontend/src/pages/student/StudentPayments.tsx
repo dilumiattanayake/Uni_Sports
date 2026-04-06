@@ -123,7 +123,6 @@ export default function StudentPayments() {
     return new Date(date).toLocaleDateString();
   };
 
-  const totalPayments = payments.reduce((sum, p) => sum + p.amount, 0);
   const pendingCount = payments.filter(p => p.status === "pending").length;
   const approvedCount = payments.filter(p => p.status === "approved" || p.status === "paid").length;
 
@@ -300,15 +299,7 @@ export default function StudentPayments() {
         />
 
         {/* Summary Cards */}
-        <div className="grid gap-4 md:grid-cols-4">
-          <Card className="bg-gradient-to-br from-indigo-950 via-indigo-900 to-indigo-800" >
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Payments</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{totalPayments} LKR</div>
-            </CardContent>
-          </Card>
+        <div className="grid gap-4 md:grid-cols-3">
           <Card className="bg-gradient-to-br from-indigo-950 via-indigo-900 to-indigo-800" >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Pending</CardTitle>

@@ -291,6 +291,12 @@ export default function Checkout() {
 
 		setPlacingOrder(true);
 		try {
+			// Create merchandise order so it appears in Student My Orders.
+			await merchandiseService.createOrder(item._id, {
+				quantity,
+				selectedSize,
+			});
+
 			const uploadedUrl = await uploadReceipt();
 			const finalReceiptUrl = uploadedUrl || receiptUrl;
 			if (!finalReceiptUrl) {
@@ -337,7 +343,7 @@ export default function Checkout() {
 			localStorage.setItem("billingDetails", JSON.stringify(billingDetails));
 			sessionStorage.removeItem("checkoutOrderContext");
 			toast.success("Order placed successfully. Payment is pending verification.");
-			navigate("/student/payments");
+			navigate("/student/merchandise/my-orders");
 		} catch (error) {
 			const message = error instanceof Error ? error.message : "Order failed";
 			toast.error(message);
