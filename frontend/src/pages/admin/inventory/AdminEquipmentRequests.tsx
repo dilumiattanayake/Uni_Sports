@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { equipmentRequestService } from '../../../services/equipmentRequestService';
 import { DashboardLayout } from "@/components/DashboardLayout";
+import { Scanner } from '@yudiel/react-qr-scanner';
 
 // Define TypeScript interfaces for the populated data
 interface RequestedItem {
@@ -40,6 +41,9 @@ export default function AdminEquipmentRequests() {
     status: 'Pending',
     notes: ''
   });
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
+  const [scannerMessage, setScannerMessage] = useState<string | null>(null);
+  const [scannerBusy, setScannerBusy] = useState(false);
 
   useEffect(() => {
     fetchRequests();
@@ -100,6 +104,23 @@ export default function AdminEquipmentRequests() {
     }
   };
 
+  const processScannedQr = async (qrData: string) => {
+    if (scannerBusy || !qrData) {
+      return;
+    }
+
+    try {
+      setScannerBusy(true);
+      const response = await equipmentRequestService.processQrPickup(qrData);
+      setScannerMessage(response.message || 'QR scanned successfully.');
+      await fetchRequests();
+    } catch (err: any) {
+      setScannerMessage(err.message || 'Failed to process QR scan.');
+    } finally {
+      setScannerBusy(false);
+    }
+  };
+
   if (loading) return <DashboardLayout><div className="p-8 text-center text-slate-400 mt-20 font-medium">Loading requests...</div></DashboardLayout>;
   if (error) return <DashboardLayout><div className="p-8 text-center text-red-500 mt-20">{error}</div></DashboardLayout>;
 
@@ -113,10 +134,22 @@ export default function AdminEquipmentRequests() {
             <h1 className="text-3xl font-bold text-white tracking-tight">Equipment Borrowing Requests</h1>
             <p className="text-slate-400 text-sm mt-1">Manage and track student equipment requests.</p>
           </div>
-          
-          <div className="bg-[#1e1e2d] px-4 py-2.5 rounded-lg shadow-lg border border-slate-700/50 text-sm font-medium text-slate-300 flex items-center gap-2">
-            <span className="text-indigo-400">Total Requests:</span> 
-            <span className="text-white font-bold">{requests.length}</span>
+
+          <div className="flex gap-3 items-center">
+            <button
+              onClick={() => {
+                setScannerMessage(null);
+                setIsScannerOpen(true);
+              }}
+              className="bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-lg font-medium transition shadow-lg shadow-emerald-500/20 border border-emerald-500/50"
+            >
+              Scan QR
+            </button>
+
+            <div className="bg-[#1e1e2d] px-4 py-2.5 rounded-lg shadow-lg border border-slate-700/50 text-sm font-medium text-slate-300 flex items-center gap-2">
+              <span className="text-indigo-400">Total Requests:</span>
+              <span className="text-white font-bold">{requests.length}</span>
+            </div>
           </div>
         </div>
 
@@ -193,6 +226,66 @@ export default function AdminEquipmentRequests() {
                 ))}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {/* QR SCANNER MODAL */}
+        {isScannerOpen && (
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-[#1e1e2d] rounded-2xl p-6 md:p-8 w-full max-w-xl shadow-2xl border border-slate-700">
+              <h2 className="text-xl font-bold mb-4 text-emerald-300 border-b border-slate-700/50 pb-4">Scan Student Pickup QR</h2>
+              <p className="text-sm text-slate-300 mb-4">
+                Ask the student to open their approved request QR pass and point it at your camera.
+              </p>
+
+              <div className="rounded-xl overflow-hidden border border-slate-700 bg-black">
+                <Scanner
+                  constraints={{ facingMode: 'environment' }}
+                  onScan={(detectedCodes: any) => {
+                    const firstCode = Array.isArray(detectedCodes) ? detectedCodes[0] : null;
+                    const rawValue = firstCode?.rawValue;
+                    if (rawValue) {
+                      processScannedQr(rawValue);
+                    }
+                  }}
+                  onError={(error: unknown) => {
+                    console.error('QR scan error:', error);
+                  }}
+                />
+              </div>
+
+              {scannerMessage && (
+                <div className="mt-4 text-sm rounded-lg px-4 py-3 border border-slate-600 bg-[#151521] text-slate-200">
+                  {scannerMessage}
+                </div>
+              )}
+
+              <div className="mt-4">
+                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+                  Manual QR Input (Fallback)
+                </label>
+                <input
+                  type="text"
+                  placeholder="Paste QR data string here"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      processScannedQr((e.target as HTMLInputElement).value);
+                    }
+                  }}
+                  className="w-full bg-[#151521] border border-slate-600 text-white rounded-lg px-4 py-2.5 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                />
+              </div>
+
+              <div className="flex justify-end mt-6">
+                <button
+                  type="button"
+                  onClick={() => setIsScannerOpen(false)}
+                  className="px-5 py-2.5 border border-slate-600 rounded-lg text-slate-300 font-medium hover:bg-slate-800 transition"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
           </div>
         )}
 

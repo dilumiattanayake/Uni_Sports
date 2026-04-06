@@ -19,6 +19,11 @@ interface BorrowRequest {
   status: string;
   notes?: string;
   createdAt: string;
+  qrPass?: {
+    qrImage?: string;
+    generatedAt?: string;
+    scannedAt?: string;
+  };
 }
 
 export default function StudentMyRequests() {
@@ -35,6 +40,7 @@ export default function StudentMyRequests() {
     lostQuantity: 0,
     issueNote: ''
   });
+  const [selectedQrRequest, setSelectedQrRequest] = useState<BorrowRequest | null>(null);
 
   useEffect(() => {
     fetchMyRequests();
@@ -73,7 +79,7 @@ export default function StudentMyRequests() {
     setSelectedRequest(request);
     // Auto-select the first item in the dropdown
     setIssueData({
-      itemId: request.items[0]?.equipment._id || '',
+      itemId: request.items[0]?._id || '',
       damagedQuantity: 0,
       lostQuantity: 0,
       issueNote: ''
@@ -178,21 +184,66 @@ export default function StudentMyRequests() {
                     </td>
                     <td className="px-6 py-5 whitespace-nowrap text-right">
                       {/* Only allow issue reporting if the items are currently in their possession */}
-                      {req.status === 'Borrowed' || req.status === 'Overdue' ? (
-                        <button 
-                          onClick={() => openIssueModal(req)}
-                          className="text-xs font-bold text-red-400 hover:text-white bg-red-500/10 px-4 py-2 rounded-lg border border-red-500/20 hover:bg-red-600 hover:border-red-500 transition shadow-sm"
-                        >
-                          Report Issue
-                        </button>
-                      ) : (
-                        <span className="text-slate-600 italic text-xs font-medium px-4">N/A</span>
-                      )}
+                      <div className="flex justify-end gap-2">
+                        {req.status === 'Approved' && req.qrPass?.qrImage && (
+                          <button
+                            onClick={() => setSelectedQrRequest(req)}
+                            className="text-xs font-bold text-emerald-300 hover:text-white bg-emerald-500/10 px-4 py-2 rounded-lg border border-emerald-500/20 hover:bg-emerald-600 hover:border-emerald-500 transition shadow-sm"
+                          >
+                            Show Pickup QR
+                          </button>
+                        )}
+
+                        {(req.status === 'Borrowed' || req.status === 'Overdue') ? (
+                          <button
+                            onClick={() => openIssueModal(req)}
+                            className="text-xs font-bold text-red-400 hover:text-white bg-red-500/10 px-4 py-2 rounded-lg border border-red-500/20 hover:bg-red-600 hover:border-red-500 transition shadow-sm"
+                          >
+                            Report Issue
+                          </button>
+                        ) : req.status !== 'Approved' ? (
+                          <span className="text-slate-600 italic text-xs font-medium px-4">N/A</span>
+                        ) : null}
+                      </div>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {/* PICKUP QR MODAL */}
+        {selectedQrRequest?.qrPass?.qrImage && (
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-[#1e1e2d] rounded-2xl p-6 md:p-8 w-full max-w-md shadow-2xl border border-slate-700">
+              <h2 className="text-xl font-bold mb-4 text-emerald-300 border-b border-slate-700/50 pb-4">Pickup QR Pass</h2>
+              <p className="text-sm text-slate-300 mb-4">
+                Show this QR code at the sports room checkout desk to collect your approved request.
+              </p>
+
+              <div className="bg-white rounded-xl p-4 flex justify-center">
+                <img
+                  src={selectedQrRequest.qrPass.qrImage}
+                  alt="Pickup QR Pass"
+                  className="w-64 h-64 object-contain"
+                />
+              </div>
+
+              <p className="text-xs text-slate-400 mt-4">
+                Request ID: <span className="text-slate-200">{selectedQrRequest._id}</span>
+              </p>
+
+              <div className="flex justify-end pt-4">
+                <button
+                  type="button"
+                  onClick={() => setSelectedQrRequest(null)}
+                  className="px-5 py-2.5 border border-slate-600 rounded-lg text-slate-300 font-medium hover:bg-slate-800 transition"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
           </div>
         )}
 
@@ -213,7 +264,7 @@ export default function StudentMyRequests() {
                     className="w-full bg-[#151521] border border-slate-600 text-white rounded-lg px-4 py-2.5 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 appearance-none cursor-pointer"
                   >
                     {selectedRequest.items.map((item) => (
-                      <option key={item.equipment._id} value={item.equipment._id}>
+                      <option key={item._id} value={item._id}>
                         {item.equipment.itemName} (Borrowed: {item.quantity})
                       </option>
                     ))}

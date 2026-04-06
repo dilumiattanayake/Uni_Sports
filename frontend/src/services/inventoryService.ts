@@ -29,5 +29,17 @@ export const inventoryService = {
       method: "PUT",
       body: JSON.stringify(data),
     });
+  },
+
+  joinWaitlist: async (id: string) => {
+    return fetchWithAuth(`/inventory/${id}/waitlist`, {
+      method: "POST",
+    });
+  },
+
+  leaveWaitlist: async (id: string) => {
+    return fetchWithAuth(`/inventory/${id}/waitlist`, {
+      method: "DELETE",
+    });
   }
 };

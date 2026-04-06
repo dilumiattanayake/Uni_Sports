@@ -7,7 +7,8 @@ const {
   getMyRequests, 
   getAllRequests, 
   updateRequestStatus, 
-  reportIssueOnRequest 
+  reportIssueOnRequest,
+  processQrPickup,
 } = require('../controllers/equipmentRequestController');
 
 // Import Middleware
@@ -18,7 +19,8 @@ const validate = require('../middleware/validator'); // Your validator middlewar
 const {
   createBorrowRequestSchema,
   updateRequestStatusSchema,
-  reportIssueOnRequestSchema
+  reportIssueOnRequestSchema,
+  processQrPickupSchema,
 } = require('../validators/equipmentRequestValidator');
 
 // Note: Order matters here. Put specific routes (like /my-requests) BEFORE dynamic ones (like /:id)
@@ -49,6 +51,14 @@ router.route('/:id/report-issue')
     authorize('student'), 
     validate(reportIssueOnRequestSchema), // Validation added
     reportIssueOnRequest
+  );
+
+router.route('/scan-qr')
+  .post(
+    protect,
+    authorize('admin'),
+    validate(processQrPickupSchema),
+    processQrPickup
   );
 
 module.exports = router;

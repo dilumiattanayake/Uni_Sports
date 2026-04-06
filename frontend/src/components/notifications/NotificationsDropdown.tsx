@@ -17,7 +17,7 @@ type ApiNotificationType =
 
 interface ApiNotification {
   _id: string;
-  type: ApiNotificationType;
+  type: string;
   title: string;
   message: string;
   isRead: boolean;
@@ -144,7 +144,7 @@ export function NotificationsDropdown() {
           ) : (
             <div className="divide-y divide-border">
               {notifications.map((notif) => {
-                const config = typeConfig[notif.type];
+                const config = typeConfig[notif.type as ApiNotificationType] ?? typeConfig.other;
                 const Icon = config.icon;
                 return (
                   <button

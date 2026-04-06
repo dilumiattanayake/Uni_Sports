@@ -52,9 +52,33 @@ const EquipmentRequestSchema = new mongoose.Schema({
   processedBy: {
     type: mongoose.Schema.ObjectId,
     ref: 'User' 
+  },
+  qrPass: {
+    token: {
+      type: String
+    },
+    qrImage: {
+      type: String
+    },
+    generatedAt: {
+      type: Date
+    },
+    scannedAt: {
+      type: Date
+    }
   }
 }, {
   timestamps: true
 });
+
+EquipmentRequestSchema.index(
+  { 'qrPass.token': 1 },
+  {
+    unique: true,
+    partialFilterExpression: {
+      'qrPass.token': { $type: 'string' }
+    }
+  }
+);
 
 module.exports = mongoose.model('EquipmentRequest', EquipmentRequestSchema);

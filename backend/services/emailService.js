@@ -115,9 +115,32 @@ const sendSessionCancellationEmail = async (studentEmail, studentName, sessionDe
   return await sendEmail({ to: studentEmail, subject, html, text });
 };
 
+/**
+ * Send inventory restock notification email
+ */
+const sendInventoryRestockedEmail = async (studentEmail, studentName, inventoryDetails) => {
+  const subject = `Back in Stock: ${inventoryDetails.itemName} - UniSports`;
+  const html = `
+    <h2>Great News! Item Back in Stock</h2>
+    <p>Hi ${studentName || 'Student'},</p>
+    <p>The item you asked to be notified about is now available again:</p>
+    <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px;">
+      <p><strong>Item:</strong> ${inventoryDetails.itemName}</p>
+      <p><strong>Currently Available:</strong> ${inventoryDetails.availableQuantity}</p>
+    </div>
+    <p>Please log in to UniSports to place your request before stock runs out.</p>
+    <p>Best regards,<br>UniSports Team</p>
+  `;
+
+  const text = `Back in Stock: ${inventoryDetails.itemName}\n\nHi ${studentName || 'Student'},\n\n${inventoryDetails.itemName} is now available again (${inventoryDetails.availableQuantity} in stock). Log in to UniSports to place your request.\n\nBest regards,\nUniSports Team`;
+
+  return await sendEmail({ to: studentEmail, subject, html, text });
+};
+
 module.exports = {
   sendEmail,
   sendSessionTimeChangeEmail,
   sendJoinRequestDecisionEmail,
   sendSessionCancellationEmail,
+  sendInventoryRestockedEmail,
 };

@@ -1,5 +1,36 @@
 const EquipmentRequest = require('../models/EquipmentRequest');
 const Inventory = require('../models/Inventory');
+const QRCode = require('qrcode');
+const crypto = require('crypto');
+const { processRestockAlertsForInventoryIds } = require('../services/inventoryAlertService');
+
+const generatePickupQrPass = async (request) => {
+  if (request.qrPass?.token && request.qrPass?.qrImage) {
+    return request.qrPass;
+  }
+
+  const token = crypto.randomBytes(24).toString('hex');
+  const qrPayload = JSON.stringify({
+    type: 'equipment_pickup',
+    requestId: request._id,
+    token,
+    studentId: request.student,
+  });
+
+  const qrImage = await QRCode.toDataURL(qrPayload, {
+    width: 280,
+    margin: 1,
+  });
+
+  request.qrPass = {
+    token,
+    qrImage,
+    generatedAt: new Date(),
+    scannedAt: null,
+  };
+
+  return request.qrPass;
+};
 
 // ==========================================
 // STUDENT CONTROLLERS
@@ -49,6 +80,7 @@ exports.getMyRequests = async (req, res, next) => {
   try {
     const requests = await EquipmentRequest.find({ student: req.user.id })
       .populate('items.equipment', 'itemName sport')
+      .select('+qrPass')
       .sort('-createdAt');
 
     res.status(200).json({ success: true, count: requests.length, data: requests });
@@ -70,6 +102,7 @@ exports.getAllRequests = async (req, res, next) => {
     const requests = await EquipmentRequest.find(req.query)
       .populate('student', 'name email')
       .populate('items.equipment', 'itemName location')
+      .select('+qrPass')
       .sort('expectedReturnDate');
 
     res.status(200).json({ success: true, count: requests.length, data: requests });
@@ -90,7 +123,9 @@ exports.updateRequestStatus = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'Request not found' });
     }
 
-    // LOGIC: If approving or marking as borrowed, we must deduct from inventory
+    let finalStatus = status;
+
+    // LOGIC: If approving or marking as borrowed from pending, deduct inventory
     if ((status === 'Approved' || status === 'Borrowed') && request.status === 'Pending') {
       for (const item of request.items) {
         const invItem = await Inventory.findById(item.equipment);
@@ -105,20 +140,12 @@ exports.updateRequestStatus = async (req, res, next) => {
       }
     }
 
-    // LOGIC: If marking as returned, we must add back to inventory
-    if (status === 'Returned' && (request.status === 'Borrowed' || request.status === 'Approved' || request.status === 'Overdue')) {
-      for (const item of request.items) {
-        const invItem = await Inventory.findById(item.equipment);
-        invItem.availableQuantity += item.quantity;
-        await invItem.save();
-      }
-      request.actualReturnDate = Date.now();
-    }
+    // LOGIC: If returning items, add back available stock and update damage/loss ledgers.
+    if ((status === 'Returned' || status === 'Returned with Issues') &&
+        ['Borrowed', 'Approved', 'Issue Reported', 'Overdue'].includes(request.status)) {
 
-    if ((status === 'Returned' || status === 'Returned with Issues') && 
-        ['Borrowed', 'Issue Reported', 'Overdue'].includes(request.status)) {
-      
       let hasDamageOrLoss = false;
+      const restockedInventoryIds = [];
 
       for (const item of request.items) {
         const invItem = await Inventory.findById(item.equipment);
@@ -143,21 +170,89 @@ exports.updateRequestStatus = async (req, res, next) => {
         }
 
         await invItem.save();
+        restockedInventoryIds.push(invItem._id);
       }
 
       // Force status to "Returned with Issues" if damages were logged, regardless of what admin sent
-      request.status = hasDamageOrLoss ? 'Returned with Issues' : 'Returned';
+      finalStatus = hasDamageOrLoss ? 'Returned with Issues' : 'Returned';
       request.actualReturnDate = Date.now();
+
+      await processRestockAlertsForInventoryIds(restockedInventoryIds);
+    }
+
+    if (status === 'Approved') {
+      await generatePickupQrPass(request);
     }
 
     // Update the request document
-    request.status = status;
+    request.status = finalStatus;
     request.processedBy = req.user.id;
     if (notes) request.notes = notes;
 
     await request.save();
 
     res.status(200).json({ success: true, data: request });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Process student pickup from QR pass scan
+// @route   POST /api/equipment-requests/scan-qr
+// @access  Private (Admin)
+exports.processQrPickup = async (req, res, next) => {
+  try {
+    const { qrData } = req.body;
+
+    if (!qrData || typeof qrData !== 'string') {
+      return res.status(400).json({ success: false, message: 'QR data is required' });
+    }
+
+    let requestId;
+    let token;
+
+    try {
+      const parsed = JSON.parse(qrData);
+      requestId = parsed.requestId;
+      token = parsed.token;
+    } catch (error) {
+      token = qrData;
+    }
+
+    if (!token) {
+      return res.status(400).json({ success: false, message: 'Invalid QR payload' });
+    }
+
+    const query = requestId
+      ? { _id: requestId, 'qrPass.token': token }
+      : { 'qrPass.token': token };
+
+    const request = await EquipmentRequest.findOne(query)
+      .populate('student', 'name email')
+      .populate('items.equipment', 'itemName location');
+
+    if (!request) {
+      return res.status(404).json({ success: false, message: 'No matching request found for this QR code.' });
+    }
+
+    if (request.status !== 'Approved') {
+      return res.status(400).json({
+        success: false,
+        message: `This request cannot be checked out because its current status is ${request.status}.`,
+        data: request,
+      });
+    }
+
+    request.status = 'Borrowed';
+    request.processedBy = req.user.id;
+    request.qrPass.scannedAt = new Date();
+    await request.save();
+
+    return res.status(200).json({
+      success: true,
+      message: 'QR scanned successfully. Request marked as Borrowed.',
+      data: request,
+    });
   } catch (error) {
     next(error);
   }

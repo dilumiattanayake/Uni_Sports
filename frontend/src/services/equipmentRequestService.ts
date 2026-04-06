@@ -29,5 +29,12 @@ export const equipmentRequestService = {
       method: "PUT",
       body: JSON.stringify(data),
     });
+  },
+
+  processQrPickup: async (qrData: string) => {
+    return fetchWithAuth(`/equipment-requests/scan-qr`, {
+      method: 'POST',
+      body: JSON.stringify({ qrData }),
+    });
   }
 };

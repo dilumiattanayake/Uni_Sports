@@ -8,7 +8,8 @@ const {
   createInventory, 
   updateInventory, 
   deleteInventory, 
-  reportDamageOrLoss 
+  joinInventoryWaitlist,
+  leaveInventoryWaitlist,
 } = require('../controllers/inventoryController');
 
 // Import Middleware
@@ -44,4 +45,9 @@ router.route('/:id')
     updateInventory
   )
   .delete(protect, authorize('admin'), deleteInventory);
+
+router.route('/:id/waitlist')
+  .post(protect, authorize('student'), joinInventoryWaitlist)
+  .delete(protect, authorize('student'), leaveInventoryWaitlist);
+
 module.exports = router;

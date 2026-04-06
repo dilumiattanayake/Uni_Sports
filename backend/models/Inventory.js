@@ -51,10 +51,23 @@ const InventorySchema = new mongoose.Schema({
   lastUpdatedBy: {
     type: mongoose.Schema.ObjectId,
     ref: 'User'
-  }
+  },
+  waitlist: [{
+    student: {
+      type: mongoose.Schema.ObjectId,
+      ref: 'User',
+      required: true
+    },
+    joinedAt: {
+      type: Date,
+      default: Date.now
+    }
+  }]
 }, {
   timestamps: true
 });
+
+InventorySchema.index({ 'waitlist.student': 1 });
 
 InventorySchema.pre('save', function(next) {
   if (this.availableQuantity <= 0) {

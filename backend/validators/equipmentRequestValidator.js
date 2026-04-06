@@ -17,10 +17,14 @@ const createBorrowRequestSchema = z.object({
 });
 
 const updateRequestStatusSchema = z.object({
-  status: z.enum(['Approved', 'Rejected', 'Borrowed', 'Returned', 'Overdue'], {
+  status: z.enum(['Approved', 'Rejected', 'Borrowed', 'Returned', 'Returned with Issues', 'Overdue'], {
     errorMap: () => ({ message: 'Invalid status update' })
   }),
   notes: z.string().optional()
+});
+
+const processQrPickupSchema = z.object({
+  qrData: z.string().min(1, 'QR data is required')
 });
 
 const reportIssueOnRequestSchema = z.object({
@@ -35,5 +39,6 @@ const reportIssueOnRequestSchema = z.object({
 module.exports = {
   createBorrowRequestSchema,
   updateRequestStatusSchema,
-  reportIssueOnRequestSchema
+  reportIssueOnRequestSchema,
+  processQrPickupSchema,
 };

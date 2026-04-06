@@ -217,13 +217,14 @@ export default function AdminInventory() {
                 <th className="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Sport / Location</th>
                 <th className="px-6 py-4 text-center text-xs font-bold text-slate-400 uppercase tracking-wider">Total</th>
                 <th className="px-6 py-4 text-center text-xs font-bold text-slate-400 uppercase tracking-wider">Available</th>
+                <th className="px-6 py-4 text-center text-xs font-bold text-slate-400 uppercase tracking-wider">Waitlisted</th>
                 <th className="px-6 py-4 text-center text-xs font-bold text-slate-400 uppercase tracking-wider">Status</th>
                 <th className="px-6 py-4 text-right text-xs font-bold text-slate-400 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-700/50 bg-[#1e1e2d]">
               {inventory.length === 0 ? (
-                  <tr><td colSpan={6} className="px-6 py-12 text-center text-slate-400">No equipment found.</td></tr>            
+                  <tr><td colSpan={7} className="px-6 py-12 text-center text-slate-400">No equipment found.</td></tr>
               ) : (
                 inventory.map((item: any) => (
                   <tr key={item._id} className="hover:bg-[#151521]/50 transition duration-200">
@@ -252,6 +253,9 @@ export default function AdminInventory() {
                       <span className={`${item.availableQuantity === 0 ? 'text-red-400' : 'text-green-400'}`}>
                         {item.availableQuantity}
                       </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-bold text-amber-300">
+                      {item.waitlistCount || 0}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center">
                       <span className={`px-3 py-1 inline-flex text-xs font-bold uppercase tracking-wide rounded-full border ${

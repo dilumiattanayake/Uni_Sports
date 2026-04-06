@@ -11,8 +11,18 @@ interface CartItem {
   maxAvailable: number;
 }
 
+interface InventoryItem {
+  _id: string;
+  itemName: string;
+  image?: string;
+  sport?: { name?: string };
+  availableQuantity: number;
+  waitlistCount?: number;
+  isWaitlistedByMe?: boolean;
+}
+
 export default function StudentInventory() {
-  const [inventory, setInventory] = useState<any[]>([]);
+  const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -40,6 +50,20 @@ export default function StudentInventory() {
       setError(err.message || 'Failed to fetch inventory');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleWaitlistToggle = async (item: InventoryItem) => {
+    try {
+      if (item.isWaitlistedByMe) {
+        await inventoryService.leaveWaitlist(item._id);
+      } else {
+        await inventoryService.joinWaitlist(item._id);
+      }
+
+      await fetchInventory();
+    } catch (err: any) {
+      alert(err.message || 'Failed to update waitlist.');
     }
   };
 
@@ -186,17 +210,30 @@ export default function StudentInventory() {
                 <p className="text-sm font-semibold text-indigo-400 mb-4">{item.sport?.name || 'General Equipment'}</p>
                 
                 <div className="mt-auto">
-                  <button 
-                    onClick={() => addToCart(item)}
-                    disabled={item.availableQuantity === 0}
-                    className={`w-full py-2.5 rounded-lg font-bold text-sm transition ${
-                      item.availableQuantity === 0 
-                        ? 'bg-[#2a2d3d] text-slate-500 cursor-not-allowed' 
-                        : 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 hover:bg-indigo-600 hover:text-white hover:border-indigo-500 shadow-sm'
-                    }`}
-                  >
-                    {item.availableQuantity === 0 ? 'Unavailable' : 'Add to Request'}
-                  </button>
+                  {item.availableQuantity === 0 ? (
+                    <>
+                      <button
+                        onClick={() => handleWaitlistToggle(item)}
+                        className={`w-full py-2.5 rounded-lg font-bold text-sm transition ${
+                          item.isWaitlistedByMe
+                            ? 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 hover:bg-emerald-600 hover:text-white'
+                            : 'bg-amber-500/10 text-amber-300 border border-amber-500/20 hover:bg-amber-600 hover:text-white'
+                        }`}
+                      >
+                        {item.isWaitlistedByMe ? 'On Waitlist (Click to Leave)' : 'Notify Me When Available'}
+                      </button>
+                      <p className="mt-2 text-xs text-slate-400">
+                        {item.waitlistCount || 0} student{(item.waitlistCount || 0) === 1 ? '' : 's'} waiting
+                      </p>
+                    </>
+                  ) : (
+                    <button
+                      onClick={() => addToCart(item)}
+                      className="w-full py-2.5 rounded-lg font-bold text-sm transition bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 hover:bg-indigo-600 hover:text-white hover:border-indigo-500 shadow-sm"
+                    >
+                      Add to Request
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
