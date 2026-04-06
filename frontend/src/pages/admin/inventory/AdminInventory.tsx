@@ -1,61 +1,91 @@
 import React, { useState, useEffect } from 'react';
 import { inventoryService } from '../../../services/inventoryService';
+import { locationService } from '../../../services/locationService';
+import { sportService } from '../../../services/sportService';
 import { DashboardLayout } from "@/components/DashboardLayout";
 
 export default function AdminInventory() {
   const [inventory, setInventory] = useState([]);
+  
+  // State for dropdowns
+  const [sportsList, setSportsList] = useState<any[]>([]);
+  const [locationsList, setLocationsList] = useState<any[]>([]);
+  
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   
   // Modal State
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   
-  // Form State
+  // Form State & Validation State
+  const [formErrors, setFormErrors] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     itemName: '',
     sport: '', 
     location: '', 
     totalQuantity: 0,
-    image: null
+    originalQuantity: 0, // NEW: Track this to prevent decreasing quantity on edit
+    image: null as File | null
   });
 
-  // Fetch data on component mount
+  // Fetch all required data on component mount
   useEffect(() => {
-    fetchInventory();
+    fetchAllData();
   }, []);
 
-  const fetchInventory = async () => {
+  const fetchAllData = async () => {
     try {
       setLoading(true);
-      const response = await inventoryService.getAll();
-      setInventory(response.data);
+      const [inventoryRes, sportsRes, locationsRes] = await Promise.all([
+        inventoryService.getAll(),
+        sportService.getAll(),
+        locationService.getAll()
+      ]);
+      
+      setInventory(inventoryRes.data || inventoryRes);
+      setSportsList(sportsRes.data || sportsRes);
+      setLocationsList(locationsRes.data || locationsRes);
       setError(null);
     } catch (err: any) {
-      setError(err.message || 'Failed to fetch inventory');
+      setError(err.message || 'Failed to fetch inventory and related data');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const fetchInventoryOnly = async () => {
+    try {
+      const response = await inventoryService.getAll();
+      setInventory(response.data || response);
+    } catch (err: any) {
+      console.error('Failed to refresh inventory:', err);
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+    // Clear errors when user starts typing again
+    if (formErrors.length > 0) setFormErrors([]);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      setFormData({ ...formData, image: e.target.files[0] as any });
+      setFormData({ ...formData, image: e.target.files[0] });
+      if (formErrors.length > 0) setFormErrors([]);
     }
   };
 
   // Open Modal for Editing
   const openEditModal = (item: any) => {
+    setFormErrors([]);
     setFormData({
       itemName: item.itemName,
       sport: item.sport?._id || '', 
       location: item.location?._id || '', 
       totalQuantity: item.totalQuantity,
+      originalQuantity: item.totalQuantity, // Store original to validate later
       image: null 
     });
     setEditingId(item._id);
@@ -64,17 +94,64 @@ export default function AdminInventory() {
 
   // Reset form helper
   const resetForm = () => {
-    setFormData({ itemName: '', sport: '', location: '', totalQuantity: 0, image: null });
+    setFormErrors([]);
+    setFormData({ itemName: '', sport: '', location: '', totalQuantity: 0, originalQuantity: 0, image: null });
     setEditingId(null);
     setIsAddModalOpen(false);
+  };
+
+  // ==========================================
+  // FRONTEND VALIDATION LOGIC
+  // ==========================================
+  const validateForm = () => {
+    const errors: string[] = [];
+
+    // 1. Item Name Validation
+    if (!formData.itemName || formData.itemName.trim().length < 2) {
+      errors.push("Item Name must be at least 2 characters long.");
+    }
+
+    // 2. Dropdown Validations
+    if (!formData.sport) errors.push("Please select a Sport.");
+    if (!formData.location) errors.push("Please select a Location.");
+
+    // 3. Quantity Format Validation
+    const qty = Number(formData.totalQuantity);
+    if (!qty || qty < 1 || !Number.isInteger(qty)) {
+      errors.push("Total Quantity must be a positive whole number.");
+    }
+
+    // 4. Update-Specific Validation (Cannot decrease total quantity here)
+    if (editingId && qty < formData.originalQuantity) {
+      errors.push(`Cannot decrease stock below original (${formData.originalQuantity}). Use damage/loss reporting instead.`);
+    }
+
+    // 5 & 6. Image File Validation (Type and Size)
+    if (formData.image) {
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+      if (!allowedTypes.includes(formData.image.type)) {
+        errors.push("Image must be a JPEG, PNG, or WEBP file.");
+      }
+      // 5MB Limit check (5 * 1024 * 1024 bytes)
+      if (formData.image.size > 5242880) {
+        errors.push("Image file size must be less than 5MB.");
+      }
+    }
+
+    setFormErrors(errors);
+    return errors.length === 0; // Returns true if form is valid
   };
 
   // Submit Equipment (Handles BOTH Add and Edit)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Run Validation before touching the API
+    if (!validateForm()) return;
+
     try {
       const submitData = new FormData();
-      submitData.append('itemName', formData.itemName);
+      submitData.append('itemName', formData.itemName.trim());
       submitData.append('sport', formData.sport);
       submitData.append('location', formData.location);
       submitData.append('totalQuantity', String(formData.totalQuantity));
@@ -90,10 +167,11 @@ export default function AdminInventory() {
       }
       
       resetForm();
-      fetchInventory(); 
+      fetchInventoryOnly(); 
       
     } catch (err: any) {
-      alert(err.message || 'Failed to save equipment');
+      // Catch any backend errors that slip through
+      setFormErrors([err.message || 'Failed to save equipment.']);
     }
   };
 
@@ -102,7 +180,7 @@ export default function AdminInventory() {
     if (window.confirm('Are you sure you want to delete this item?')) {
       try {
         await inventoryService.delete(id);
-        fetchInventory(); 
+        fetchInventoryOnly(); 
       } catch (err: any) {
         alert(err.message || 'Failed to delete item');
       }
@@ -212,13 +290,25 @@ export default function AdminInventory() {
               <h2 className="text-2xl font-bold mb-6 text-white border-b border-slate-700/50 pb-4">
                 {editingId ? 'Edit Equipment' : 'Add New Equipment'}
               </h2>
+
+              {/* Validation Error Display */}
+              {formErrors.length > 0 && (
+                <div className="mb-6 bg-red-500/10 border border-red-500/50 rounded-lg p-4">
+                  <h3 className="text-red-400 font-bold text-sm mb-2">Please fix the following errors:</h3>
+                  <ul className="list-disc list-inside text-red-300 text-xs space-y-1">
+                    {formErrors.map((err, index) => (
+                      <li key={index}>{err}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
               
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-4" noValidate>
                 
                 <div>
                   <label className="block text-sm font-bold text-slate-300 mb-2">Item Name</label>
                   <input 
-                    type="text" name="itemName" required
+                    type="text" name="itemName" 
                     value={formData.itemName} onChange={handleInputChange}
                     className="w-full bg-[#151521] border border-slate-600 text-white placeholder-slate-500 rounded-lg px-4 py-2.5 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                     placeholder="e.g. Cricket Bat"
@@ -226,29 +316,37 @@ export default function AdminInventory() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-bold text-slate-300 mb-2">Sport ID</label>
-                  <input 
-                    type="text" name="sport" required
+                  <label className="block text-sm font-bold text-slate-300 mb-2">Sport</label>
+                  <select 
+                    name="sport" 
                     value={formData.sport} onChange={handleInputChange}
-                    className="w-full bg-[#151521] border border-slate-600 text-white placeholder-slate-500 rounded-lg px-4 py-2.5 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-                    placeholder="Paste Sport Object ID here"
-                  />
+                    className="w-full bg-[#151521] border border-slate-600 text-white rounded-lg px-4 py-2.5 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 appearance-none cursor-pointer"
+                  >
+                    <option value="" disabled>Select a Sport</option>
+                    {sportsList.map((sport) => (
+                      <option key={sport._id} value={sport._id}>{sport.name}</option>
+                    ))}
+                  </select>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-bold text-slate-300 mb-2">Location ID</label>
-                  <input 
-                    type="text" name="location" required
+                  <label className="block text-sm font-bold text-slate-300 mb-2">Location</label>
+                  <select 
+                    name="location" 
                     value={formData.location} onChange={handleInputChange}
-                    className="w-full bg-[#151521] border border-slate-600 text-white placeholder-slate-500 rounded-lg px-4 py-2.5 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-                    placeholder="Paste Location Object ID here"
-                  />
+                    className="w-full bg-[#151521] border border-slate-600 text-white rounded-lg px-4 py-2.5 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 appearance-none cursor-pointer"
+                  >
+                    <option value="" disabled>Select a Location</option>
+                    {locationsList.map((loc) => (
+                      <option key={loc._id} value={loc._id}>{loc.name}</option>
+                    ))}
+                  </select>
                 </div>
 
                 <div>
                   <label className="block text-sm font-bold text-slate-300 mb-2">Total Quantity</label>
                   <input 
-                    type="number" name="totalQuantity" min="1" required
+                    type="number" name="totalQuantity" 
                     value={formData.totalQuantity} onChange={handleInputChange}
                     className="w-full bg-[#151521] border border-slate-600 text-white rounded-lg px-4 py-2.5 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                   />
@@ -256,13 +354,14 @@ export default function AdminInventory() {
 
                 <div className="mb-6">
                   <label className="block text-sm font-bold text-slate-300 mb-2">
-                    {editingId ? 'Update Image (Leave blank to keep current)' : 'Equipment Image'}
+                    {editingId ? 'Update Image (Optional)' : 'Equipment Image'}
                   </label>
                   <input 
-                    type="file" accept="image/*"
+                    type="file" accept="image/jpeg, image/png, image/webp"
                     onChange={handleFileChange}
                     className="w-full text-sm text-slate-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-indigo-500/10 file:text-indigo-400 hover:file:bg-indigo-500/20 hover:file:text-indigo-300 outline-none transition file:cursor-pointer"
                   />
+                  <p className="text-xs text-slate-500 mt-2">Max size: 5MB. Formats: JPG, PNG, WEBP.</p>
                 </div>
 
                 <div className="flex justify-end space-x-3 pt-4 border-t border-slate-700/50">

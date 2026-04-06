@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { merchandiseService } from '../../../services/merchandiseService';
+import { sportService } from '../../../services/sportService';
 import { DashboardLayout } from "@/components/DashboardLayout";
 
 interface Variant {
@@ -9,12 +10,15 @@ interface Variant {
 
 export default function AdminMerchandise() {
   const [merchandise, setMerchandise] = useState<any[]>([]);
+  const [sportsList, setSportsList] = useState<any[]>([]); 
+  
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  // Modal State
+  // Modal & Validation State
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null); 
+  const [formErrors, setFormErrors] = useState<string[]>([]);
   
   // Form State
   const [formData, setFormData] = useState({
@@ -28,31 +32,48 @@ export default function AdminMerchandise() {
   const [variants, setVariants] = useState<Variant[]>([{ size: 'M', stockQuantity: 0 }]);
   const availableSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'N/A'];
 
+  // Fetch all required data on component mount
   useEffect(() => {
-    fetchMerchandise();
+    fetchAllData();
   }, []);
 
-  const fetchMerchandise = async () => {
+  const fetchAllData = async () => {
     try {
       setLoading(true);
-      const response = await merchandiseService.getAll();
-      setMerchandise(response.data);
+      const [merchRes, sportsRes] = await Promise.all([
+        merchandiseService.getAll(),
+        sportService.getAll()
+      ]);
+      
+      setMerchandise(merchRes.data || merchRes);
+      setSportsList(sportsRes.data || sportsRes);
       setError(null);
     } catch (err: any) {
-      setError(err.message || 'Failed to fetch merchandise');
+      setError(err.message || 'Failed to fetch merchandise and sports data');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchMerchandiseOnly = async () => {
+    try {
+      const response = await merchandiseService.getAll();
+      setMerchandise(response.data || response);
+    } catch (err: any) {
+      console.error('Failed to refresh merchandise:', err);
     }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+    if (formErrors.length > 0) setFormErrors([]);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       setFormData({ ...formData, image: e.target.files[0] });
+      if (formErrors.length > 0) setFormErrors([]);
     }
   };
 
@@ -60,18 +81,22 @@ export default function AdminMerchandise() {
     const updatedVariants = [...variants];
     updatedVariants[index] = { ...updatedVariants[index], [field]: value };
     setVariants(updatedVariants);
+    if (formErrors.length > 0) setFormErrors([]);
   };
 
   const addVariant = () => {
     setVariants([...variants, { size: 'L', stockQuantity: 0 }]);
+    if (formErrors.length > 0) setFormErrors([]);
   };
 
   const removeVariant = (index: number) => {
     setVariants(variants.filter((_, i) => i !== index));
+    if (formErrors.length > 0) setFormErrors([]);
   };
 
   // Open Modal for Editing an existing item
   const openEditModal = (item: any) => {
+    setFormErrors([]);
     setFormData({
       itemName: item.itemName,
       sport: item.sport?._id || '', 
@@ -80,26 +105,85 @@ export default function AdminMerchandise() {
       image: null 
     });
     
-    // Map existing variants into state
     setVariants(item.variants.map((v: any) => ({ size: v.size, stockQuantity: v.stockQuantity })));
-    
     setEditingId(item._id);
     setIsAddModalOpen(true);
   };
 
   // Reset form helper
   const resetForm = () => {
+    setFormErrors([]);
     setFormData({ itemName: '', sport: '', category: 'Apparel', price: 0, image: null });
     setVariants([{ size: 'M', stockQuantity: 0 }]);
     setEditingId(null);
     setIsAddModalOpen(false);
   };
 
+  // ==========================================
+  // FRONTEND VALIDATION LOGIC
+  // ==========================================
+  const validateForm = () => {
+    const errors: string[] = [];
+
+    // 1. Text & Dropdown Validation
+    if (!formData.itemName || formData.itemName.trim().length < 2) {
+      errors.push("Item Name must be at least 2 characters long.");
+    }
+    if (!formData.sport) {
+      errors.push("Please select a Sport.");
+    }
+
+    // 2. Pricing Validation
+    const price = Number(formData.price);
+    if (isNaN(price) || price < 0) {
+      errors.push("Price cannot be a negative number.");
+    }
+
+    // 3. Variant Validations
+    if (variants.length === 0) {
+      errors.push("You must add at least one size/stock variant.");
+    } else {
+      const selectedSizes = new Set();
+      
+      variants.forEach((v) => {
+        // Check for duplicates
+        if (selectedSizes.has(v.size)) {
+          errors.push(`Duplicate size selected: ${v.size}. Each size must be listed only once.`);
+        }
+        selectedSizes.add(v.size);
+
+        // Check stock validity
+        const stock = Number(v.stockQuantity);
+        if (isNaN(stock) || stock < 0 || !Number.isInteger(stock)) {
+          errors.push(`Stock quantity for size ${v.size} must be a whole number (0 or greater).`);
+        }
+      });
+    }
+
+    // 4. Image Validation
+    if (formData.image) {
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+      if (!allowedTypes.includes(formData.image.type)) {
+        errors.push("Image must be a JPEG, PNG, or WEBP file.");
+      }
+      if (formData.image.size > 5242880) { // 5MB
+        errors.push("Image file size must be less than 5MB.");
+      }
+    }
+
+    setFormErrors(errors);
+    return errors.length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Run Validation
+    if (!validateForm()) return;
+
     try {
       const submitData = new FormData();
-      submitData.append('itemName', formData.itemName);
+      submitData.append('itemName', formData.itemName.trim());
       submitData.append('sport', formData.sport);
       submitData.append('category', formData.category);
       submitData.append('price', String(formData.price));
@@ -109,7 +193,6 @@ export default function AdminMerchandise() {
         submitData.append('image', formData.image);
       }
 
-      // Check if updating or creating
       if (editingId) {
         await merchandiseService.update(editingId, submitData);
       } else {
@@ -117,19 +200,18 @@ export default function AdminMerchandise() {
       }
       
       resetForm();
-      fetchMerchandise();
+      fetchMerchandiseOnly();
       
     } catch (err: any) {
-      alert(err.message || 'Failed to save merchandise.');
+      setFormErrors([err.message || 'Failed to save merchandise.']);
     }
   };
 
-  // Delete Merchandise
   const handleDelete = async (id: string) => {
     if (window.confirm('Are you sure you want to delete this item?')) {
       try {
         await merchandiseService.delete(id); 
-        fetchMerchandise(); 
+        fetchMerchandiseOnly(); 
       } catch (err: any) {
         alert(err.message || 'Failed to delete item');
       }
@@ -231,21 +313,42 @@ export default function AdminMerchandise() {
         {isAddModalOpen && (
           <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
             <div className="bg-[#1e1e2d] rounded-2xl p-6 md:p-8 w-full max-w-2xl shadow-2xl border border-slate-700 max-h-[90vh] overflow-y-auto">
-              {/* Dynamic Title */}
+              
               <h2 className="text-2xl font-bold mb-6 text-white border-b border-slate-700/50 pb-4">
                 {editingId ? 'Edit Merchandise' : 'Add New Merchandise'}
               </h2>
+
+              {/* Validation Error Display */}
+              {formErrors.length > 0 && (
+                <div className="mb-6 bg-red-500/10 border border-red-500/50 rounded-lg p-4">
+                  <h3 className="text-red-400 font-bold text-sm mb-2">Please fix the following errors:</h3>
+                  <ul className="list-disc list-inside text-red-300 text-xs space-y-1">
+                    {formErrors.map((err, index) => (
+                      <li key={index}>{err}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
               
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-4" noValidate>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                   <div>
                     <label className="block text-sm font-bold text-slate-300 mb-2">Item Name</label>
-                    <input type="text" name="itemName" required value={formData.itemName} onChange={handleInputChange} className="w-full bg-[#151521] border border-slate-600 text-white placeholder-slate-500 rounded-lg px-4 py-2.5 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500" />
+                    <input type="text" name="itemName" value={formData.itemName} onChange={handleInputChange} className="w-full bg-[#151521] border border-slate-600 text-white placeholder-slate-500 rounded-lg px-4 py-2.5 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500" />
                   </div>
                   <div>
-                    <label className="block text-sm font-bold text-slate-300 mb-2">Sport ID</label>
-                    <input type="text" name="sport" required value={formData.sport} onChange={handleInputChange} className="w-full bg-[#151521] border border-slate-600 text-white placeholder-slate-500 rounded-lg px-4 py-2.5 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500" placeholder="Paste Sport Object ID here" />
+                    <label className="block text-sm font-bold text-slate-300 mb-2">Sport</label>
+                    <select 
+                      name="sport" 
+                      value={formData.sport} onChange={handleInputChange} 
+                      className="w-full bg-[#151521] border border-slate-600 text-white rounded-lg px-4 py-2.5 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 appearance-none cursor-pointer"
+                    >
+                      <option value="" disabled>Select a Sport</option>
+                      {sportsList.map((sport) => (
+                        <option key={sport._id} value={sport._id}>{sport.name}</option>
+                      ))}
+                    </select>
                   </div>
                 </div>
 
@@ -262,7 +365,7 @@ export default function AdminMerchandise() {
                   </div>
                   <div>
                     <label className="block text-sm font-bold text-slate-300 mb-2">Price (LKR)</label>
-                    <input type="number" name="price" min="0" required value={formData.price} onChange={handleInputChange} className="w-full bg-[#151521] border border-slate-600 text-white placeholder-slate-500 rounded-lg px-4 py-2.5 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500" />
+                    <input type="number" name="price" min="0" value={formData.price} onChange={handleInputChange} className="w-full bg-[#151521] border border-slate-600 text-white placeholder-slate-500 rounded-lg px-4 py-2.5 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500" />
                   </div>
                 </div>
 
@@ -285,7 +388,7 @@ export default function AdminMerchandise() {
                           {availableSizes.map(size => <option key={size} value={size}>{size}</option>)}
                         </select>
                         <input 
-                          type="number" min="0" required placeholder="Stock"
+                          type="number" min="0" placeholder="Stock"
                           value={variant.stockQuantity} 
                           onChange={(e) => handleVariantChange(index, 'stockQuantity', Number(e.target.value))}
                           className="w-1/3 bg-[#1e1e2d] border border-slate-600 text-white rounded-lg px-3 py-2 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
@@ -300,9 +403,10 @@ export default function AdminMerchandise() {
 
                 <div className="mb-8">
                   <label className="block text-sm font-bold text-slate-300 mb-2">
-                    {editingId ? 'Update Image (Leave blank to keep current)' : 'Merchandise Image'}
+                    {editingId ? 'Update Image (Optional)' : 'Merchandise Image'}
                   </label>
-                  <input type="file" accept="image/*" onChange={handleFileChange} className="w-full text-sm text-slate-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-indigo-500/10 file:text-indigo-400 hover:file:bg-indigo-500/20 hover:file:text-indigo-300 outline-none transition file:cursor-pointer" />
+                  <input type="file" accept="image/jpeg, image/png, image/webp" onChange={handleFileChange} className="w-full text-sm text-slate-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-indigo-500/10 file:text-indigo-400 hover:file:bg-indigo-500/20 hover:file:text-indigo-300 outline-none transition file:cursor-pointer" />
+                  <p className="text-xs text-slate-500 mt-2">Max size: 5MB. Formats: JPG, PNG, WEBP.</p>
                 </div>
 
                 <div className="flex justify-end space-x-3 pt-4 border-t border-slate-700/50">

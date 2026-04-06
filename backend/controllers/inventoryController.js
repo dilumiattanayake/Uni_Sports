@@ -52,10 +52,14 @@ exports.getInventoryById = async (req, res, next) => {
 // @access  Private (Admin Only)
 exports.createInventory = async (req, res, next) => {
   try {
-    // Add user to req.body so we know who created/updated it
     req.body.lastUpdatedBy = req.user.id;
 
-    // The image URL will be saved here if it's included in req.body
+    // FIX: Catch the file uploaded by Multer
+    if (req.file) {
+      // Create the path that your React frontend is expecting
+      req.body.image = `/uploads/${req.file.filename}`;
+    }
+
     const item = await Inventory.create(req.body);
 
     res.status(201).json({
@@ -66,7 +70,6 @@ exports.createInventory = async (req, res, next) => {
     next(error);
   }
 };
-
 // @desc    Update equipment (Add stock or edit details)
 // @route   PUT /api/inventory/:id
 // @access  Private (Admin Only)
@@ -78,7 +81,6 @@ exports.updateInventory = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'Equipment not found' });
     }
 
-    // Handle Stock Addition Logic carefully
     if (req.body.totalQuantity && req.body.totalQuantity > item.totalQuantity) {
       const addedAmount = req.body.totalQuantity - item.totalQuantity;
       item.availableQuantity += addedAmount;
@@ -90,15 +92,17 @@ exports.updateInventory = async (req, res, next) => {
         });
     }
 
-    // Update other allowed fields
     if (req.body.itemName) item.itemName = req.body.itemName;
     if (req.body.location) item.location = req.body.location;
     if (req.body.sport) item.sport = req.body.sport;
-    if (req.body.image) item.image = req.body.image; // NEW: Allow image update
+    
+    // FIX: Update image if a new file was uploaded
+    if (req.file) {
+      item.image = `/uploads/${req.file.filename}`;
+    }
     
     item.lastUpdatedBy = req.user.id;
 
-    // Use .save() instead of findByIdAndUpdate so the pre('save') hook runs to update status
     await item.save();
 
     res.status(200).json({ success: true, data: item });
