@@ -19,7 +19,7 @@ import { Input } from "@/components/ui/input";
 
 interface Payment {
   _id: string;
-  user: { _id: string; name: string; email: string };
+  user?: { _id?: string; name?: string; email?: string };
   type: "event" | "item";
   amount: number;
   status: "pending" | "approved" | "rejected" | "paid" | "delivered";
@@ -113,8 +113,8 @@ export default function AdminPayments() {
   const formatDate = (date: string) => new Date(date).toLocaleDateString();
 
   const filtered = payments.filter(p => {
-    const matchesSearch = p.user.name.toLowerCase().includes(search.toLowerCase()) ||
-                         p.user.email.toLowerCase().includes(search.toLowerCase()) ||
+    const matchesSearch = p.user?.name?.toLowerCase().includes(search.toLowerCase()) ||
+                         p.user?.email?.toLowerCase().includes(search.toLowerCase()) ||
                          p._id.includes(search);
     const matchesStatus = !filterStatus || p.status === filterStatus;
     return matchesSearch && matchesStatus;
@@ -207,8 +207,8 @@ export default function AdminPayments() {
             <TableBody>
               {filtered.map((payment) => (
                 <TableRow key={payment._id} className="border-slate-700 hover:bg-slate-700/50">
-                  <TableCell className="text-slate-200">{payment.user.name}</TableCell>
-                  <TableCell className="text-slate-200">{payment.user.email}</TableCell>
+                  <TableCell className="text-slate-200">{payment.user?.name || "Unknown"}</TableCell>
+                  <TableCell className="text-slate-200">{payment.user?.email || "No email"}</TableCell>
                   <TableCell className="text-slate-200">
                     <Badge variant="outline" className="capitalize">{payment.type}</Badge>
                   </TableCell>
@@ -240,7 +240,7 @@ export default function AdminPayments() {
                           </DialogHeader>
                           <div className="space-y-4">
                             <div>
-                              <p className="text-sm font-medium text-slate-300">Student: {selectedPayment?.user.name}</p>
+                              <p className="text-sm font-medium text-slate-300">Student: {selectedPayment?.user?.name || "Unknown"}</p>
                               <p className="text-sm text-slate-400">Amount: {selectedPayment?.amount} LKR</p>
                             </div>
                             <div className="flex gap-2">
