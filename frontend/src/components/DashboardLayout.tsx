@@ -6,7 +6,13 @@ import { NotificationsDropdown } from "@/components/notifications/NotificationsD
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { user, role } = useAuth();
 
-  const roleLabel = role === "admin" ? "Admin" : role === "coach" ? "Coach" : "Student";
+  const roleLabel = role === "admin" ? "Admin" : role === "coach" ? "Coach" : role === "student" ? "Student" : "User";
+  const initials = user?.name
+    ? user.name
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+    : "U";
 
   return (
     <SidebarProvider defaultOpen={true}>
@@ -24,7 +30,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             <div className="flex items-center gap-2">
               <NotificationsDropdown />
               <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-display font-bold text-xs">
-                {user.name.split(" ").map(n => n[0]).join("")}
+                {initials}
               </div>
             </div>
           </header>
