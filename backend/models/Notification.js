@@ -19,6 +19,12 @@ const notificationSchema = new mongoose.Schema(
         'join_request_rejected',
         'session_cancelled',
         'new_session_available',
+        'coach_assigned_to_sport',
+        'location_booking_approved',
+        'location_booking_declined',
+        'location_booking_clash',
+        'location_booking_request_submitted',
+        'admin_location_booking_request',
         'other',
       ],
       required: true,
@@ -39,6 +45,10 @@ const notificationSchema = new mongoose.Schema(
     relatedSport: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Sport',
+    },
+    relatedLocationBookingRequest: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'LocationBookingRequest',
     },
     // Read status
     isRead: {

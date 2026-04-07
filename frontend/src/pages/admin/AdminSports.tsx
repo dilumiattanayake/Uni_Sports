@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Download, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import AdminSportCoachAssignment from "@/components/AdminSportCoachAssignment";
 
 interface SportData {
   _id: string;
@@ -28,6 +29,7 @@ export default function AdminSports() {
   const [editingSport, setEditingSport] = useState<SportData | null>(null);
   const [form, setForm] = useState({ name: "", description: "", category: "team", maxParticipants: 20 });
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<"sports" | "coaches">("sports");
 
   useEffect(() => {
     loadSports();
@@ -189,7 +191,35 @@ export default function AdminSports() {
       <div className="pointer-events-none absolute -left-24 -top-24 h-72 w-72 rounded-full bg-cyan-500/10 blur-3xl" />
       <div className="pointer-events-none absolute -right-24 top-28 h-72 w-72 rounded-full bg-indigo-500/10 blur-3xl" />
 
+      {/* Tab Switcher */}
       <div className="relative rounded-2xl border border-cyan-400/25 bg-gradient-to-br from-[#0f1e35] via-[#142844] to-[#1a2140] p-5 shadow-lg shadow-black/25">
+        <div className="flex gap-4">
+          <button
+            onClick={() => setActiveTab("sports")}
+            className={`px-4 py-2 rounded-lg font-medium transition-all ${
+              activeTab === "sports"
+                ? "bg-cyan-500 text-slate-950"
+                : "bg-slate-700/50 text-slate-200 hover:bg-slate-600/50"
+            }`}
+          >
+            📊 Manage Sports
+          </button>
+          <button
+            onClick={() => setActiveTab("coaches")}
+            className={`px-4 py-2 rounded-lg font-medium transition-all ${
+              activeTab === "coaches"
+                ? "bg-cyan-500 text-slate-950"
+                : "bg-slate-700/50 text-slate-200 hover:bg-slate-600/50"
+            }`}
+          >
+            👥 Assign Coaches
+          </button>
+        </div>
+      </div>
+
+      {/* Sports Management Tab */}
+      {activeTab === "sports" && (
+        <div className="relative rounded-2xl border border-cyan-400/25 bg-gradient-to-br from-[#0f1e35] via-[#142844] to-[#1a2140] p-5 shadow-lg shadow-black/25">
         <PageHeader title="Sports Management" description="Add, edit, and manage university sports programs">
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
@@ -302,14 +332,13 @@ export default function AdminSports() {
             <Download className="h-4 w-4" /> Export CSV
           </Button>
         </div>
-      </div>
 
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-cyan-200/80">Sports Showcase</h3>
-        <span className="text-xs text-slate-400">Hover cards for quick actions</span>
-      </div>
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-cyan-200/80">Sports Showcase</h3>
+          <span className="text-xs text-slate-400">Hover cards for quick actions</span>
+        </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {loading ? (
           <div className="col-span-full text-center text-muted-foreground py-8">Loading sports...</div>
         ) : filtered.length === 0 ? (
@@ -361,6 +390,18 @@ export default function AdminSports() {
           ))
         )}
       </div>
+        </div>
+      )}
+
+      {/* Coach Assignment Tab */}
+      {activeTab === "coaches" && (
+        <div className="relative rounded-2xl border border-indigo-400/25 bg-gradient-to-br from-[#0f1e35] via-[#142844] to-[#1a2140] p-5 shadow-lg shadow-black/25">
+          <AdminSportCoachAssignment 
+            token={localStorage.getItem("token") || ""} 
+            adminId={localStorage.getItem("userId") || ""}
+          />
+        </div>
+      )}
     </div>
   );
 }

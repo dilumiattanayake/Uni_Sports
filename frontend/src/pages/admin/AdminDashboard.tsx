@@ -4,15 +4,8 @@ import { toast } from "sonner";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  ArrowRight,
-  Boxes,
-  CalendarDays,
-  CreditCard,
-  Loader2,
-  Trophy,
-  Users,
-} from "lucide-react";
+import { ArrowRight, Boxes, CalendarDays, CreditCard, Loader2, Trophy, Users, MapPin } from "lucide-react";
+import AdminLocationBookingManagement from "@/components/AdminLocationBookingManagement";
 
 type Sport = {
   _id: string;
@@ -337,6 +330,20 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
+              <div className={panelTheme.summary}>
+                <div className="mb-6 flex items-center justify-between">
+                  <div>
+                    <h2 className="text-xl font-bold text-slate-100">6. Location Booking Requests</h2>
+                    <p className="mt-1 text-sm text-slate-300">Approve or decline coach location requests</p>
+                  </div>
+                  <Badge className="bg-blue-300/20 text-blue-100">Management</Badge>
+                </div>
+                <AdminLocationBookingManagement token={token} adminId="" />
+              </div>
+            </div>
+
+            {/* Payment Summary Section */}
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
               <div className={panelTheme.summary}>
                 <div className="mb-6 flex items-center justify-between">
                   <div>
