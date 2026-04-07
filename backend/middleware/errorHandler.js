@@ -32,7 +32,11 @@ const errorHandler = (err, req, res, next) => {
   // Mongoose duplicate key
   if (err.code === 11000) {
     const field = Object.keys(err.keyValue)[0];
-    const message = `Duplicate value for field: ${field}`;
+    const bookingSlotFields = ['location', 'date', 'startTime', 'endTime'];
+    const isBookingSlotDuplicate = bookingSlotFields.some((key) => key in (err.keyValue || {}));
+    const message = isBookingSlotDuplicate
+      ? 'This location is already booked for the selected date and time'
+      : `Duplicate value for field: ${field}`;
     error = new ErrorResponse(message, 400);
   }
 

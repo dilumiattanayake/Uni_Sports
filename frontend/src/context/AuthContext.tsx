@@ -6,6 +6,7 @@ const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:5001";
 interface AuthContextType {
   user: User | null;
   role: UserRole | null;
+  token: string | null;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string; role?: UserRole }>;
   logout: () => void;
   switchRole: (role: UserRole) => void;
@@ -20,6 +21,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
   const [role, setRole] = useState<UserRole | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -31,6 +33,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (storedToken && storedUser) {
       try {
         const parsedUser = JSON.parse(storedUser);
+        setToken(storedToken);
         setUser(parsedUser);
         setRole(parsedUser.role);
       } catch (e) {
@@ -132,8 +135,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const data = await response.json();
 
       if (response.ok) {
-        localStorage.setItem("token", data.data.token);
+        const newToken = data.data.token;
+        localStorage.setItem("token", newToken);
         localStorage.setItem("user", JSON.stringify(data.data.user));
+        setToken(newToken);
         setUser(data.data.user);
         setRole(data.data.user.role);
         return { success: true, role: data.data.user.role };
@@ -187,12 +192,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    setToken(null);
     setUser(null);
     setRole(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, role, login, logout, switchRole, loading, isLoading: loading, updateProfile, changePassword, deleteAccount }}>
+    <AuthContext.Provider value={{ user, role, token, login, logout, switchRole, loading, isLoading: loading, updateProfile, changePassword, deleteAccount }}>
       {!loading && children}
     </AuthContext.Provider>
   );

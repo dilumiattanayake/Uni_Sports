@@ -5,7 +5,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Bell, Check, CheckCheck, Info, AlertTriangle, CheckCircle2, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:5001";
+const API_BASE = '';
 
 type ApiNotificationType =
   | "session_time_change"
@@ -13,6 +13,12 @@ type ApiNotificationType =
   | "join_request_rejected"
   | "session_cancelled"
   | "new_session_available"
+  | "coach_assigned_to_sport"
+  | "location_booking_approved"
+  | "location_booking_declined"
+  | "location_booking_clash"
+  | "location_booking_request_submitted"
+  | "admin_location_booking_request"
   | "other";
 
 interface ApiNotification {
@@ -30,6 +36,12 @@ const typeConfig: Record<ApiNotificationType, { icon: typeof Info; className: st
   join_request_rejected: { icon: XCircle, className: "text-destructive bg-destructive/10" },
   session_cancelled: { icon: XCircle, className: "text-destructive bg-destructive/10" },
   new_session_available: { icon: Info, className: "text-info bg-info/10" },
+  coach_assigned_to_sport: { icon: CheckCircle2, className: "text-success bg-success/10" },
+  location_booking_approved: { icon: CheckCircle2, className: "text-success bg-success/10" },
+  location_booking_declined: { icon: XCircle, className: "text-destructive bg-destructive/10" },
+  location_booking_clash: { icon: AlertTriangle, className: "text-warning bg-warning/10" },
+  location_booking_request_submitted: { icon: Info, className: "text-info bg-info/10" },
+  admin_location_booking_request: { icon: AlertTriangle, className: "text-warning bg-warning/10" },
   other: { icon: Info, className: "text-info bg-info/10" },
 };
 
@@ -129,20 +141,20 @@ export function NotificationsDropdown() {
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 p-0" align="end" sideOffset={8}>
-        <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-          <h3 className="font-display font-bold text-sm">Notifications</h3>
+      <PopoverContent className="w-80 p-0 bg-white rounded-lg shadow-lg" align="end" sideOffset={8}>
+        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
+          <h3 className="font-display font-bold text-sm text-black">Notifications</h3>
           {unreadCount > 0 && (
-            <Button variant="ghost" size="sm" className="h-7 text-xs gap-1 text-muted-foreground hover:text-foreground" onClick={markAllAsRead}>
+            <Button variant="ghost" size="sm" className="h-7 text-xs gap-1 text-gray-600 hover:text-black" onClick={markAllAsRead}>
               <CheckCheck className="h-3.5 w-3.5" /> Mark all read
             </Button>
           )}
         </div>
         <ScrollArea className="max-h-80">
           {notifications.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-8">No notifications</p>
+            <p className="text-sm text-gray-500 text-center py-8">No notifications</p>
           ) : (
-            <div className="divide-y divide-border">
+            <div className="divide-y divide-gray-200">
               {notifications.map((notif) => {
                 const config = typeConfig[notif.type as ApiNotificationType] ?? typeConfig.other;
                 const Icon = config.icon;
@@ -151,8 +163,8 @@ export function NotificationsDropdown() {
                     key={notif._id}
                     onClick={() => markAsRead(notif._id)}
                     className={cn(
-                      "w-full text-left px-4 py-3 flex gap-3 hover:bg-muted/50 transition-colors",
-                      !notif.isRead && "bg-muted/30"
+                      "w-full text-left px-4 py-3 flex gap-3 hover:bg-gray-100 transition-colors",
+                      !notif.isRead && "bg-blue-50"
                     )}
                   >
                     <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5", config.className)}>
@@ -160,11 +172,11 @@ export function NotificationsDropdown() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2">
-                        <p className={cn("text-sm font-medium", !notif.isRead && "font-semibold")}>{notif.title}</p>
-                        {!notif.isRead && <span className="h-2 w-2 rounded-full bg-secondary shrink-0 mt-1.5" />}
+                        <p className={cn("text-sm font-medium text-black", !notif.isRead && "font-semibold")}>{notif.title}</p>
+                        {!notif.isRead && <span className="h-2 w-2 rounded-full bg-blue-500 shrink-0 mt-1.5" />}
                       </div>
-                      <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{notif.message}</p>
-                      <p className="text-[10px] text-muted-foreground/60 mt-1">{timeAgo(notif.createdAt)}</p>
+                      <p className="text-xs text-gray-600 mt-0.5 line-clamp-2">{notif.message}</p>
+                      <p className="text-[10px] text-gray-400 mt-1">{timeAgo(notif.createdAt)}</p>
                     </div>
                   </button>
                 );

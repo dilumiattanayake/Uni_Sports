@@ -423,6 +423,70 @@ const getMyCoachSessions = async (req, res, next) => {
 };
 
 /**
+ * @desc    Remove student from session (unenroll/cancel)
+ * @route   DELETE /api/sessions/:id/unenroll
+ * @access  Private/Student
+ */
+const unenrollFromSession = async (req, res, next) => {
+  try {
+    const studentId = req.user.id;
+    const sessionId = req.params.id;
+
+    // Find session
+    const session = await PracticeSession.findById(sessionId)
+      .populate('sport', 'name')
+      .populate('coach', 'name email');
+
+    if (!session) {
+      return next(new ErrorResponse('Session not found', 404));
+    }
+
+    // Check if student is enrolled
+    const enrollmentIndex = session.enrolledStudents.findIndex(
+      (e) => e.student.toString() === studentId
+    );
+
+    if (enrollmentIndex === -1) {
+      return next(new ErrorResponse('You are not enrolled in this session', 400));
+    }
+
+    // Remove student from session
+    session.enrolledStudents.splice(enrollmentIndex, 1);
+    await session.save();
+
+    // Send notification to coach
+    await notificationService.notify(
+      session.coach._id,
+      'session_student_cancelled',
+      {
+        studentId,
+        sessionId,
+        sport: session.sport.name,
+      }
+    );
+
+    // Send confirmation email to coach
+    await emailService.sendSessionCancellationEmail(
+      session.coach.email,
+      session.coach.name,
+      {
+        sport: session.sport.name,
+        sessionTime: session.startTime,
+        sessionEnd: session.endTime,
+      }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: 'You have been unenrolled from this session',
+      data: session,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
  * @desc    Get student's enrolled sessions
  * @route   GET /api/sessions/student/my-sessions
  * @access  Private/Student
@@ -467,4 +531,5 @@ module.exports = {
   deleteSession,
   getMyCoachSessions,
   getMyStudentSessions,
+  unenrollFromSession,
 };

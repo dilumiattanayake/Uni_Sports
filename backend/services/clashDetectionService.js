@@ -195,9 +195,94 @@ const validateSessionTiming = (startTime, endTime) => {
   return { isValid: true };
 };
 
+/**
+ * Check location booking clash with booking requests and practice sessions
+ * Detects conflicts across all location uses
+ */
+const checkLocationBookingClash = async (locationId, date, startTime, endTime, excludeBookingId = null) => {
+  try {
+    const LocationBookingRequest = require('../models/LocationBookingRequest');
+    
+    // Convert date and times to comparable format
+    const bookingDate = new Date(date);
+    bookingDate.setHours(0, 0, 0, 0);
+    const bookingDayEnd = new Date(bookingDate);
+    bookingDayEnd.setHours(23, 59, 59, 999);
+    
+    // Parse time strings (format: "14:00")
+    const [startHour, startMin] = startTime.split(':').map(Number);
+    const [endHour, endMin] = endTime.split(':').map(Number);
+    
+    // Check for clashes in booking requests (approved or pending)
+    const bookingQuery = {
+      location: locationId,
+      status: { $in: ['approved', 'pending'] },
+      date: { $gte: bookingDate, $lte: bookingDayEnd },
+    };
+
+    // Time overlap logic for string times
+    const bookingClashes = await LocationBookingRequest.find(bookingQuery)
+      .populate('coach', 'name')
+      .populate('sport', 'name');
+
+    for (const booking of bookingClashes) {
+      if (excludeBookingId && booking._id.toString() === excludeBookingId.toString()) {
+        continue;
+      }
+
+      const [bStartHour, bStartMin] = booking.startTime.split(':').map(Number);
+      const [bEndHour, bEndMin] = booking.endTime.split(':').map(Number);
+      
+      const bStartMins = bStartHour * 60 + bStartMin;
+      const bEndMins = bEndHour * 60 + bEndMin;
+      const newStartMins = startHour * 60 + startMin;
+      const newEndMins = endHour * 60 + endMin;
+
+      // Check for overlap
+      if (!(newEndMins <= bStartMins || newStartMins >= bEndMins)) {
+        return {
+          hasClash: true,
+          clashType: 'booking_request',
+          clashingBooking: booking,
+          message: `Location already requested by ${booking.coach.name} for ${booking.sport.name} from ${booking.startTime} to ${booking.endTime}`,
+        };
+      }
+    }
+
+    // Also check practice sessions by converting booking date + HH:mm to Date values.
+    // PracticeSession.startTime/endTime are Date fields, not plain time strings.
+    const startDateTime = new Date(date);
+    startDateTime.setHours(startHour, startMin, 0, 0);
+
+    const endDateTime = new Date(date);
+    endDateTime.setHours(endHour, endMin, 0, 0);
+
+    const sessionClash = await checkLocationClash(
+      locationId,
+      startDateTime,
+      endDateTime,
+      excludeBookingId
+    );
+    if (sessionClash.hasClash) {
+      return {
+        hasClash: true,
+        clashType: 'practice_session',
+        clashingSession: sessionClash.clashingSession,
+        message: sessionClash.message,
+      };
+    }
+
+    return { hasClash: false };
+  } catch (error) {
+    console.error('Check location booking clash error:', error);
+    throw error;
+  }
+};
+
 module.exports = {
   checkLocationClash,
   checkStudentClash,
   checkCoachClash,
   validateSessionTiming,
+  checkLocationBookingClash,
 };

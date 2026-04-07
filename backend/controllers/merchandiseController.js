@@ -108,6 +108,23 @@ exports.getAllMerchandise = async (req, res, next) => {
   }
 };
 
+// @desc    Get single merchandise item by id
+// @route   GET /api/merchandise/:id
+// @access  Private (All)
+exports.getMerchandiseById = async (req, res, next) => {
+  try {
+    const merch = await Merchandise.findById(req.params.id).populate('sport', 'name');
+
+    if (!merch) {
+      return res.status(404).json({ success: false, message: 'Merchandise not found' });
+    }
+
+    res.status(200).json({ success: true, data: merch });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @desc    Purchase or Claim a merchandise item
 // @route   POST /api/merchandise/:id/order
 // @access  Private (Student)
