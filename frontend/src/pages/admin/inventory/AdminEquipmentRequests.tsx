@@ -3,14 +3,17 @@ import { equipmentRequestService } from '../../../services/equipmentRequestServi
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Scanner } from '@yudiel/react-qr-scanner';
 
-// Define TypeScript interfaces for the populated data
+// --- Updated TypeScript Interfaces ---
 interface RequestedItem {
   _id: string;
   equipment: {
     _id: string;
     itemName: string;
-  };
+  } | null;
   quantity: number;
+  damagedQuantity?: number;
+  lostQuantity?: number;
+  issueNote?: string;
 }
 
 interface StudentInfo {
@@ -21,9 +24,10 @@ interface StudentInfo {
 
 interface BorrowRequest {
   _id: string;
-  student: StudentInfo;
+  student: StudentInfo | null;
   items: RequestedItem[];
   expectedReturnDate: string;
+  actualReturnDate?: string;
   status: string;
   notes?: string;
   createdAt: string;
@@ -54,6 +58,7 @@ export default function AdminEquipmentRequests() {
       setLoading(true);
       const response = await equipmentRequestService.getAll();
       setRequests(response.data);
+      console.log('Fetched Requests:', response.data);
       setError(null);
     } catch (err: any) {
       setError(err.message || 'Failed to fetch equipment requests');
@@ -69,6 +74,7 @@ export default function AdminEquipmentRequests() {
       'Approved': 'bg-blue-500/20 text-blue-300 border-blue-500/30',
       'Borrowed': 'bg-purple-500/20 text-purple-300 border-purple-500/30',
       'Returned': 'bg-green-500/20 text-green-300 border-green-500/30',
+      'Returned with Issues': 'bg-orange-500/20 text-orange-300 border-orange-500/30',
       'Overdue': 'bg-red-500/20 text-red-300 border-red-500/30',
       'Rejected': 'bg-slate-500/20 text-slate-300 border-slate-500/30'
     };
@@ -185,17 +191,37 @@ export default function AdminEquipmentRequests() {
                     </td>
                     
                     <td className="px-6 py-5">
-                      <ul className="space-y-1.5">
+                      <ul className="space-y-3">
                         {req.items.map((item, idx) => (
-                          <li key={idx} className="text-sm flex items-center gap-2">
-                            <span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
-                            <span className="font-semibold text-slate-200">{item.equipment?.itemName || 'Unknown Item'}</span> 
-                            <span className="text-slate-500 font-medium bg-[#151521] px-2 py-0.5 rounded border border-slate-700/50">x{item.quantity}</span>
+                          <li key={idx} className="text-sm flex flex-col gap-1.5">
+                            <div className="flex items-center gap-2">
+                              <span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                              <span className="font-semibold text-slate-200">{item.equipment?.itemName || 'Unknown Item'}</span> 
+                              <span className="text-slate-500 font-medium bg-[#151521] px-2 py-0.5 rounded border border-slate-700/50">x{item.quantity}</span>
+                            </div>
+                            {/* Render Damage/Lost tags if applicable */}
+                            {(!!item.lostQuantity || !!item.damagedQuantity || !!item.issueNote) && (
+                              <div className="ml-3.5 flex flex-wrap gap-2 text-xs items-center">
+                                {!!item.lostQuantity && (
+                                  <span className="text-red-400 bg-red-500/10 px-2 py-0.5 rounded border border-red-500/20 font-medium tracking-wide">
+                                    Lost: {item.lostQuantity}
+                                  </span>
+                                )}
+                                {!!item.damagedQuantity && (
+                                  <span className="text-orange-400 bg-orange-500/10 px-2 py-0.5 rounded border border-orange-500/20 font-medium tracking-wide">
+                                    Damaged: {item.damagedQuantity}
+                                  </span>
+                                )}
+                                {item.issueNote && (
+                                  <span className="text-slate-400 italic">"{item.issueNote}"</span>
+                                )}
+                              </div>
+                            )}
                           </li>
                         ))}
                       </ul>
                       {req.notes && (
-                        <div className="mt-3 bg-[#151521] p-3 rounded-lg border border-slate-700/50">
+                        <div className="mt-4 bg-[#151521] p-3 rounded-lg border border-slate-700/50">
                           <p className="text-xs text-slate-300 leading-relaxed">
                             <span className="font-bold text-indigo-400 uppercase tracking-wider mr-2">Note:</span> 
                             {req.notes}
@@ -298,7 +324,7 @@ export default function AdminEquipmentRequests() {
               <div className="mb-6 bg-[#151521] p-4 rounded-lg border border-slate-700/50 text-sm space-y-2">
                 <div className="flex justify-between items-center">
                   <span className="text-slate-500 font-bold uppercase tracking-wider text-xs">Student</span>
-                  <span className="font-semibold text-white">{selectedRequest.student?.name || selectedRequest.student?.email}</span>
+                  <span className="font-semibold text-white">{selectedRequest.student?.name || selectedRequest.student?.email || 'Unknown Student'}</span>
                 </div>
                 <div className="flex justify-between items-center pt-2 border-t border-slate-700/50">
                   <span className="text-slate-500 font-bold uppercase tracking-wider text-xs">Current Status</span>
@@ -319,6 +345,7 @@ export default function AdminEquipmentRequests() {
                     <option value="Rejected">Rejected</option>
                     <option value="Borrowed">Borrowed (Handed to student)</option>
                     <option value="Returned">Returned (Safely received)</option>
+                    <option value="Returned with Issues">Returned (With Issues)</option>
                     <option value="Overdue">Overdue</option>
                   </select>
                 </div>
