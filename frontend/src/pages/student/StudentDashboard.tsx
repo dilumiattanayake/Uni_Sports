@@ -3,6 +3,8 @@ import { Link } from "react-router-dom"
 import { DashboardLayout } from "@/components/DashboardLayout"
 import { PageHeader } from "@/components/common/PageHeader"
 import { Button } from "@/components/ui/button"
+import { useAuth } from "@/context/AuthContext"
+import { toast } from "sonner"
 import sportsImage from "@/assets/sports.jpeg"
 import sportsEvents from "@/assets/events.jpg"
 import sportsItems from "@/assets/sports items.jpg"
@@ -17,8 +19,15 @@ import {
 import { ArrowRight, Boxes, CalendarDays, ChevronRight, Dumbbell, Medal, Users } from "lucide-react"
 
 const StudentDashboard = () => {
+  const { user, token } = useAuth()
   const [carouselApi, setCarouselApi] = useState<CarouselApi>()
   const [currentSlide, setCurrentSlide] = useState(0)
+  const [acceptedSessions, setAcceptedSessions] = useState<any[]>([])
+  const [acceptedSessionsRaw, setAcceptedSessionsRaw] = useState<any[]>([])
+  const [pendingRequests, setPendingRequests] = useState<any[]>([])
+  const [sessionsLoading, setSessionsLoading] = useState(true)
+  const [sessionsError, setSessionsError] = useState("")
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   useEffect(() => {
     if (!carouselApi) return
@@ -49,19 +58,126 @@ const StudentDashboard = () => {
     }
   }, [carouselApi])
 
+  // Fetch accepted join requests (real sessions)
+  useEffect(() => {
+    const fetchAcceptedSessions = async () => {
+      if (!user?.id || !token) return
+      
+      try {
+        setSessionsLoading(true)
+        setSessionsError("")
+        const [acceptedRes, pendingRes] = await Promise.all([
+          fetch(`/api/join-requests/student/my-requests?status=accepted`, {
+            headers: { "Authorization": `Bearer ${token}` },
+            cache: "no-store",
+          }),
+          fetch(`/api/join-requests/student/my-requests?status=pending`, {
+            headers: { "Authorization": `Bearer ${token}` },
+            cache: "no-store",
+          }),
+        ])
+        
+        if (!acceptedRes.ok) throw new Error("Failed to fetch sessions")
+        
+        const acceptedData = await acceptedRes.json()
+        setAcceptedSessionsRaw(acceptedData.data || [])
+        
+        const sessions = acceptedData.data?.map((joinReq: any) => ({
+          name: joinReq.session?.sport?.name,
+          date: joinReq.session?.startTime ? new Date(joinReq.session.startTime).toLocaleDateString() : "TBD",
+          time: joinReq.session?.startTime ? new Date(joinReq.session.startTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : "TBD",
+          location: joinReq.session?.location?.name || "TBD",
+        })) || []
+        
+        setAcceptedSessions(sessions)
+
+        if (pendingRes.ok) {
+          const pendingData = await pendingRes.json()
+          setPendingRequests(pendingData.data || [])
+        }
+      } catch (err: any) {
+        console.error("Error fetching sessions:", err)
+        setSessionsError("Could not load your sessions")
+      } finally {
+        setSessionsLoading(false)
+      }
+    }
+
+    fetchAcceptedSessions()
+  }, [user?.id, token])
+
+  const handleDeleteRequest = async (requestId: string, sportName: string) => {
+    if (!window.confirm(`Delete your join request for ${sportName}?`)) {
+      return
+    }
+
+    setDeletingId(requestId)
+    try {
+      const response = await fetch(`/api/join-requests/${requestId}`, {
+        method: "DELETE",
+        headers: { "Authorization": `Bearer ${token}` },
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to delete request")
+      }
+
+      setPendingRequests(prev => prev.filter(r => r._id !== requestId))
+      console.log(`Delete request for ${sportName} successful`)
+    } catch (error: any) {
+      console.error("Error deleting request:", error)
+    } finally {
+      setDeletingId(null)
+    }
+  }
+
+  const handleCancelSession = async (sessionId: string, sportName: string) => {
+    if (!window.confirm(`Cancel your booking for ${sportName}? This action cannot be undone.`)) {
+      return
+    }
+
+    setDeletingId(sessionId)
+    try {
+      const response = await fetch(`/api/sessions/${sessionId}/unenroll`, {
+        method: "DELETE",
+        headers: { "Authorization": `Bearer ${token}` },
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to cancel session")
+      }
+
+      // Remove from accepted sessions
+      setAcceptedSessionsRaw(prev => prev.filter(j => j.session._id !== sessionId))
+      setAcceptedSessions(prev => 
+        prev.filter(s => s.name !== sportName)
+      )
+      toast.success(`Successfully cancelled ${sportName} session`, {
+        description: "Your booking has been removed. Coach has been notified."
+      })
+    } catch (error: any) {
+      console.error("Error cancelling session:", error)
+      toast.error("Failed to cancel session", {
+        description: error.message || "Please try again later"
+      })
+    } finally {
+      setDeletingId(null)
+    }
+  }
+
   const stats = [
     {
       label: "Active Sports",
-      value: 3,
-      subtitle: "Currently enrolled",
+      value: acceptedSessions.length,
+      subtitle: "Enrolled sports",
       icon: <Users className="h-6 w-6" />,
       cardClass: "bg-gradient-to-br from-indigo-950 via-indigo-900 to-indigo-800 text-white",
       iconWrapClass: "bg-indigo-500/30",
     },
     {
       label: "Upcoming Sessions",
-      value: 3,
-      subtitle: "Scheduled this week",
+      value: acceptedSessions.length,
+      subtitle: "Scheduled sessions",
       icon: <CalendarDays className="h-6 w-6" />,
       cardClass: "bg-gradient-to-br from-green-500 via-green-400 to-emerald-400 text-white",
       iconWrapClass: "bg-white/25",
@@ -76,11 +192,11 @@ const StudentDashboard = () => {
     },
   ]
 
-  const sports = [
-    { name: "Football", date: "Mar 10, 2026", time: "5:30 PM", location: "Main Ground" },
-    { name: "Basketball", date: "Mar 12, 2026", time: "6:00 PM", location: "Indoor Court" },
-    { name: "Cricket", date: "Mar 15, 2026", time: "4:30 PM", location: "Practice Nets" },
-  ]
+  const sports = acceptedSessions.length > 0 
+    ? acceptedSessions 
+    : [
+        { name: "No sessions yet", date: "Join a sport to see sessions", time: "", location: "" },
+      ]
 
   const inventoryItems = [
     { category: "Cricket", item: "Official Jersey" },
@@ -232,6 +348,45 @@ const StudentDashboard = () => {
           ))}
         </section>
 
+        {/* Pending Join Requests Section */}
+        {pendingRequests.length > 0 && (
+          <section className="rounded-xl border border-amber-200 bg-amber-50 p-6 shadow-sm">
+            <h2 className="mb-4 text-lg font-semibold text-amber-900 flex items-center gap-2">
+              ⏳ Pending Join Requests ({pendingRequests.length})
+            </h2>
+            <div className="space-y-2">
+              {pendingRequests.map((req) => (
+                <div
+                  key={req._id}
+                  className="flex items-center justify-between rounded-lg border border-amber-200 bg-white p-4"
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-gray-900">
+                      {req.session?.sport?.name}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      Session: {req.session?.startTime ? new Date(req.session.startTime).toLocaleDateString() : "TBD"} at{" "}
+                      {req.session?.startTime ? new Date(req.session.startTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "TBD"}
+                    </p>
+                    <p className="text-xs text-amber-600 mt-1">
+                      Requested: {new Date(req.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() =>
+                      handleDeleteRequest(req._id, req.session?.sport?.name || "this request")
+                    }
+                    disabled={deletingId === req._id}
+                    className="ml-3 px-3 py-2 text-red-600 hover:bg-red-50 rounded transition disabled:opacity-50 text-sm font-medium"
+                  >
+                    {deletingId === req._id ? "Deleting..." : "Cancel"}
+                  </button>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
         <section>
           <h2 className="mb-4 text-lg font-semibold text-foreground">Quick Actions</h2>
           <div className="grid gap-4 sm:grid-cols-3">
@@ -259,29 +414,46 @@ const StudentDashboard = () => {
         <div className="grid gap-6 lg:grid-cols-3">
           <section className="rounded-xl border border-border bg-card p-6 shadow-sm">
             <div className="mb-5 flex items-center justify-between">
-              <h2 className="font-semibold text-foreground">Sports</h2>
-              <Link to="/student/sports" className="text-sm font-semibold text-primary hover:underline">
+              <h2 className="font-semibold text-foreground">My Sessions</h2>
+              <Link to="/student/sessions" className="text-sm font-semibold text-primary hover:underline">
                 View all
               </Link>
             </div>
             <div className="space-y-3">
-              {sports.map((sport) => (
-                <div
-                  key={`${sport.name}-${sport.date}-${sport.time}`}
-                  className="flex items-center justify-between rounded-lg border border-border bg-muted/50 px-4 py-4 text-sm transition hover:bg-muted/80"
-                >
-                  <div>
-                    <p className="font-semibold text-foreground">{sport.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {sport.date} · {sport.time}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <p className="text-xs text-muted-foreground">{sport.location}</p>
-                    <ArrowRight className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-                  </div>
+              {acceptedSessions.length === 0 ? (
+                <div className="p-6 text-center text-muted-foreground">
+                  <p className="text-sm">No booked sessions yet</p>
+                  <p className="text-xs mt-2">Browse sports to join sessions</p>
                 </div>
-              ))}
+              ) : (
+                acceptedSessions.map((sport, idx) => {
+                  const rawSession = acceptedSessionsRaw[idx]
+                  return (
+                    <div
+                      key={`${sport.name}-${sport.date}-${sport.time}`}
+                      className="flex items-start justify-between rounded-lg border border-green-200 bg-green-50 px-4 py-4 text-sm transition hover:bg-green-100"
+                    >
+                      <div className="flex-1">
+                        <p className="font-semibold text-gray-900">{sport.name}</p>
+                        <p className="text-xs text-gray-600 mt-1">
+                          📅 {sport.date} · ⏱️ {sport.time}
+                        </p>
+                        <p className="text-xs text-gray-600">
+                          📍 {sport.location}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => handleCancelSession(rawSession?.session?._id, sport.name)}
+                        disabled={deletingId === rawSession?.session?._id}
+                        className="ml-3 px-2 py-1 text-red-600 hover:bg-red-100 rounded transition disabled:opacity-50 text-xs font-medium whitespace-nowrap"
+                        title="Cancel this session booking"
+                      >
+                        {deletingId === rawSession?.session?._id ? "Cancelling..." : "Cancel"}
+                      </button>
+                    </div>
+                  )
+                })
+              )}
             </div>
           </section>
 

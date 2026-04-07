@@ -1,7 +1,6 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PageHeader } from "@/components/common/PageHeader";
-import { mockEvents, mockSports } from "@/data/mockData";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus, Search, Pencil, Trash2, CalendarDays, MapPin, Users, Link } from "lucide-react";
 import { Event } from "@/types";
 import { toast } from "sonner";
+
+const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:5001";
 
 const STATUS_COLORS: Record<string, string> = {
   upcoming:  "bg-blue-100 text-blue-700",
@@ -34,7 +35,10 @@ const emptyForm = {
 };
 
 export default function AdminEvents() {
-  const [events, setEvents] = useState<Event[]>(mockEvents);
+  const token = localStorage.getItem('token');
+  const [events, setEvents] = useState<Event[]>([]);
+  const [sports, setSports] = useState<any[]>([]);
+  const [eventsLoading, setEventsLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -42,6 +46,34 @@ export default function AdminEvents() {
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [deletingEvent, setDeletingEvent] = useState<Event | null>(null);
   const [form, setForm] = useState(emptyForm);
+
+  // Fetch events and sports from API
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [eventsRes, sportsRes] = await Promise.all([
+          fetch(`${API_BASE}/api/events`, { headers: { 'Authorization': `Bearer ${token}` }, cache: 'no-store' }),
+          fetch(`${API_BASE}/api/sports`, { headers: { 'Authorization': `Bearer ${token}` }, cache: 'no-store' })
+        ]);
+
+        if (eventsRes.ok) {
+          const eventsData = await eventsRes.json();
+          setEvents(eventsData.data || []);
+        }
+        if (sportsRes.ok) {
+          const sportsData = await sportsRes.json();
+          setSports(sportsData.data || []);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        toast.error("Failed to load events and sports");
+      } finally {
+        setEventsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [token]);
 
   // ── Filtering ──────────────────────────────────────────────────
   const filtered = events.filter((e) => {
@@ -125,11 +157,15 @@ export default function AdminEvents() {
   };
 
   // ── Helpers ────────────────────────────────────────────────────
-  const getSportName = (sportId: string) =>
-    mockSports.find((s) => s.id === sportId)?.name ?? "Unknown";
+  const getSportName = (sportId: string) => {
+    const sport = sports.find((s) => s._id === sportId || s.id === sportId);
+    return sport?.name ?? "Unknown";
+  };
 
-  const getSportIcon = (sportId: string) =>
-    mockSports.find((s) => s.id === sportId)?.icon ?? "🏅";
+  const getSportIcon = (sportId: string) => {
+    const sport = sports.find((s) => s._id === sportId || s.id === sportId);
+    return sport?.icon ?? "🏅";
+  };
 
   const formatDate = (dateStr: string) =>
     dateStr ? new Date(dateStr).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "—";
@@ -184,8 +220,8 @@ export default function AdminEvents() {
                     <SelectValue placeholder="Select a sport" />
                   </SelectTrigger>
                   <SelectContent>
-                    {mockSports.map((sport) => (
-                      <SelectItem key={sport.id} value={sport.id}>
+                    {sports.map((sport) => (
+                      <SelectItem key={sport._id || sport.id} value={sport._id || sport.id}>
                         {sport.icon} {sport.name}
                       </SelectItem>
                     ))}

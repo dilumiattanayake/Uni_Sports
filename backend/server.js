@@ -11,6 +11,7 @@ const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const sportRoutes = require('./routes/sportRoutes');
 const locationRoutes = require('./routes/locationRoutes');
+const locationBookingRoutes = require('./routes/locationBookingRoutes');
 const sessionRoutes = require('./routes/sessionRoutes');
 const joinRequestRoutes = require('./routes/joinRequestRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
@@ -29,7 +30,12 @@ const app = express();
 connectDB();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: ['http://localhost:8080', 'http://localhost:3000', 'http://127.0.0.1:8080'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
@@ -41,6 +47,14 @@ app.use('/uploads', express.static('uploads'));
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
+
+// Disable caching for API responses
+app.use('/api', (req, res, next) => {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
+  next();
+});
 
 // Health check route
 app.get('/api/health', (req, res) => {
@@ -56,6 +70,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/sports', sportRoutes);
 app.use('/api/locations', locationRoutes);
+app.use('/api/location-bookings', locationBookingRoutes);
 app.use('/api/sessions', sessionRoutes);
 app.use('/api/join-requests', joinRequestRoutes);
 app.use('/api/notifications', notificationRoutes);
