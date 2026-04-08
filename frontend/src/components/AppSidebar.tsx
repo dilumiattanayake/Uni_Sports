@@ -1,20 +1,28 @@
 import { useAuth } from "@/context/AuthContext";
 import { UserRole } from "@/types";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { NavLink } from "@/components/NavLink";
 import {
   LayoutDashboard, Trophy, Users, MapPin, Calendar, UserCheck, BookOpen, Settings,
-  ChevronLeft, Medal, DollarSign,  Package, Home,
+  ChevronLeft, Medal, DollarSign, Package, Home, CalendarDays, CreditCard, Boxes,
+  Dumbbell, ChevronDown, ChevronRight, LogOut, Wallet, BarChart,
 } from "lucide-react";
 import {
-  Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
-  SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarFooter, useSidebar,
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarFooter,
+  useSidebar,
 } from "@/components/ui/sidebar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import logo from "@/assets/Logo.jpg";
 import logoos from "@/assets/Logoos.jpg";
-
 
 const adminLinks = [
   { title: "Home", url: "/admin/home", icon: Home },
@@ -23,132 +31,639 @@ const adminLinks = [
   { title: "Coaches", url: "/admin/coaches", icon: Users },
   { title: "Students", url: "/admin/students", icon: UserCheck },
   { title: "Locations", url: "/admin/locations", icon: MapPin },
-  { title: "Events", url: "/admin/events", icon:  Medal },
-  { title: "Inventory", url: "/admin/inventory", icon:  Package },
-  { title: "Payments", url: "/admin/payments", icon:  DollarSign },
+  { title: "Events", url: "/admin/events", icon: Medal },
+  { title: "Orders", url: "/admin/orders", icon: DollarSign },
+  { title: "Inventory", url: "/admin/inventory", icon: Package },
+  { title: "Equipment Requests", url: "/admin/requests", icon: UserCheck },
+  { title: "Merchandise", url: "/admin/merchandise", icon: BookOpen },
+  { title: "Payments", url: "/admin/payments", icon: DollarSign },
+];
+
+const adminLinksNew = [
+  { title: "Dashboard", url: "/AdminDashboard", icon: LayoutDashboard },
+];
+
+const sportsManagementLinks = [
+  { title: "Sports", url: "/admin/sports", icon: Trophy },
+  { title: "Coaches", url: "/admin/coaches", icon: Users },
+  { title: "Locations", url: "/admin/locations", icon: MapPin },
+];
+
+const userManagementLinks = [
+  { title: "All Users", url: "/admin/users", icon: UserCheck },
+];
+
+const paymentManagementLinks = [
+  { title: "Payments", url: "/admin/payments", icon: DollarSign },
+  { title: "Transaction", url: "/admin/payment/transaction", icon: Wallet },
+  { title: "Reports", url: "/admin/payment/report", icon: BarChart },
+];
+
+const inventoryManagementLinks = [
+  { title: "Inventory", url: "/admin/inventory", icon: Package },
+  { title: "Equipment Requests", url: "/admin/requests", icon: UserCheck },
+];
+
+const eventManagementLinks = [
+  { title: "Events", url: "/admin/events", icon: Medal },
+];
+
+const merchandiseManagementLinks = [
+  { title: "Merchandise", url: "/admin/merchandise", icon: BookOpen },
+  { title: "Orders", url: "/admin/orders", icon: DollarSign },
 ];
 
 const coachLinks = [
-  { title: "Dashboard", url: "/CoachDashboard", icon: LayoutDashboard },
+  { title: "Dashboard", url: "/coach", icon: LayoutDashboard },
   { title: "Sessions", url: "/coach/sessions", icon: Calendar },
   { title: "Join Requests", url: "/coach/requests", icon: UserCheck },
-  { title: "My Team", url: "/coach/teams", icon: Users },
+  { title: "Payments", url: "/coach/payments", icon: CreditCard },
 ];
 
 const studentLinks = [
   { title: "Dashboard", url: "/StudentDashboard", icon: LayoutDashboard },
-  { title: "Browse Sports", url: "/StudentBrowseSports", icon: BookOpen },
-  { title: "My Sessions", url: "/StudentSessions", icon: Calendar },
-  { title: "My Requests", url: "/StudentRequests", icon: UserCheck },
-  { title: "Browse Events", url: "/StudentBrowseEvents", icon: Medal},
-  { title: "My Events", url: "/StudentEvents", icon:  Trophy },
-  { title: "Inventory", url: "/student/inventory", icon:  Package },
-  { title: "My Payements", url: "/student/payments", icon:  DollarSign },
+  { title: "Shop Merchandise", url: "/student/merchandise", icon: Package },
+  { title: "My Orders", url: "/student/merchandise/my-orders", icon: Package },
+  { title: "My Requests", url: "/student/inventory/my-requests", icon: UserCheck },
+  { title: "Browse Events", url: "/student/events", icon: Medal },
+  { title: "My Events", url: "/student/events/my-events", icon: Trophy },
+  { title: "Inventory", url: "/student/inventory", icon: Package },
+  { title: "My Payements", url: "/student/payments", icon: DollarSign },
+  { title: "Browse Sports", url: "/student/sports", icon: BookOpen },
+  { title: "My Sessions", url: "/student/sessions", icon: Calendar },
+  { title: "Payments", url: "/student/payments", icon: CreditCard },
 ];
 
-const roleConfig: Record<UserRole, { links: typeof adminLinks; label: string; color: string }> = {
-  admin: { links: adminLinks, label: "Admin", color: "bg-accent text-accent-foreground" },
-  coach: { links: coachLinks, label: "Coach", color: "bg-secondary text-secondary-foreground" },
-  student: { links: studentLinks, label: "Student", color: "bg-info text-info-foreground" },
+const studentLinksNew = [
+   { title: "Dashboard", url: "/StudentDashboard", icon: LayoutDashboard },
+];
+
+const studentSportsLinks = [
+  { title: "Browse Sports", url: "/student/sports", icon: BookOpen },
+  { title: "My Sessions", url: "/student/sessions", icon: Calendar },
+  { title: "My Requests", url: "/student/requests", icon: UserCheck },
+];
+
+const studentEventLinks = [
+  { title: "Browse Events", url: "/student/events", icon: Medal },
+  { title: "My Events", url: "/student/events/my-events", icon: Trophy },
+];
+
+const studentInventoryLinks = [
+  { title: "Inventory", url: "/student/inventory", icon: Package },
+  { title: "My Requests", url: "/student/inventory/my-requests", icon: Boxes },
+];
+
+const studentMerchandiseLinks = [
+  { title: "Shop Merchandise", url: "/student/merchandise", icon: Package },
+  { title: "My Orders", url: "/student/merchandise/my-orders", icon: DollarSign },
+];
+
+const studentPaymentLinks = [
+  { title: "Payments", url: "/student/payments", icon: CreditCard },
+];
+
+const roleConfig: Partial<Record<UserRole, { links: typeof coachLinks; label: string }>> = {
+  coach: { links: coachLinks, label: "Coach" },
+  student: { links: studentLinks, label: "Student" },
 };
+
+const adminPrimaryButtons = [
+  { title: "Event Management", icon: CalendarDays },
+  { title: "Inventory Management", icon: Boxes },
+  { title: "Payment Management", icon: CreditCard },
+  { title: "User Management", icon: Users },
+];
 
 export function AppSidebar() {
   const { role, user } = useAuth();
   const { state, toggleSidebar } = useSidebar();
   const collapsed = state === "collapsed";
+  const location = useLocation();
   const navigate = useNavigate();
-  const config = roleConfig[role];
+  const config = role !== "admin" ? roleConfig[role] : undefined;
+  
+  const [sportsMenuOpen, setSportsMenuOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [paymentMenuOpen, setPaymentMenuOpen] = useState(false);
+  const [inventoryMenuOpen, setInventoryMenuOpen] = useState(false);
+  const [eventMenuOpen, setEventMenuOpen] = useState(false);
+  const [merchandiseMenuOpen, setMerchandiseMenuOpen] = useState(false);
+
+  const toggleSportsMenu = () => {
+    setSportsMenuOpen((prev) => {
+      const next = !prev;
+      if (next) {
+        setUserMenuOpen(false);
+        setEventMenuOpen(false);
+        setPaymentMenuOpen(false);
+        setInventoryMenuOpen(false);
+        setMerchandiseMenuOpen(false);
+      }
+      return next;
+    });
+  };
+
+  const toggleUserMenu = () => {
+    setUserMenuOpen((prev) => {
+      const next = !prev;
+      if (next) {
+        setSportsMenuOpen(false);
+        setEventMenuOpen(false);
+        setPaymentMenuOpen(false);
+        setInventoryMenuOpen(false);
+        setMerchandiseMenuOpen(false);
+      }
+      return next;
+    });
+  };
+
+  const toggleEventMenu = () => {
+    setEventMenuOpen((prev) => {
+      const next = !prev;
+      if (next) {
+        setSportsMenuOpen(false);
+        setUserMenuOpen(false);
+        setPaymentMenuOpen(false);
+        setInventoryMenuOpen(false);
+        setMerchandiseMenuOpen(false);
+      }
+      return next;
+    });
+  };
+
+  const togglePaymentMenu = () => {
+    setPaymentMenuOpen((prev) => {
+      const next = !prev;
+      if (next) {
+        setSportsMenuOpen(false);
+        setUserMenuOpen(false);
+        setEventMenuOpen(false);
+        setInventoryMenuOpen(false);
+        setMerchandiseMenuOpen(false);
+      }
+      return next;
+    });
+  };
+
+  const toggleInventoryMenu = () => {
+    setInventoryMenuOpen((prev) => {
+      const next = !prev;
+      if (next) {
+        setSportsMenuOpen(false);
+        setUserMenuOpen(false);
+        setEventMenuOpen(false);
+        setPaymentMenuOpen(false);
+        setMerchandiseMenuOpen(false);
+      }
+      return next;
+    });
+  };
+
+  const toggleMerchandiseMenu = () => {
+    setMerchandiseMenuOpen((prev) => {
+      const next = !prev;
+      if (next) {
+        setSportsMenuOpen(false);
+        setUserMenuOpen(false);
+        setEventMenuOpen(false);
+        setPaymentMenuOpen(false);
+        setInventoryMenuOpen(false);
+      }
+      return next;
+    });
+  };
+
+  const hasSportsPath = location.pathname.includes("/admin/sports") || 
+                       location.pathname.includes("/admin/coaches") ||
+                       location.pathname.includes("/admin/locations");
+
+  const hasUserPath = location.pathname.includes("/admin/students") || 
+                     location.pathname.includes("/admin/coaches");
+
+  const hasPaymentPath = location.pathname.includes("/admin/payments");
+  const hasInventoryPath = location.pathname.includes("/admin/inventory");
+  const hasEventPath = location.pathname.includes("/admin/events");
 
   const handleLogoClick = () => {
-  if (role === "admin") navigate("/AdminDashboard");
-  else if (role === "coach") navigate("/CoachDashboard");
-  else if (role === "student") navigate("/StudentDashboard");
-};
+    if (role === "admin") navigate("/AdminDashboard");
+    else if (role === "coach") navigate("/CoachDashboard");
+    else if (role === "student") navigate("/StudentDashboard");
+  };
 
-const handleSettingsClick = () => {
-  if (role === "admin") navigate("/admin/settings");
-  else if (role === "coach") navigate("/coach/settings");
-  else if (role === "student") navigate("/student/settings");
-};
-
-
+  const getSettingsPath = () => {
+    if (role === "admin") return "/admin/settings";
+    if (role === "coach") return "/coach/settings";
+    if (role === "student") return "/student/settings";
+    return "/";
+  };
 
   return (
     <Sidebar collapsible="icon" className="border-r-0">
-      <div className="flex items-center justify-between px-4 py-5 border-b border-sidebar-border">
-
-  
-        <img
-          src={collapsed ? logoos : logo}
-          alt="UniSport Logo"
-          onClick={handleLogoClick}
-          className={`cursor-pointer object-contain transition-all ${collapsed ? "h-4 mx-auto" : "h-10 w-auto"}`}
-        />
-
+      <div 
+        className="flex items-center gap-3 px-4 py-5 border-b border-sidebar-border cursor-pointer hover:bg-sidebar-accent/50 transition-colors" 
+        onClick={handleLogoClick}
+      >
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground font-display font-bold text-sm">
+          <Dumbbell className="h-5 w-5" />
+        </div>
         {!collapsed && (
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-7 w-7 text-sidebar-foreground/50 hover:text-sidebar-foreground"
-          onClick={toggleSidebar}>
-        <ChevronLeft className="h-4 w-4" />
-        </Button>
+          <div className="flex flex-col">
+            <span className="font-display font-bold text-sm text-sidebar-foreground">UniSport</span>
+          </div>
         )}
-
+        {!collapsed && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="ml-auto h-7 w-7 text-sidebar-foreground/50 hover:text-sidebar-foreground"
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleSidebar();
+            }}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+        )}
       </div>
 
       <SidebarContent className="pt-2">
         <SidebarGroup>
-          {!collapsed && <SidebarGroupLabel className="text-sidebar-foreground/40 uppercase text-[10px] tracking-widest font-body">{config.label} Menu</SidebarGroupLabel>}
+          {!collapsed && (
+            <SidebarGroupLabel className="text-sidebar-foreground/40 uppercase text-[10px] tracking-widest font-body">
+              {role === "admin" ? "Admin Menu" : `${config?.label} Menu`}
+            </SidebarGroupLabel>
+          )}
           <SidebarGroupContent>
-            <SidebarMenu>
-              {config.links.map((item) => (
-                <SidebarMenuItem key={item.title} className={item.title === "Dashboard" ? "mb-1" : ""}>
-                  <SidebarMenuButton asChild onClick={(e) => e.stopPropagation()}>
-                    <NavLink
-                      to={item.url}
-                      end={item.title === "Dashboard"}
-                      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors
-                                  text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground
-                                  ${collapsed ? "justify-center" : ""} `}
-                      activeClassName={`bg-sidebar-accent text-sidebar-primary font-medium
-                                      ${collapsed ? "border-2 border-orange-400 bg-orange-400 text-white rounded-xl p-2 flex justify-center items-center" : ""}`}
-                    >
-                      <item.icon className="h-4 w-4 shrink-0" />
-                      {!collapsed && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
+            {role === "admin" ? (
+              <div className="space-y-1">
+                {adminLinksNew.map((item) => (
+                  <NavLink
+                     key={item.title}
+                     to={item.url}
+                     className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                     activeClassName="bg-sidebar-accent text-sidebar-primary font-medium">
+                     <item.icon className="h-4 w-4 shrink-0" />
+                      <span>{item.title}</span>
+                  </NavLink>
+                ))}
+                {/* Sports Management */}
+                <div>
+                  <button
+                    onClick={toggleSportsMenu}
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                  >
+                    <Trophy className="h-4 w-4 shrink-0" />
+                    <span className="flex-1 text-left">Sports Management</span>
+                    {sportsMenuOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                  </button>
+                  {sportsMenuOpen && !collapsed && (
+                    <div className="mt-1 space-y-1 pl-8">
+                      {sportsManagementLinks.map((item) => (
+                        <NavLink
+                          key={item.title}
+                          to={item.url}
+                          className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                          activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
+                        >
+                          <item.icon className="h-4 w-4 shrink-0" />
+                          <span>{item.title}</span>
+                        </NavLink>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* User Management */}
+                <div>
+                  <button
+                    onClick={toggleUserMenu}
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                  >
+                    <Users className="h-4 w-4 shrink-0" />
+                    <span className="flex-1 text-left">User Management</span>
+                    {userMenuOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                  </button>
+                  {userMenuOpen && !collapsed && (
+                    <div className="mt-1 space-y-1 pl-8">
+                      {userManagementLinks.map((item) => (
+                        <NavLink
+                          key={item.title}
+                          to={item.url}
+                          className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                          activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
+                        >
+                          <item.icon className="h-4 w-4 shrink-0" />
+                          <span>{item.title}</span>
+                        </NavLink>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Event Management */}
+                <div>
+                  <button
+                    onClick={toggleEventMenu}
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                  >
+                    <Medal className="h-4 w-4 shrink-0" />
+                    <span className="flex-1 text-left">Event Management</span>
+                    {eventMenuOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                  </button>
+                  {eventMenuOpen && !collapsed && (
+                    <div className="mt-1 space-y-1 pl-8">
+                      {eventManagementLinks.map((item) => (
+                        <NavLink
+                          key={item.title}
+                          to={item.url}
+                          className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                          activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
+                        >
+                          <item.icon className="h-4 w-4 shrink-0" />
+                          <span>{item.title}</span>
+                        </NavLink>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Payment Management */}
+                <div>
+                  <button
+                    onClick={togglePaymentMenu}
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                  >
+                    <DollarSign className="h-4 w-4 shrink-0" />
+                    <span className="flex-1 text-left">Payment Management</span>
+                    {paymentMenuOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                  </button>
+                  {paymentMenuOpen && !collapsed && (
+                    <div className="mt-1 space-y-1 pl-8">
+                      {paymentManagementLinks.map((item) => (
+                        <NavLink
+                          key={item.title}
+                          to={item.url}
+                          className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                          activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
+                        >
+                          <item.icon className="h-4 w-4 shrink-0" />
+                          <span>{item.title}</span>
+                        </NavLink>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Inventory Management */}
+                <div>
+                  <button
+                    onClick={toggleInventoryMenu}
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                  >
+                    <Package className="h-4 w-4 shrink-0" />
+                    <span className="flex-1 text-left">Inventory Management</span>
+                    {inventoryMenuOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                  </button>
+                  {inventoryMenuOpen && !collapsed && (
+                    <div className="mt-1 space-y-1 pl-8">
+                      {inventoryManagementLinks.map((item) => (
+                        <NavLink
+                          key={item.title}
+                          to={item.url}
+                          className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                          activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
+                        >
+                          <item.icon className="h-4 w-4 shrink-0" />
+                          <span>{item.title}</span>
+                        </NavLink>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Merchandise Management */}
+                <div>
+                  <button
+                    onClick={toggleMerchandiseMenu}
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                  >
+                    <Package className="h-4 w-4 shrink-0" />
+                    <span className="flex-1 text-left">Merch Management</span>
+                    {merchandiseMenuOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                  </button>
+                  {merchandiseMenuOpen && !collapsed && (
+                    <div className="mt-1 space-y-1 pl-8">
+                      {merchandiseManagementLinks.map((item) => (
+                        <NavLink
+                          key={item.title}
+                          to={item.url}
+                          className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                          activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
+                        >
+                          <item.icon className="h-4 w-4 shrink-0" />
+                          <span>{item.title}</span>
+                        </NavLink>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : role === "student" ? (
+              <div className="space-y-1">
+
+                {studentLinksNew.map((item) => (
+                  <NavLink
+                     key={item.title}
+                     to={item.url}
+                     className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                     activeClassName="bg-sidebar-accent text-sidebar-primary font-medium">
+                     <item.icon className="h-4 w-4 shrink-0" />
+                      <span>{item.title}</span>
+                  </NavLink>
+                ))}
+
+                {/* Sports */}
+                <div>
+                  <button
+                    onClick={toggleSportsMenu}
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                  >
+                    <BookOpen className="h-4 w-4 shrink-0" />
+                    <span className="flex-1 text-left">Sports</span>
+                    {sportsMenuOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                  </button>
+                  {sportsMenuOpen && !collapsed && (
+                    <div className="mt-1 space-y-1 pl-8">
+                      {studentSportsLinks.map((item) => (
+                        <NavLink
+                          key={item.title}
+                          to={item.url}
+                          className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                          activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
+                        >
+                          <item.icon className="h-4 w-4 shrink-0" />
+                          <span>{item.title}</span>
+                        </NavLink>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Events */}
+                <div>
+                  <button
+                    onClick={toggleEventMenu}
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                  >
+                    <Medal className="h-4 w-4 shrink-0" />
+                    <span className="flex-1 text-left">Events</span>
+                    {eventMenuOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                  </button>
+                  {eventMenuOpen && !collapsed && (
+                    <div className="mt-1 space-y-1 pl-8">
+                      {studentEventLinks.map((item) => (
+                        <NavLink
+                          key={item.title}
+                          to={item.url}
+                          className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                          activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
+                        >
+                          <item.icon className="h-4 w-4 shrink-0" />
+                          <span>{item.title}</span>
+                        </NavLink>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Inventory */}
+                <div>
+                  <button
+                    onClick={toggleInventoryMenu}
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                  >
+                    <Package className="h-4 w-4 shrink-0" />
+                    <span className="flex-1 text-left">Inventory</span>
+                    {inventoryMenuOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                  </button>
+                  {inventoryMenuOpen && !collapsed && (
+                    <div className="mt-1 space-y-1 pl-8">
+                      {studentInventoryLinks.map((item) => (
+                        <NavLink
+                          key={item.title}
+                          to={item.url}
+                          className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                          activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
+                        >
+                          <item.icon className="h-4 w-4 shrink-0" />
+                          <span>{item.title}</span>
+                        </NavLink>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Merchandise */}
+                <div>
+                  <button
+                    onClick={toggleMerchandiseMenu}
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                  >
+                    <Package className="h-4 w-4 shrink-0" />
+                    <span className="flex-1 text-left">Merchandise</span>
+                    {merchandiseMenuOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                  </button>
+                  {merchandiseMenuOpen && !collapsed && (
+                    <div className="mt-1 space-y-1 pl-8">
+                      {studentMerchandiseLinks.map((item) => (
+                        <NavLink
+                          key={item.title}
+                          to={item.url}
+                          className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                          activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
+                        >
+                          <item.icon className="h-4 w-4 shrink-0" />
+                          <span>{item.title}</span>
+                        </NavLink>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Payments */}
+                <div>
+                  <button
+                    onClick={togglePaymentMenu}
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                  >
+                    <CreditCard className="h-4 w-4 shrink-0" />
+                    <span className="flex-1 text-left">Payments</span>
+                    {paymentMenuOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                  </button>
+                  {paymentMenuOpen && !collapsed && (
+                    <div className="mt-1 space-y-1 pl-8">
+                      {studentPaymentLinks.map((item) => (
+                        <NavLink
+                          key={item.title}
+                          to={item.url}
+                          className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                          activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
+                        >
+                          <item.icon className="h-4 w-4 shrink-0" />
+                          <span>{item.title}</span>
+                        </NavLink>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <SidebarMenu>
+                {config?.links.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild>
+                      <NavLink
+                        to={item.url}
+                        end={item.url === `/${role}`}
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors text-sm"
+                        activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
+                      >
+                        <item.icon className="h-4 w-4 shrink-0" />
+                        {!collapsed && <span>{item.title}</span>}
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            )}
           </SidebarGroupContent>
         </SidebarGroup>
-       
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border p-4">
-        {!collapsed && user && (
+        {!collapsed && (
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-full bg-sidebar-primary/20 flex items-center justify-center text-sidebar-primary font-display font-bold text-xs">
-                {user.name.split(" ").map(n => n[0]).join("")}
+              <div className="h-8 w-8 rounded-full bg-sidebar-primary/20 flex items-center justify-center text-sidebar-primary font-display font-bold text-xs uppercase">
+                {user?.name
+                  ?.split(" ")
+                  .map((namePart) => namePart[0])
+                  .join("") || "?"}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-medium text-sidebar-foreground truncate">{user.name}</p>
-                <p className="text-[10px] text-sidebar-foreground/50 truncate">{user.email}</p>
+                <p className="text-xs font-medium text-sidebar-foreground truncate">{user?.name || "Loading..."}</p>
+                <p className="text-[10px] text-sidebar-foreground/50 truncate">{user?.email || ""}</p>
               </div>
             </div>
-            
-            <Button 
-              variant="default" 
-              className="w-full justify-centre mt-2 bg-orange-400 hover:bg-orange-500 text-white border-0"  
-              size="sm"
-              onClick={handleSettingsClick}
+            <Button
+              variant="outline"
+              className="w-full justify-center bg-orange-400 border-sidebar-border text-sidebar-foreground hover:bg-orange-500"
+              onClick={() => navigate(getSettingsPath())}
             >
-              <Settings className="mr-2 h-4 w-4" />
+              <Settings className=" justify-center mr-2 h-4 w-4" />
               Profile Settings
             </Button>
-
           </div>
         )}
       </SidebarFooter>

@@ -4,12 +4,14 @@ import "./index.css";
 import { StrictMode } from "react";
 import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
+import { Toaster } from "sonner";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
       <AuthProvider>
         <App />
+        <Toaster position="top-right" richColors closeButton />
       </AuthProvider>
     </BrowserRouter>
   </StrictMode>

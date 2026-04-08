@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, ReactNode } from "react";
 import { User, UserRole } from "@/types";
 
+const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:5001";
+
 interface AuthContextType {
   user: User | null;
   role: UserRole | null;
@@ -8,6 +10,10 @@ interface AuthContextType {
   logout: () => void;
   switchRole: (role: UserRole) => void;
   loading: boolean;
+  isLoading: boolean;
+  updateProfile: (data: any) => Promise<{ success: boolean; message?: string }>;
+  changePassword: (currentPassword: string, newPassword: string) => Promise<{ success: boolean; message?: string }>;
+  deleteAccount: () => Promise<{ success: boolean; message?: string }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -38,13 +44,86 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const switchRole = (newRole: UserRole) => setRole(newRole);
 
+  const updateProfile = async (data: any): Promise<{ success: boolean; message?: string }> => {
+    const token = localStorage.getItem('token');
+    try {
+      const res = await fetch(`${API_BASE}/api/auth/profile`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify(data),
+      });
+
+      const json = await res.json();
+      if (!res.ok) return { success: false, message: json.message || 'Failed to update profile' };
+
+      if (json.data) {
+        const updatedUser = { ...user, ...json.data };
+        setUser(updatedUser as User);
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+      }
+
+      return { success: true, message: json.message || 'Profile updated successfully' };
+    } catch (error) {
+      console.error('Update profile error', error);
+      return { success: false, message: 'Network error, try again.' };
+    }
+  };
+
+  const changePassword = async (currentPassword: string, newPassword: string): Promise<{ success: boolean; message?: string }> => {
+    const token = localStorage.getItem('token');
+    try {
+      const res = await fetch(`${API_BASE}/api/auth/change-password`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+      const json = await res.json();
+      return { success: res.ok, message: json.message || 'Failed to change password' };
+    } catch (error) {
+      console.error('Change password error', error);
+      return { success: false, message: 'Network error, try again.' };
+    }
+  };
+
+  const deleteAccount = async (): Promise<{ success: boolean; message?: string }> => {
+    if (!user?.id) return { success: false, message: 'User id missing.' };
+    const token = localStorage.getItem('token');
+    try {
+      const res = await fetch(`${API_BASE}/api/users/${user.id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      });
+      const json = await res.json();
+      if (res.ok) {
+        setUser(null);
+        setRole(null);
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        return { success: true, message: json.message || 'Account deleted successfully' };
+      }
+      return { success: false, message: json.message || 'Failed to delete account' };
+    } catch (error) {
+      console.error('Delete account error', error);
+      return { success: false, message: 'Network error, try again.' };
+    }
+  };
+
   const login = async (email: string, password: string): Promise<{ success: boolean; error?: string; role?: UserRole }> => {
     
     // =========================================================================
     // REAL BACKEND LOGIN 
     // =========================================================================
     try {
-      const response = await fetch("http://localhost:5000/api/auth/login", {
+      const response = await fetch(`${API_BASE}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -113,7 +192,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, role, login, logout, switchRole, loading }}>
+    <AuthContext.Provider value={{ user, role, login, logout, switchRole, loading, isLoading: loading, updateProfile, changePassword, deleteAccount }}>
       {!loading && children}
     </AuthContext.Provider>
   );

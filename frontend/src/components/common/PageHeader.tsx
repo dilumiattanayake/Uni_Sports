@@ -9,8 +9,8 @@ interface PageHeaderProps {
 
 export function PageHeader({ title, description, children, className }: PageHeaderProps) {
   return (
-    <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6", className)}>
-      <div>
+    <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 vibrant-header p-4 animate-fade-in", className)}>
+      <div className="min-w-0">
         <h1 className="text-2xl font-display font-bold text-foreground">{title}</h1>
         {description && <p className="text-sm text-muted-foreground mt-1">{description}</p>}
       </div>

@@ -5,7 +5,7 @@
 module.exports = {
   // Server Config
   NODE_ENV: process.env.NODE_ENV || 'development',
-  PORT: process.env.PORT || 5000,
+  PORT: process.env.PORT || 5001,
 
   // Database Config
   MONGO_URI: process.env.MONGO_URI,
