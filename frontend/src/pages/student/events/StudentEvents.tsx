@@ -318,6 +318,12 @@ export default function StudentEvents() {
                         </button>
                       )}
                     </div>
+
+                    {event.myRegistrationStatus === 'waitlisted' && (
+                      <p className="mt-2 text-[11px] text-yellow-300/90 font-medium">
+                        Auto-promotion is enabled. You will move to confirmed when a slot opens.
+                      </p>
+                    )}
                   </div>
                 </div>
               )

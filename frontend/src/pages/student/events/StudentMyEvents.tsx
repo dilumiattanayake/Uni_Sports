@@ -14,6 +14,7 @@ export default function StudentMyEvents() {
   const [myRegistrations, setMyRegistrations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [promotionNotice, setPromotionNotice] = useState<string | null>(null);
 
   // Manage Modal State
   const [managingReg, setManagingReg] = useState<any | null>(null);
@@ -38,6 +39,7 @@ export default function StudentMyEvents() {
     return '';
   };
   const currentUserId = getUserId();
+  const statusSnapshotKey = `event_status_snapshot_${currentUserId || 'guest'}`;
 
   useEffect(() => {
     fetchMyRegistrations();
@@ -47,7 +49,36 @@ export default function StudentMyEvents() {
     try {
       setLoading(true);
       const response = await registrationService.getMyRegistrations();
-      setMyRegistrations(response.data || []);
+      const registrations = response.data || [];
+
+      let previousStatusByRegistrationId: Record<string, string> = {};
+      try {
+        const previousSnapshot = localStorage.getItem(statusSnapshotKey);
+        previousStatusByRegistrationId = previousSnapshot ? JSON.parse(previousSnapshot) : {};
+      } catch (snapshotError) {
+        previousStatusByRegistrationId = {};
+      }
+
+      const promotedEventTitles = registrations
+        .filter((reg: any) => previousStatusByRegistrationId[reg._id] === 'waitlisted' && reg.status === 'confirmed')
+        .map((reg: any) => reg.event?.title || 'an event');
+
+      if (promotedEventTitles.length > 0) {
+        const uniqueTitles = [...new Set(promotedEventTitles)];
+        setPromotionNotice(
+          uniqueTitles.length === 1
+            ? `Great news! You have been promoted from waitlist to confirmed for ${uniqueTitles[0]}.`
+            : `Great news! You have been promoted from waitlist to confirmed for ${uniqueTitles.length} events.`
+        );
+      }
+
+      const nextSnapshot = registrations.reduce((acc: Record<string, string>, reg: any) => {
+        acc[reg._id] = reg.status;
+        return acc;
+      }, {});
+      localStorage.setItem(statusSnapshotKey, JSON.stringify(nextSnapshot));
+
+      setMyRegistrations(registrations);
     } catch (err: any) {
       setError(err.message || 'Failed to load your registered events');
     } finally {
@@ -114,8 +145,8 @@ export default function StudentMyEvents() {
     if (window.confirm("Are you absolutely sure you want to cancel this registration? You will lose your spot entirely.")) {
       try {
         setIsUpdating(true);
-        await registrationService.cancelRegistration(managingReg._id);
-        alert("Registration cancelled.");
+        const response = await registrationService.cancelRegistration(managingReg._id);
+        alert(response.message || "Registration cancelled.");
         setManagingReg(null);
         fetchMyRegistrations();
       } catch (err: any) {
@@ -142,6 +173,18 @@ export default function StudentMyEvents() {
             Browse More Events
           </Link>
         </div>
+
+        {promotionNotice && (
+          <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-emerald-300 flex items-start justify-between gap-3">
+            <p className="text-sm font-medium">{promotionNotice}</p>
+            <button
+              onClick={() => setPromotionNotice(null)}
+              className="text-xs font-semibold text-emerald-200 hover:text-white transition"
+            >
+              Dismiss
+            </button>
+          </div>
+        )}
 
         {/* REGISTRATIONS GRID */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
