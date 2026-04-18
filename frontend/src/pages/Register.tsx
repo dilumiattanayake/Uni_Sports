@@ -205,7 +205,7 @@ function Register() {
             value={formData.name}
             onChange={handleChange}
             required
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-950"
+            className="w-full border text-black border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-950"
           />
 
           {/* Email */}
@@ -219,7 +219,7 @@ function Register() {
             value={formData.email}
             onChange={handleChange}
             required
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-950"
+            className="w-full text-black border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-950"
           />
 
           {/* Phone (Only for Coach) */}
@@ -236,7 +236,7 @@ function Register() {
               placeholder="Phone Number "
               value={formData.phone}
               onChange={handleChange}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-950"
+              className="w-full border text-black border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-950"
             />
           )}
 
@@ -247,11 +247,11 @@ function Register() {
           <input
             type="password"
             name="password"
-            placeholder="Enter your assword"
+            placeholder="Enter your password"
             value={formData.password}
             onChange={handleChange}
             required
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-950"
+            className="w-full border text-black border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-950"
           />
 
           {/* Confirm Password */}
@@ -265,7 +265,7 @@ function Register() {
             value={formData.confirmPassword}
             onChange={handleChange}
             required
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-950"
+            className="w-full border text-black border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-950"
           /><br></br>
           
 
