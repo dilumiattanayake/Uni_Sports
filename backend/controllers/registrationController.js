@@ -257,11 +257,37 @@ const cancelMyRegistration = async (req, res, next) => {
       return next(new ErrorResponse('You cannot cancel a registration for an ongoing or completed event.', 400));
     }
 
+    const shouldPromoteWaitlistedRegistration = registration.status === 'confirmed';
+    const eventDetails = registration.event;
+
     await registration.deleteOne();
+
+    let promotedRegistration = null;
+
+    if (shouldPromoteWaitlistedRegistration) {
+      promotedRegistration = await Registration.findOne({
+        event: registration.event._id,
+        status: 'waitlisted'
+      })
+        .sort({ createdAt: 1 })
+        .populate('event', 'title sport')
+        .populate('primaryStudent', 'name email studentId')
+        .populate('teamMembers', 'name email studentId');
+
+      if (promotedRegistration) {
+        promotedRegistration.status = 'confirmed';
+        await promotedRegistration.save();
+      }
+    }
 
     res.status(200).json({
       success: true,
-      message: 'Registration successfully cancelled.'
+      message: promotedRegistration
+        ? 'Registration successfully cancelled. The next waitlisted registration was promoted to confirmed.'
+        : 'Registration successfully cancelled.',
+      data: {
+        promotedRegistration,
+      }
     });
   } catch (error) {
     next(error);
