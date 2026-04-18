@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { registrationService } from '../../../services/registrationService';
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Link } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
 
 interface TeamMember {
   _id: string;
@@ -11,6 +12,7 @@ interface TeamMember {
 }
 
 export default function StudentMyEvents() {
+  const { user } = useAuth();
   const [myRegistrations, setMyRegistrations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -25,21 +27,13 @@ export default function StudentMyEvents() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
 
-  // Checks common localStorage keys used in MERN apps to find your actual logged-in ID
-  const getUserId = () => {
-    try {
-      const storageItem = localStorage.getItem('user') || localStorage.getItem('userInfo');
-      if (storageItem) {
-        const parsed = JSON.parse(storageItem);
-        return parsed._id || parsed.id || '';
-      }
-    } catch (e) {
-      console.error("Could not parse user from local storage");
-    }
-    return '';
-  };
-  const currentUserId = getUserId();
-  const statusSnapshotKey = `event_status_snapshot_${currentUserId || 'guest'}`;
+  const currentUserId = user?.id || '';
+  const statusSnapshotKey = currentUserId ? `event_status_snapshot_${currentUserId}` : null;
+
+  useEffect(() => {
+    setPromotionNotice(null);
+    setMyRegistrations([]);
+  }, [currentUserId]);
 
   useEffect(() => {
     fetchMyRegistrations();
@@ -52,11 +46,13 @@ export default function StudentMyEvents() {
       const registrations = response.data || [];
 
       let previousStatusByRegistrationId: Record<string, string> = {};
-      try {
-        const previousSnapshot = localStorage.getItem(statusSnapshotKey);
-        previousStatusByRegistrationId = previousSnapshot ? JSON.parse(previousSnapshot) : {};
-      } catch (snapshotError) {
-        previousStatusByRegistrationId = {};
+      if (statusSnapshotKey) {
+        try {
+          const previousSnapshot = localStorage.getItem(statusSnapshotKey);
+          previousStatusByRegistrationId = previousSnapshot ? JSON.parse(previousSnapshot) : {};
+        } catch (snapshotError) {
+          previousStatusByRegistrationId = {};
+        }
       }
 
       const promotedEventTitles = registrations
@@ -76,7 +72,9 @@ export default function StudentMyEvents() {
         acc[reg._id] = reg.status;
         return acc;
       }, {});
-      localStorage.setItem(statusSnapshotKey, JSON.stringify(nextSnapshot));
+      if (statusSnapshotKey) {
+        localStorage.setItem(statusSnapshotKey, JSON.stringify(nextSnapshot));
+      }
 
       setMyRegistrations(registrations);
     } catch (err: any) {
