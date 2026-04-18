@@ -3,6 +3,7 @@ import { eventService } from '../../../services/eventService';
 import { registrationService } from '../../../services/registrationService';
 import { sportService } from '../../../services/sportService';
 import { DashboardLayout } from "@/components/DashboardLayout";
+import { useAuth } from '@/context/AuthContext';
 
 // Define the shape of a team member for the UI
 interface TeamMember {
@@ -13,6 +14,7 @@ interface TeamMember {
 }
 
 export default function StudentEvents() {
+  const { user } = useAuth();
   const [events, setEvents] = useState<any[]>([]);
   const [sports, setSports] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -35,10 +37,12 @@ export default function StudentEvents() {
   // Search State (for Team Members)
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
+  const currentUserId = user?.id || (user as any)?._id || '';
+  const statusSnapshotKey = currentUserId ? `event_status_snapshot_${currentUserId}` : null;
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [currentUserId]);
 
   const fetchData = async () => {
     try {
@@ -51,6 +55,14 @@ export default function StudentEvents() {
 
       const allEvents = allEventsRes.data || [];
       const myRegistrations = myRegsRes.data || [];
+
+      if (statusSnapshotKey) {
+        const nextSnapshot = myRegistrations.reduce((acc: Record<string, string>, reg: any) => {
+          acc[reg._id] = reg.status;
+          return acc;
+        }, {});
+        localStorage.setItem(statusSnapshotKey, JSON.stringify(nextSnapshot));
+      }
       
       const sportsData = (sportsRes as any).data || sportsRes || [];
       setSports(sportsData);

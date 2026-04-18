@@ -27,7 +27,7 @@ export default function StudentMyEvents() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
 
-  const currentUserId = user?.id || '';
+  const currentUserId = user?.id || (user as any)?._id || '';
   const statusSnapshotKey = currentUserId ? `event_status_snapshot_${currentUserId}` : null;
 
   useEffect(() => {
@@ -37,7 +37,7 @@ export default function StudentMyEvents() {
 
   useEffect(() => {
     fetchMyRegistrations();
-  }, []);
+  }, [currentUserId]);
 
   const fetchMyRegistrations = async () => {
     try {
