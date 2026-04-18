@@ -6,7 +6,7 @@ import { NavLink } from "@/components/NavLink";
 import {
   LayoutDashboard, Trophy, Users, MapPin, Calendar, UserCheck, BookOpen, Settings,
   ChevronLeft, Medal, DollarSign, Package, Home, CalendarDays, CreditCard, Boxes,
-  Dumbbell, ChevronDown, ChevronRight, LogOut, Wallet, BarChart,
+  ChevronDown, ChevronRight, LogOut, Wallet, BarChart,
 } from "lucide-react";
 import {
   Sidebar,
@@ -21,8 +21,8 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import logo from "@/assets/Logo.jpg";
-import logoos from "@/assets/Logoos.jpg";
+import logo from "@/assets/unisportsidebar.png";
+import logoos from "@/assets/sidebarshort.png";
 
 const adminLinks = [
   { title: "Home", url: "/admin/home", icon: Home },
@@ -261,17 +261,16 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon" className="border-r-0">
       <div 
-        className="flex items-center gap-3 px-4 py-5 border-b border-sidebar-border cursor-pointer hover:bg-sidebar-accent/50 transition-colors" 
+        className={`flex items-center border-b border-sidebar-border cursor-pointer hover:bg-sidebar-accent/50 transition-colors ${
+          collapsed ? "justify-center px-2 py-4" : "gap-3 px-4 py-5"
+        }`}
         onClick={handleLogoClick}
       >
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground font-display font-bold text-sm">
-          <Dumbbell className="h-5 w-5" />
-        </div>
-        {!collapsed && (
-          <div className="flex flex-col">
-            <span className="font-display font-bold text-sm text-sidebar-foreground">UniSport</span>
-          </div>
-        )}
+        <img
+          src={collapsed ? logoos : logo}
+          alt="UniSport logo"
+          className={collapsed ? "h-8 w-8 shrink-0 object-contain" : "h-9 w-auto shrink-0 object-contain"}
+        />
         {!collapsed && (
           <Button
             variant="ghost"
