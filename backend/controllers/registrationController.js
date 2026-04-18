@@ -3,6 +3,26 @@ const Event = require('../models/Event');
 const { ErrorResponse } = require('../middleware/errorHandler');
 const User = require('../models/User'); // Adjust path to your User model
 
+const getRegistrationParticipantCount = (registration) => {
+  if (!registration) return 0;
+  if (registration.registrationType === 'team') {
+    return 1 + (registration.teamMembers?.length || 0);
+  }
+  return 1;
+};
+
+const getConfirmedParticipantCount = async (eventId) => {
+  const confirmedRegistrations = await Registration.find({
+    event: eventId,
+    status: 'confirmed'
+  }).select('registrationType teamMembers');
+
+  return confirmedRegistrations.reduce(
+    (sum, registration) => sum + getRegistrationParticipantCount(registration),
+    0
+  );
+};
+
 /**
  * @desc    Submit a new registration (Individual or Team)
  * @route   POST /api/events/:eventId/registrations
@@ -48,15 +68,33 @@ const createRegistration = async (req, res, next) => {
       return next(new ErrorResponse('You are already registered as a team member in another team', 400));
     }
 
-    // 4. Calculate Capacity & Status (Confirmed vs Waitlisted)
-    // Here we count total *registrations* (1 individual = 1 slot, 1 team = 1 slot). 
-    // If you want to count total heads, you would aggregate the size of the teamMembers arrays.
-    const confirmedCount = await Registration.countDocuments({ 
-      event: eventId, 
-      status: 'confirmed' 
-    });
+    let normalizedTeamMembers = [];
+    let incomingParticipantCount = 1;
 
-    const status = confirmedCount < event.maxParticipants ? 'confirmed' : 'waitlisted';
+    if (registrationType === 'team') {
+      if (!teamName) {
+        return next(new ErrorResponse('Team name is required for team registrations', 400));
+      }
+
+      normalizedTeamMembers = [...new Set((teamMembers || []).map((memberId) => String(memberId)))];
+      if (normalizedTeamMembers.includes(String(studentId))) {
+        return next(new ErrorResponse('Team captain cannot be added as a team member', 400));
+      }
+
+      const totalTeamSize = normalizedTeamMembers.length + 1; // +1 for captain
+      if (totalTeamSize < event.minTeamSize || totalTeamSize > event.maxTeamSize) {
+        return next(new ErrorResponse(`Team size must be between ${event.minTeamSize} and ${event.maxTeamSize} members.`, 400));
+      }
+
+      incomingParticipantCount = totalTeamSize;
+    }
+
+    // 4. Calculate Capacity & Status (Confirmed vs Waitlisted)
+    // Team events consume slots by participant headcount, not by registration document count.
+    const confirmedParticipantCount = await getConfirmedParticipantCount(eventId);
+    const status = confirmedParticipantCount + incomingParticipantCount <= event.maxParticipants
+      ? 'confirmed'
+      : 'waitlisted';
 
     // 5. Create the Registration Object
     const registrationData = {
@@ -67,11 +105,8 @@ const createRegistration = async (req, res, next) => {
     };
 
     if (registrationType === 'team') {
-      if (!teamName) {
-        return next(new ErrorResponse('Team name is required for team registrations', 400));
-      }
       registrationData.teamName = teamName;
-      registrationData.teamMembers = teamMembers || [];
+      registrationData.teamMembers = normalizedTeamMembers;
     }
 
     // 6. Save to Database
@@ -258,35 +293,44 @@ const cancelMyRegistration = async (req, res, next) => {
     }
 
     const shouldPromoteWaitlistedRegistration = registration.status === 'confirmed';
-    const eventDetails = registration.event;
 
     await registration.deleteOne();
 
-    let promotedRegistration = null;
+    const promotedRegistrations = [];
 
     if (shouldPromoteWaitlistedRegistration) {
-      promotedRegistration = await Registration.findOne({
+      const waitlistedRegistrations = await Registration.find({
         event: registration.event._id,
         status: 'waitlisted'
       })
-        .sort({ createdAt: 1 })
-        .populate('event', 'title sport')
-        .populate('primaryStudent', 'name email studentId')
-        .populate('teamMembers', 'name email studentId');
+        .sort({ createdAt: 1 });
 
-      if (promotedRegistration) {
-        promotedRegistration.status = 'confirmed';
-        await promotedRegistration.save();
+      let confirmedParticipantCount = await getConfirmedParticipantCount(registration.event._id);
+
+      for (const waitlisted of waitlistedRegistrations) {
+        const waitlistedParticipantCount = getRegistrationParticipantCount(waitlisted);
+        if (confirmedParticipantCount + waitlistedParticipantCount > registration.event.maxParticipants) {
+          continue;
+        }
+
+        waitlisted.status = 'confirmed';
+        await waitlisted.save();
+
+        confirmedParticipantCount += waitlistedParticipantCount;
+        promotedRegistrations.push(waitlisted);
       }
     }
 
+    const promotedRegistration = promotedRegistrations[0] || null;
+
     res.status(200).json({
       success: true,
-      message: promotedRegistration
-        ? 'Registration successfully cancelled. The next waitlisted registration was promoted to confirmed.'
+      message: promotedRegistrations.length > 0
+        ? `Registration successfully cancelled. ${promotedRegistrations.length} waitlisted registration(s) promoted to confirmed.`
         : 'Registration successfully cancelled.',
       data: {
         promotedRegistration,
+        promotedCount: promotedRegistrations.length,
       }
     });
   } catch (error) {
