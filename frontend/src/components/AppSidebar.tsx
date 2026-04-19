@@ -1,6 +1,6 @@
 import { useAuth } from "@/context/AuthContext";
 import { UserRole } from "@/types";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type MouseEvent } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { NavLink } from "@/components/NavLink";
 import {
@@ -239,11 +239,27 @@ export function AppSidebar() {
                        location.pathname.includes("/admin/locations");
 
   const hasUserPath = location.pathname.includes("/admin/students") || 
-                     location.pathname.includes("/admin/coaches");
+                     location.pathname.includes("/admin/coaches") ||
+                     location.pathname.includes("/admin/users");
 
-  const hasPaymentPath = location.pathname.includes("/admin/payments");
+  const hasPaymentPath = location.pathname.includes("/admin/payments") ||
+                         location.pathname.includes("/admin/payment/transaction") ||
+                         location.pathname.includes("/admin/payment/report");
   const hasInventoryPath = location.pathname.includes("/admin/inventory");
   const hasEventPath = location.pathname.includes("/admin/events");
+  const hasMerchandisePath = location.pathname.includes("/admin/merchandise") ||
+                             location.pathname.includes("/admin/orders");
+
+  const hasStudentSportsPath = location.pathname.includes("/student/sports") ||
+                               location.pathname.includes("/student/sessions") ||
+                               location.pathname.includes("/student/requests");
+  const hasStudentEventPath = location.pathname.includes("/student/events");
+  const hasStudentInventoryPath = location.pathname.includes("/student/inventory");
+  const hasStudentMerchandisePath = location.pathname.includes("/student/merchandise");
+  const hasStudentPaymentPath = location.pathname.includes("/student/payments");
+
+  const submenuActiveClassName = "-ml-8 w-[calc(100%+2rem)] pl-10 bg-gray-500/35 text-orange-500 font-semibold";
+  const collapsedMainActiveClassName = "bg-orange-300/20 text-orange-500";
 
   const handleLogoClick = () => {
     if (role === "admin") navigate("/AdminDashboard");
@@ -256,6 +272,19 @@ export function AppSidebar() {
     if (role === "coach") return "/coach/settings";
     if (role === "student") return "/student/settings";
     return "/";
+  };
+
+  const handleCollapsedMenuClick = (event: MouseEvent<HTMLDivElement>) => {
+    if (!collapsed) return;
+
+    const target = event.target as HTMLElement;
+    const clickedMenuControl = target.closest("a,button");
+
+    if (!clickedMenuControl) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    toggleSidebar();
   };
 
   return (
@@ -286,7 +315,14 @@ export function AppSidebar() {
         )}
       </div>
 
-      <SidebarContent className="pt-2">
+      <SidebarContent
+        className={
+          collapsed
+            ? "pt-2 [&_a]:justify-center [&_a]:px-2 [&_a]:gap-0 [&_a>span]:hidden [&_button]:justify-center [&_button]:px-2 [&_button]:gap-0 [&_button>span]:hidden [&_button_svg:last-child]:hidden"
+            : "pt-2"
+        }
+        onClickCapture={handleCollapsedMenuClick}
+      >
         <SidebarGroup>
           {!collapsed && (
             <SidebarGroupLabel className="text-sidebar-foreground/40 uppercase text-[10px] tracking-widest font-body">
@@ -310,7 +346,9 @@ export function AppSidebar() {
                 <div>
                   <button
                     onClick={toggleSportsMenu}
-                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                    className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground ${
+                      collapsed && hasSportsPath ? collapsedMainActiveClassName : ""
+                    }`}
                   >
                     <Trophy className="h-4 w-4 shrink-0" />
                     <span className="flex-1 text-left">Sports Management</span>
@@ -323,7 +361,7 @@ export function AppSidebar() {
                           key={item.title}
                           to={item.url}
                           className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
-                          activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
+                          activeClassName={submenuActiveClassName}
                         >
                           <item.icon className="h-4 w-4 shrink-0" />
                           <span>{item.title}</span>
@@ -337,7 +375,9 @@ export function AppSidebar() {
                 <div>
                   <button
                     onClick={toggleUserMenu}
-                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                    className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground ${
+                      collapsed && hasUserPath ? collapsedMainActiveClassName : ""
+                    }`}
                   >
                     <Users className="h-4 w-4 shrink-0" />
                     <span className="flex-1 text-left">User Management</span>
@@ -350,7 +390,7 @@ export function AppSidebar() {
                           key={item.title}
                           to={item.url}
                           className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
-                          activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
+                          activeClassName={submenuActiveClassName}
                         >
                           <item.icon className="h-4 w-4 shrink-0" />
                           <span>{item.title}</span>
@@ -364,7 +404,9 @@ export function AppSidebar() {
                 <div>
                   <button
                     onClick={toggleEventMenu}
-                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                    className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground ${
+                      collapsed && hasEventPath ? collapsedMainActiveClassName : ""
+                    }`}
                   >
                     <Medal className="h-4 w-4 shrink-0" />
                     <span className="flex-1 text-left">Event Management</span>
@@ -377,7 +419,7 @@ export function AppSidebar() {
                           key={item.title}
                           to={item.url}
                           className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
-                          activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
+                          activeClassName={submenuActiveClassName}
                         >
                           <item.icon className="h-4 w-4 shrink-0" />
                           <span>{item.title}</span>
@@ -391,7 +433,9 @@ export function AppSidebar() {
                 <div>
                   <button
                     onClick={togglePaymentMenu}
-                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                    className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground ${
+                      collapsed && hasPaymentPath ? collapsedMainActiveClassName : ""
+                    }`}
                   >
                     <DollarSign className="h-4 w-4 shrink-0" />
                     <span className="flex-1 text-left">Payment Management</span>
@@ -404,7 +448,7 @@ export function AppSidebar() {
                           key={item.title}
                           to={item.url}
                           className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
-                          activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
+                          activeClassName={submenuActiveClassName}
                         >
                           <item.icon className="h-4 w-4 shrink-0" />
                           <span>{item.title}</span>
@@ -418,7 +462,9 @@ export function AppSidebar() {
                 <div>
                   <button
                     onClick={toggleInventoryMenu}
-                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                    className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground ${
+                      collapsed && hasInventoryPath ? collapsedMainActiveClassName : ""
+                    }`}
                   >
                     <Package className="h-4 w-4 shrink-0" />
                     <span className="flex-1 text-left">Inventory Management</span>
@@ -431,7 +477,7 @@ export function AppSidebar() {
                           key={item.title}
                           to={item.url}
                           className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
-                          activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
+                          activeClassName={submenuActiveClassName}
                         >
                           <item.icon className="h-4 w-4 shrink-0" />
                           <span>{item.title}</span>
@@ -445,7 +491,9 @@ export function AppSidebar() {
                 <div>
                   <button
                     onClick={toggleMerchandiseMenu}
-                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                    className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground ${
+                      collapsed && hasMerchandisePath ? collapsedMainActiveClassName : ""
+                    }`}
                   >
                     <Package className="h-4 w-4 shrink-0" />
                     <span className="flex-1 text-left">Merch Management</span>
@@ -458,7 +506,7 @@ export function AppSidebar() {
                           key={item.title}
                           to={item.url}
                           className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
-                          activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
+                          activeClassName={submenuActiveClassName}
                         >
                           <item.icon className="h-4 w-4 shrink-0" />
                           <span>{item.title}</span>
@@ -486,7 +534,9 @@ export function AppSidebar() {
                 <div>
                   <button
                     onClick={toggleSportsMenu}
-                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                    className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground ${
+                      collapsed && hasStudentSportsPath ? collapsedMainActiveClassName : ""
+                    }`}
                   >
                     <BookOpen className="h-4 w-4 shrink-0" />
                     <span className="flex-1 text-left">Sports</span>
@@ -499,7 +549,7 @@ export function AppSidebar() {
                           key={item.title}
                           to={item.url}
                           className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
-                          activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
+                          activeClassName={submenuActiveClassName}
                         >
                           <item.icon className="h-4 w-4 shrink-0" />
                           <span>{item.title}</span>
@@ -513,7 +563,9 @@ export function AppSidebar() {
                 <div>
                   <button
                     onClick={toggleEventMenu}
-                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                    className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground ${
+                      collapsed && hasStudentEventPath ? collapsedMainActiveClassName : ""
+                    }`}
                   >
                     <Medal className="h-4 w-4 shrink-0" />
                     <span className="flex-1 text-left">Events</span>
@@ -526,7 +578,7 @@ export function AppSidebar() {
                           key={item.title}
                           to={item.url}
                           className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
-                          activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
+                          activeClassName={submenuActiveClassName}
                         >
                           <item.icon className="h-4 w-4 shrink-0" />
                           <span>{item.title}</span>
@@ -540,7 +592,9 @@ export function AppSidebar() {
                 <div>
                   <button
                     onClick={toggleInventoryMenu}
-                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                    className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground ${
+                      collapsed && hasStudentInventoryPath ? collapsedMainActiveClassName : ""
+                    }`}
                   >
                     <Package className="h-4 w-4 shrink-0" />
                     <span className="flex-1 text-left">Inventory</span>
@@ -553,7 +607,7 @@ export function AppSidebar() {
                           key={item.title}
                           to={item.url}
                           className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
-                          activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
+                          activeClassName={submenuActiveClassName}
                         >
                           <item.icon className="h-4 w-4 shrink-0" />
                           <span>{item.title}</span>
@@ -567,7 +621,9 @@ export function AppSidebar() {
                 <div>
                   <button
                     onClick={toggleMerchandiseMenu}
-                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                    className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground ${
+                      collapsed && hasStudentMerchandisePath ? collapsedMainActiveClassName : ""
+                    }`}
                   >
                     <Package className="h-4 w-4 shrink-0" />
                     <span className="flex-1 text-left">Merchandise</span>
@@ -580,7 +636,7 @@ export function AppSidebar() {
                           key={item.title}
                           to={item.url}
                           className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
-                          activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
+                          activeClassName={submenuActiveClassName}
                         >
                           <item.icon className="h-4 w-4 shrink-0" />
                           <span>{item.title}</span>
@@ -594,7 +650,9 @@ export function AppSidebar() {
                 <div>
                   <button
                     onClick={togglePaymentMenu}
-                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                    className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground ${
+                      collapsed && hasStudentPaymentPath ? collapsedMainActiveClassName : ""
+                    }`}
                   >
                     <CreditCard className="h-4 w-4 shrink-0" />
                     <span className="flex-1 text-left">Payments</span>
@@ -607,7 +665,7 @@ export function AppSidebar() {
                           key={item.title}
                           to={item.url}
                           className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
-                          activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
+                          activeClassName={submenuActiveClassName}
                         >
                           <item.icon className="h-4 w-4 shrink-0" />
                           <span>{item.title}</span>
