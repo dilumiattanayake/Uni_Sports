@@ -20,13 +20,6 @@ router.get('/', protect, authorize('admin'), paymentController.getPayments);
 router.get('/my', protect, authorize('student'), paymentController.getMyPayments);
 
 /**
- * @route   GET /api/payments/:id
- * @desc    Get single payment
- * @access  Private
- */
-router.get('/:id', protect, paymentController.getPayment);
-
-/**
  * @route   POST /api/payments
  * @desc    Create direct payment (event/item)
  * @access  Private/Student
@@ -142,5 +135,12 @@ router.get(
   authorize('admin'),
   paymentController.getPaymentReport
 );
+
+/**
+ * @route   GET /api/payments/:id
+ * @desc    Get single payment
+ * @access  Private
+ */
+router.get('/:id', protect, paymentController.getPayment);
 
 module.exports = router;
