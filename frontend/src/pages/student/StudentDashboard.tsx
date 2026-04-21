@@ -8,6 +8,7 @@ import { toast } from "sonner"
 import sportsImage from "@/assets/sports.jpeg"
 import sportsEvents from "@/assets/events.jpg"
 import sportsItems from "@/assets/sports items.jpg"
+import merchendise from "@/assets/merchendises.png"
 import {
   Carousel,
   CarouselContent,
@@ -192,11 +193,12 @@ const StudentDashboard = () => {
     },
   ]
 
-  const sports = acceptedSessions.length > 0 
-    ? acceptedSessions 
-    : [
-        { name: "No sessions yet", date: "Join a sport to see sessions", time: "", location: "" },
-      ]
+  const systemSports = [
+    "Cricket",
+    "Foot Ball",
+    "Badminton",
+    "Volleyball",
+  ]
 
   const inventoryItems = [
     { category: "Cricket", item: "Official Jersey" },
@@ -264,9 +266,9 @@ const StudentDashboard = () => {
       title: "Merchandise",
       description: "Shop jerseys, kits, and official items.",
       actionLabel: "Shop Now",
-      href: "/student/payments",
+      href: "/student/merchandise",
       bgClass: "from-pink-600 to-rose-500",
-      image: "",
+      image: merchendise,
     },
   ]
 
@@ -414,46 +416,26 @@ const StudentDashboard = () => {
         <div className="grid gap-6 lg:grid-cols-3">
           <section className="rounded-xl border border-border bg-card p-6 shadow-sm">
             <div className="mb-5 flex items-center justify-between">
-              <h2 className="font-semibold text-foreground">My Sessions</h2>
-              <Link to="/student/sessions" className="text-sm font-semibold text-primary hover:underline">
-                View all
+              <h2 className="font-semibold text-foreground">Sports System</h2>
+              <Link to="/student/sports" className="text-sm font-semibold text-primary hover:underline">
+                View all sports
               </Link>
             </div>
             <div className="space-y-3">
-              {acceptedSessions.length === 0 ? (
-                <div className="p-6 text-center text-muted-foreground">
-                  <p className="text-sm">No booked sessions yet</p>
-                  <p className="text-xs mt-2">Browse sports to join sessions</p>
+              {systemSports.map((sport) => (
+                <div
+                  key={sport}
+                  className="flex items-center justify-between rounded-lg border border-border bg-muted/50 px-4 py-3 text-sm transition hover:bg-muted/80"
+                >
+                  <div>
+                    <p className="font-semibold text-foreground">{sport}</p>
+                    <p className="text-xs text-muted-foreground mt-1">Available in the sports system</p>
+                  </div>
+                  <span className="rounded-full bg-indigo-100 px-2.5 py-0.5 text-xs font-semibold text-indigo-700">
+                    Sport
+                  </span>
                 </div>
-              ) : (
-                acceptedSessions.map((sport, idx) => {
-                  const rawSession = acceptedSessionsRaw[idx]
-                  return (
-                    <div
-                      key={`${sport.name}-${sport.date}-${sport.time}`}
-                      className="flex items-start justify-between rounded-lg border border-green-200 bg-green-50 px-4 py-4 text-sm transition hover:bg-green-100"
-                    >
-                      <div className="flex-1">
-                        <p className="font-semibold text-gray-900">{sport.name}</p>
-                        <p className="text-xs text-gray-600 mt-1">
-                          📅 {sport.date} · ⏱️ {sport.time}
-                        </p>
-                        <p className="text-xs text-gray-600">
-                          📍 {sport.location}
-                        </p>
-                      </div>
-                      <button
-                        onClick={() => handleCancelSession(rawSession?.session?._id, sport.name)}
-                        disabled={deletingId === rawSession?.session?._id}
-                        className="ml-3 px-2 py-1 text-red-600 hover:bg-red-100 rounded transition disabled:opacity-50 text-xs font-medium whitespace-nowrap"
-                        title="Cancel this session booking"
-                      >
-                        {deletingId === rawSession?.session?._id ? "Cancelling..." : "Cancel"}
-                      </button>
-                    </div>
-                  )
-                })
-              )}
+              ))}
             </div>
           </section>
 
