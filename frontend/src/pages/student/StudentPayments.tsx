@@ -483,7 +483,7 @@ export default function StudentPayments() {
            <Card>
             <CardHeader>
                <CardTitle>Billing Details</CardTitle>
-                       <p className="mt-1 text-xs text-gray-600">
+                       <p className="mt-1 text-xs text-gray-200">
                    Fill out or edit your billing information below.</p>
             </CardHeader>
             <CardContent>
@@ -493,7 +493,7 @@ export default function StudentPayments() {
             
              <div className="space-y-4">
               <div className="flex flex-col">
-               <label className="text-sm font-medium text-gray-700">Full Name</label>
+               <label className="text-sm font-medium text-white">Full Name</label>
                <input
                type="text"
                disabled={!isEditing}
@@ -505,7 +505,7 @@ export default function StudentPayments() {
               </div>
 
              <div className="flex flex-col">
-              <label className="text-sm font-medium text-gray-700">Email</label>
+              <label className="text-sm font-medium text-white">Email</label>
               <input
               type="email"
                disabled={!isEditing}
@@ -517,7 +517,7 @@ export default function StudentPayments() {
              </div>
 
              <div className="flex flex-col">
-              <label className="text-sm font-medium text-gray-700">Phone Number</label>
+              <label className="text-sm font-medium text-white">Phone Number</label>
               <input
               type="tel"
                disabled={!isEditing}
@@ -529,7 +529,7 @@ export default function StudentPayments() {
              </div>
 
              <div className="flex flex-col">
-              <label className="text-sm font-medium text-gray-700">Phone Number 2 (Optional)</label>
+              <label className="text-sm font-medium text-white">Phone Number 2 (Optional)</label>
               <input
               type="tel"
                disabled={!isEditing}
@@ -542,7 +542,7 @@ export default function StudentPayments() {
 
             <div className="space-y-4">
              <div className="flex flex-col">
-              <label className="text-sm font-medium text-gray-700">Address</label>
+              <label className="text-sm font-medium text-white">Address</label>
               <input
                type="text"
                 disabled={!isEditing}
@@ -554,7 +554,7 @@ export default function StudentPayments() {
              </div>
 
              <div className="flex flex-col">
-              <label className="text-sm font-medium text-gray-700">City</label>
+              <label className="text-sm font-medium text-white">City</label>
               <input
                type="text"
                 disabled={!isEditing}
@@ -566,7 +566,7 @@ export default function StudentPayments() {
              </div>
              
              <div className="flex flex-col">
-              <label className="text-sm font-medium text-gray-700">District/Province</label>
+              <label className="text-sm font-medium text-white">District / Province</label>
               <input
                type="text"
                 disabled={!isEditing}
@@ -578,7 +578,7 @@ export default function StudentPayments() {
              </div>
 
              <div className="flex flex-col">
-              <label className="text-sm font-medium text-gray-700">Postal Code</label>
+              <label className="text-sm font-medium text-white">Postal Code</label>
               <input
                type="text"
                 disabled={!isEditing}
@@ -590,7 +590,7 @@ export default function StudentPayments() {
              </div>
 
              <div className="flex flex-col">
-              <label className="text-sm font-medium text-gray-700">Country</label>
+              <label className="text-sm font-medium text-white">Country</label>
               <input
                type="text"
                 disabled={!isEditing}
