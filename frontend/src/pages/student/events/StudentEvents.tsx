@@ -129,6 +129,8 @@ export default function StudentEvents() {
   const handleRegister = async () => {
     if (!selectedEvent) return;
 
+    const registrationType = selectedEvent.eventType === 'team' ? 'team' : 'individual';
+
     if (selectedEvent.eventType === 'team') {
       if (!teamName.trim()) {
         return alert("Please enter a Team Name to register.");
@@ -144,7 +146,7 @@ export default function StudentEvents() {
       setIsRegistering(true);
       
       const payload: any = {
-        registrationType: selectedEvent.eventType,
+        registrationType,
       };
 
       if (selectedEvent.eventType === 'team') {

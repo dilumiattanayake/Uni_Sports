@@ -32,6 +32,7 @@ const createRegistration = async (req, res, next) => {
   try {
     const { eventId } = req.params;
     const { registrationType, teamName, teamMembers } = req.body;
+    const normalizedRegistrationType = registrationType === 'solo' ? 'individual' : registrationType;
     const studentId = req.user.id || req.user._id;
 
     // 1. Verify the event exists
@@ -71,7 +72,7 @@ const createRegistration = async (req, res, next) => {
     let normalizedTeamMembers = [];
     let incomingParticipantCount = 1;
 
-    if (registrationType === 'team') {
+    if (normalizedRegistrationType === 'team') {
       if (!teamName) {
         return next(new ErrorResponse('Team name is required for team registrations', 400));
       }
@@ -100,11 +101,11 @@ const createRegistration = async (req, res, next) => {
     const registrationData = {
       event: eventId,
       primaryStudent: studentId,
-      registrationType,
+      registrationType: normalizedRegistrationType,
       status
     };
 
-    if (registrationType === 'team') {
+    if (normalizedRegistrationType === 'team') {
       registrationData.teamName = teamName;
       registrationData.teamMembers = normalizedTeamMembers;
     }
