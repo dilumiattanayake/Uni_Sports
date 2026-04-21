@@ -8,7 +8,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Eye, Loader } from "lucide-react";
-import { Link } from "react-router-dom";
 import { toast } from "sonner";
 
 type Payment = {
@@ -484,7 +483,7 @@ export default function StudentPayments() {
            <Card>
             <CardHeader>
                <CardTitle>Billing Details</CardTitle>
-                       <p className="mt-1 text-xs text-gray-600">
+                       <p className="mt-1 text-xs text-gray-200">
                    Fill out or edit your billing information below.</p>
             </CardHeader>
             <CardContent>
@@ -494,7 +493,7 @@ export default function StudentPayments() {
             
              <div className="space-y-4">
               <div className="flex flex-col">
-               <label className="text-sm font-medium text-gray-700">Full Name</label>
+               <label className="text-sm font-medium text-white">Full Name</label>
                <input
                type="text"
                disabled={!isEditing}
@@ -506,7 +505,7 @@ export default function StudentPayments() {
               </div>
 
              <div className="flex flex-col">
-              <label className="text-sm font-medium text-gray-700">Email</label>
+              <label className="text-sm font-medium text-white">Email</label>
               <input
               type="email"
                disabled={!isEditing}
@@ -518,7 +517,7 @@ export default function StudentPayments() {
              </div>
 
              <div className="flex flex-col">
-              <label className="text-sm font-medium text-gray-700">Phone Number</label>
+              <label className="text-sm font-medium text-white">Phone Number</label>
               <input
               type="tel"
                disabled={!isEditing}
@@ -530,7 +529,7 @@ export default function StudentPayments() {
              </div>
 
              <div className="flex flex-col">
-              <label className="text-sm font-medium text-gray-700">Phone Number 2 (Optional)</label>
+              <label className="text-sm font-medium text-white">Phone Number 2 (Optional)</label>
               <input
               type="tel"
                disabled={!isEditing}
@@ -543,7 +542,7 @@ export default function StudentPayments() {
 
             <div className="space-y-4">
              <div className="flex flex-col">
-              <label className="text-sm font-medium text-gray-700">Address</label>
+              <label className="text-sm font-medium text-white">Address</label>
               <input
                type="text"
                 disabled={!isEditing}
@@ -555,7 +554,7 @@ export default function StudentPayments() {
              </div>
 
              <div className="flex flex-col">
-              <label className="text-sm font-medium text-gray-700">City</label>
+              <label className="text-sm font-medium text-white">City</label>
               <input
                type="text"
                 disabled={!isEditing}
@@ -567,7 +566,7 @@ export default function StudentPayments() {
              </div>
              
              <div className="flex flex-col">
-              <label className="text-sm font-medium text-gray-700">District/Province</label>
+              <label className="text-sm font-medium text-white">District / Province</label>
               <input
                type="text"
                 disabled={!isEditing}
@@ -579,7 +578,7 @@ export default function StudentPayments() {
              </div>
 
              <div className="flex flex-col">
-              <label className="text-sm font-medium text-gray-700">Postal Code</label>
+              <label className="text-sm font-medium text-white">Postal Code</label>
               <input
                type="text"
                 disabled={!isEditing}
@@ -591,7 +590,7 @@ export default function StudentPayments() {
              </div>
 
              <div className="flex flex-col">
-              <label className="text-sm font-medium text-gray-700">Country</label>
+              <label className="text-sm font-medium text-white">Country</label>
               <input
                type="text"
                 disabled={!isEditing}
@@ -626,144 +625,6 @@ export default function StudentPayments() {
        </Card>
       </TabsContent>
      </Tabs>
-
-
-         {/* Browse Products Section */}
-  <div className="mt-8 ">
-    <h2 className="text-xl font-semibold mb-4">Browse Products</h2>
-    
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-
-      {/* Example Product Card */}
-      <div className="border rounded-lg p-4 shadow hover:shadow-md transition duration-300">
-        <img
-          src="/path/to/image.jpg"
-          alt="Product"
-          className="w-full h-40 object-cover rounded"/>
-
-         {/* Text + Button in one row */}
-        <div className="mt-2 flex items-center justify-between">
-         <h3 className="font-medium text-gray-800">Cricket</h3>
-         <Link to="/student/checkout/cricket" className="text-sm bg-indigo-950 hover:bg-indigo-900 text-white px-3 py-1 rounded-full">
-          Shop Now
-         </Link>
-        </div>
-    </div>
-
-      {/* Repeat Product Cards */}
-      <div className="border rounded-lg p-4 shadow hover:shadow-md transition duration-300">
-        <img
-          src="/path/to/image.jpg"
-          alt="Product"
-          className="w-full h-40 object-cover rounded"/>
-
-         {/* Text + Button in one row */}
-        <div className="mt-2 flex items-center justify-between">
-         <h3 className="font-medium text-gray-800">Football</h3>
-         <Link to="/student/checkout/football" className="text-sm bg-indigo-950 hover:bg-indigo-900 text-white px-3 py-1 rounded-full">
-          Shop Now
-         </Link>
-        </div>
-    </div>
-
-      {/* Repeat Product Cards */}
-    <div className="border rounded-lg p-4 shadow hover:shadow-md transition duration-300">
-        <img
-          src="/path/to/image.jpg"
-          alt="Product"
-          className="w-full h-40 object-cover rounded"/>
-
-         {/* Text + Button in one row */}
-        <div className="mt-2 flex items-center justify-between">
-         <h3 className="font-medium text-gray-800">Volleyball</h3>
-         <Link to="/student/checkout/volleyball" className="text-sm bg-indigo-950 hover:bg-indigo-900 text-white px-3 py-1 rounded-full">
-          Shop Now
-         </Link>
-        </div>
-    </div>
-
-      {/* Repeat Product Cards */}
-      <div className="border rounded-lg p-4 shadow hover:shadow-md transition duration-300">
-        <img
-          src="/path/to/image.jpg"
-          alt="Product"
-          className="w-full h-40 object-cover rounded"/>
-
-         {/* Text + Button in one row */}
-        <div className="mt-2 flex items-center justify-between">
-         <h3 className="font-medium text-gray-800">Badminton</h3>
-         <Link to="/student/checkout/badminton" className="text-sm bg-indigo-950 hover:bg-indigo-900 text-white px-3 py-1 rounded-full">
-          Shop Now
-         </Link>
-        </div>
-    </div>
-
-      {/* Repeat Product Cards */}
-      <div className="border rounded-lg p-4 shadow hover:shadow-md transition duration-300">
-        <img
-          src="/path/to/image.jpg"
-          alt="Product"
-          className="w-full h-40 object-cover rounded"/>
-
-         {/* Text + Button in one row */}
-        <div className="mt-2 flex items-center justify-between">
-         <h3 className="font-medium text-gray-800">Rugby</h3>
-         <Link to="/student/checkout/rugby" className="text-sm bg-indigo-950 hover:bg-indigo-900 text-white px-3 py-1 rounded-full">
-          Shop Now
-         </Link>
-        </div>
-    </div>
-
-      {/* Repeat Product Cards */}
-      <div className="border rounded-lg p-4 shadow hover:shadow-md transition duration-300">
-        <img
-          src="/path/to/image.jpg"
-          alt="Product"
-          className="w-full h-40 object-cover rounded"/>
-
-         {/* Text + Button in one row */}
-        <div className="mt-2 flex items-center justify-between">
-         <h3 className="font-medium text-gray-800">Tennis</h3>
-         <Link to="/student/checkout/tennis" className="text-sm bg-indigo-950 hover:bg-indigo-900 text-white px-3 py-1 rounded-full">
-          Shop Now
-         </Link>
-        </div>
-    </div>
-
-    {/* Repeat Product Cards */}
-      <div className="border rounded-lg p-4 shadow hover:shadow-md transition duration-300">
-        <img
-          src="/path/to/image.jpg"
-          alt="Product"
-          className="w-full h-40 object-cover rounded"/>
-
-         {/* Text + Button in one row */}
-        <div className="mt-2 flex items-center justify-between">
-         <h3 className="font-medium text-gray-800">Netball</h3>
-         <Link to="/student/checkout/netball" className="text-sm bg-indigo-950 hover:bg-indigo-900 text-white px-3 py-1 rounded-full">
-          Shop Now
-         </Link>
-        </div>
-     </div>
-
-     {/* Repeat Product Cards */}
-      <div className="border rounded-lg p-4 shadow hover:shadow-md transition duration-300">
-        <img
-          src="/path/to/image.jpg"
-          alt="Product"
-          className="w-full h-40 object-cover rounded"/>
-
-         {/* Text + Button in one row */}
-        <div className="mt-2 flex items-center justify-between">
-         <h3 className="font-medium text-gray-800">Carrom</h3>
-         <Link to="/student/checkout/carrom" className="text-sm bg-indigo-950 hover:bg-indigo-900 text-white px-3 py-1 rounded-full">
-          Shop Now
-         </Link>
-        </div>
-     </div>
-        
-    </div>
-  </div>
   </div>
     </DashboardLayout>
   );
