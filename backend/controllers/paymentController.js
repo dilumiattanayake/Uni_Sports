@@ -180,7 +180,39 @@ const getPayment = async (req, res, next) => {
  */
 const getPaymentReport = async (req, res, next) => {
   try {
+    const collectedStatuses = ['approved', 'paid', 'delivered'];
+
     const total = await Payment.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalAmount: { $sum: '$amount' },
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    const collected = await Payment.aggregate([
+      {
+        $match: {
+          status: { $in: collectedStatuses },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalAmount: { $sum: '$amount' },
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    const pending = await Payment.aggregate([
+      {
+        $match: {
+          status: 'pending',
+        },
+      },
       {
         $group: {
           _id: null,
@@ -202,6 +234,8 @@ const getPaymentReport = async (req, res, next) => {
     res.status(200).json({
       success: true,
       summary: total[0] || { totalAmount: 0, count: 0 },
+      collected: collected[0] || { totalAmount: 0, count: 0 },
+      pending: pending[0] || { totalAmount: 0, count: 0 },
       byType,
     });
   } catch (error) {

@@ -61,6 +61,18 @@ type Payment = {
 
 type ApiResponse<T> = {
   data?: T;
+  summary?: {
+    totalAmount?: number;
+    count?: number;
+  };
+  collected?: {
+    totalAmount?: number;
+    count?: number;
+  };
+  pending?: {
+    totalAmount?: number;
+    count?: number;
+  };
 };
 
 export default function AdminDashboard() {
@@ -73,6 +85,8 @@ export default function AdminDashboard() {
   const [events, setEvents] = useState<SessionEvent[]>([]);
   const [inventory, setInventory] = useState<LocationItem[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
+  const [reportRevenue, setReportRevenue] = useState(0);
+  const [reportPending, setReportPending] = useState(0);
 
   useEffect(() => {
     const fetchJson = async <T,>(url: string, secure = false): Promise<T[]> => {
@@ -97,8 +111,34 @@ export default function AdminDashboard() {
           fetchJson<AppUser>(`${API_BASE}/api/users`, true),
           fetchJson<SessionEvent>(`${API_BASE}/api/sessions`),
           fetchJson<LocationItem>(`${API_BASE}/api/inventory`, true),
-          fetchJson<Payment>(`${API_BASE}/api/payments`, true),
+          fetchJson<Payment>(`${API_BASE}/api/payments?limit=1000`, true),
         ]);
+
+        const fallbackRevenue = paymentsData
+          .filter((payment) => payment.status === "approved" || payment.status === "paid" || payment.status === "delivered")
+          .reduce((sum, payment) => sum + Number(payment.amount || 0), 0);
+
+        const fallbackPending = paymentsData
+          .filter((payment) => payment.status === "pending")
+          .reduce((sum, payment) => sum + Number(payment.amount || 0), 0);
+
+        const reportResponse = await fetch(`${API_BASE}/api/payments/report`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (reportResponse.ok) {
+          const reportBody = (await reportResponse.json()) as ApiResponse<Payment[]>;
+          const resolvedRevenue = Number(
+            reportBody.collected?.totalAmount ?? reportBody.summary?.totalAmount ?? fallbackRevenue,
+          );
+          const resolvedPending = Number(reportBody.pending?.totalAmount ?? fallbackPending);
+
+          setReportRevenue(Number.isFinite(resolvedRevenue) ? resolvedRevenue : fallbackRevenue);
+          setReportPending(Number.isFinite(resolvedPending) ? resolvedPending : fallbackPending);
+        } else {
+          setReportRevenue(fallbackRevenue);
+          setReportPending(fallbackPending);
+        }
 
         setSports(sportsData);
         setUsers(usersData);
@@ -193,7 +233,7 @@ export default function AdminDashboard() {
               </div>
               <div className="rounded-2xl bg-gradient-to-br from-purple-600 via-purple-500 to-pink-400 p-6 text-white shadow-xl">
                 <p className="text-sm opacity-80">Revenue</p>
-                <p className="mt-2 text-3xl font-bold">{paymentSummary.totalCollected}</p>
+                <p className="mt-2 text-3xl font-bold">{reportRevenue}</p>
               </div>
             </div>
 
@@ -392,11 +432,11 @@ export default function AdminDashboard() {
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                   <div className="rounded-xl border border-emerald-300/20 bg-emerald-300/10 p-4">
                     <p className="text-xs text-slate-300">Total Collected</p>
-                    <p className="mt-2 text-xl font-bold text-emerald-100">{paymentSummary.totalCollected}</p>
+                    <p className="mt-2 text-xl font-bold text-emerald-100">{reportRevenue}</p>
                   </div>
                   <div className="rounded-xl border border-orange-300/20 bg-orange-300/10 p-4">
                     <p className="text-xs text-slate-300">Pending</p>
-                    <p className="mt-2 text-xl font-bold text-orange-100">{paymentSummary.pending}</p>
+                    <p className="mt-2 text-xl font-bold text-orange-100">{reportPending}</p>
                   </div>
                   <div className="rounded-xl border border-cyan-300/20 bg-cyan-300/10 p-4">
                     <p className="text-xs text-slate-300">Paid Users</p>

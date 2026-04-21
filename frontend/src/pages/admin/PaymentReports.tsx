@@ -54,6 +54,7 @@ const chartPalette = {
 const exportedStatuses = new Set<PaymentStatus>(["approved", "paid", "delivered"]);
 
 export default function PaymentReports() {
+  const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:5001";
   const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -73,7 +74,7 @@ export default function PaymentReports() {
   const loadPayments = async () => {
     try {
       setLoading(true);
-      const res = await fetch("http://localhost:5001/api/payments?limit=1000", {
+      const res = await fetch(`${API_BASE}/api/payments?limit=1000`, {
         headers: { Authorization: `Bearer ${getToken()}` },
       });
 
@@ -89,7 +90,7 @@ export default function PaymentReports() {
 
   useEffect(() => {
     loadPayments();
-  }, []);
+  }, [API_BASE]);
 
   const filteredPayments = useMemo(() => {
     const term = search.trim().toLowerCase();
