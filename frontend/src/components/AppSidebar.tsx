@@ -86,7 +86,7 @@ const studentLinks = [
   { title: "My Orders", url: "/student/merchandise/my-orders", icon: Package },
   { title: "My Requests", url: "/student/inventory/my-requests", icon: UserCheck },
   { title: "Browse Events", url: "/student/events", icon: Medal },
-  { title: "My Events", url: "/student/events/my-events", icon: Trophy },
+  { title: "My Events", url: "/student/my-events", icon: Trophy },
   { title: "Inventory", url: "/student/inventory", icon: Package },
   { title: "My Payements", url: "/student/payments", icon: DollarSign },
   { title: "Browse Sports", url: "/student/sports", icon: BookOpen },
@@ -106,7 +106,7 @@ const studentSportsLinks = [
 
 const studentEventLinks = [
   { title: "Browse Events", url: "/student/events", icon: Medal },
-  { title: "My Events", url: "/student/events/my-events", icon: Trophy },
+  { title: "My Events", url: "/student/my-events", icon: Trophy },
 ];
 
 const studentInventoryLinks = [

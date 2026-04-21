@@ -117,7 +117,7 @@ const App = () => {
         <Route path="/student/sessions" element={<DashboardLayout><StudentSessions /></DashboardLayout>} />
         <Route path="/student/requests" element={<DashboardLayout><StudentRequests /></DashboardLayout>} />
         <Route path="/student/events" element={<DashboardLayout><StudentEvents /></DashboardLayout>} />
-        <Route path="/student/events/my-events" element={<DashboardLayout><StudentMyEvents /></DashboardLayout>} />
+        <Route path="/student/my-events" element={<DashboardLayout><StudentMyEvents /></DashboardLayout>} />
         <Route path="/student/payments" element={<StudentPayments />} />
         <Route path="/student/checkout/:itemSlug" element={<Checkout />} />
         <Route path="/student/settings" element={<DashboardLayout><ProfileSettings/></DashboardLayout>} />

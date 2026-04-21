@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { registrationService } from '../../../services/registrationService';
-import { DashboardLayout } from "@/components/DashboardLayout";
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 
@@ -155,8 +154,8 @@ export default function StudentMyEvents() {
     }
   };
 
-  if (loading) return <DashboardLayout><div className="p-10 text-center text-slate-400 mt-20 font-medium">Loading your events...</div></DashboardLayout>;
-  if (error) return <DashboardLayout><div className="p-10 text-center text-red-500">{error}</div></DashboardLayout>;
+  if (loading) return <div className="p-10 text-center text-slate-400 mt-20 font-medium">Loading your events...</div>;
+  if (error) return <div className="p-10 text-center text-red-500">{error}</div>;
 
   return (
       <div className="p-6 md:p-8 w-full max-w-7xl mx-auto space-y-6 text-slate-200">
