@@ -314,10 +314,19 @@ const cancelMyRegistration = async (req, res, next) => {
           continue;
         }
 
-        waitlisted.status = 'confirmed';
-        await waitlisted.save();
+        // Use a direct status update to avoid failing promotion due to unrelated
+        // legacy field validation issues on old registration documents.
+        const updateResult = await Registration.updateOne(
+          { _id: waitlisted._id, status: 'waitlisted' },
+          { $set: { status: 'confirmed' } }
+        );
+
+        if (!updateResult.modifiedCount) {
+          continue;
+        }
 
         confirmedParticipantCount += waitlistedParticipantCount;
+        waitlisted.status = 'confirmed';
         promotedRegistrations.push(waitlisted);
       }
     }
