@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { format, isWithinInterval, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, subDays, subWeeks, subMonths } from "date-fns";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 import {
   Area,
   AreaChart,
@@ -255,73 +257,42 @@ export default function PaymentReports() {
   };
 
   const handleExportPdf = () => {
-    const reportWindow = window.open("", "_blank", "width=1024,height=768");
-    if (!reportWindow) {
-      toast.error("Allow popups to export PDF");
-      return;
-    }
+    const doc = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
+    const generatedAt = new Date().toLocaleString();
 
-    const rowsHtml = filteredPayments
-      .slice(0, 200)
-      .map(
-        (payment) => `
-          <tr>
-            <td>${payment._id}</td>
-            <td>${payment.user?.name || "-"}</td>
-            <td>${payment.type}</td>
-            <td>${payment.status}</td>
-            <td>${Number(payment.amount || 0).toLocaleString()}</td>
-            <td>${new Date(payment.createdAt).toLocaleString()}</td>
-          </tr>
-        `,
-      )
-      .join("");
+    doc.setFontSize(18);
+    doc.text("Payment Reports", 40, 40);
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.text(`Generated at ${generatedAt}`, 40, 58);
 
-    reportWindow.document.write(`
-      <html>
-        <head>
-          <title>Payment Reports</title>
-          <style>
-            body { font-family: Arial, sans-serif; padding: 24px; color: #111827; }
-            h1 { margin: 0 0 6px 0; }
-            p { margin: 0 0 16px 0; color: #4b5563; }
-            .summary { display: flex; gap: 16px; margin-bottom: 16px; }
-            .box { border: 1px solid #d1d5db; border-radius: 8px; padding: 12px; min-width: 180px; }
-            table { width: 100%; border-collapse: collapse; font-size: 12px; }
-            th, td { border: 1px solid #e5e7eb; padding: 8px; text-align: left; }
-            th { background: #f3f4f6; }
-          </style>
-        </head>
-        <body>
-          <h1>Payment Reports</h1>
-          <p>Generated at ${new Date().toLocaleString()}</p>
-          <div class="summary">
-            <div class="box"><strong>Total Collected</strong><br/>LKR ${totalCollectedAmount.toLocaleString()}</div>
-            <div class="box"><strong>Approval Rate</strong><br/>${approvalRate}%</div>
-            <div class="box"><strong>Filtered Records</strong><br/>${filteredPayments.length}</div>
-          </div>
-          <table>
-            <thead>
-              <tr>
-                <th>Transaction ID</th>
-                <th>User</th>
-                <th>Type</th>
-                <th>Status</th>
-                <th>Amount</th>
-                <th>Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${rowsHtml}
-            </tbody>
-          </table>
-        </body>
-      </html>
-    `);
-    reportWindow.document.close();
-    reportWindow.focus();
-    reportWindow.print();
-    toast.success("PDF print view opened");
+    doc.setTextColor(30);
+    doc.setFontSize(11);
+    doc.text(`Total Collected: LKR ${totalCollectedAmount.toLocaleString()}`, 40, 82);
+    doc.text(`Approval Rate: ${approvalRate}%`, 280, 82);
+    doc.text(`Filtered Records: ${filteredPayments.length}`, 450, 82);
+
+    const body = filteredPayments.slice(0, 500).map((payment) => [
+      payment._id,
+      payment.user?.name || "-",
+      payment.type,
+      payment.status,
+      `LKR ${Number(payment.amount || 0).toLocaleString()}`,
+      new Date(payment.createdAt).toLocaleString(),
+    ]);
+
+    autoTable(doc, {
+      startY: 100,
+      head: [["Transaction ID", "User", "Type", "Status", "Amount", "Date"]],
+      body,
+      styles: { fontSize: 9, cellPadding: 6 },
+      headStyles: { fillColor: [17, 24, 39], textColor: 255 },
+      alternateRowStyles: { fillColor: [248, 250, 252] },
+      margin: { left: 40, right: 40 },
+    });
+
+    doc.save(`payment-reports-${Date.now()}.pdf`);
+    toast.success("PDF downloaded successfully");
   };
 
   return (
