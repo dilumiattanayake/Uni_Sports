@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Boxes, CalendarDays, CreditCard, Loader2, Trophy, Users, MapPin } from "lucide-react";
+import { ArrowRight, Boxes, CalendarDays, CreditCard, Loader2, Trophy, Users } from "lucide-react";
 import AdminLocationBookingManagement from "@/components/AdminLocationBookingManagement";
 
 type Sport = {
@@ -34,9 +34,19 @@ type SessionEvent = {
 
 type LocationItem = {
   _id: string;
-  name: string;
-  type: string;
-  capacity: number;
+  itemName: string;
+  totalQuantity: number;
+  availableQuantity: number;
+  status: string;
+  waitlistCount?: number;
+  sport?: {
+    _id: string;
+    name: string;
+  };
+  location?: {
+    _id: string;
+    name: string;
+  };
 };
 
 type Payment = {
@@ -82,11 +92,11 @@ export default function AdminDashboard() {
       try {
         setLoading(true);
 
-        const [sportsData, usersData, sessionsData, locationsData, paymentsData] = await Promise.all([
+        const [sportsData, usersData, sessionsData, inventoryData, paymentsData] = await Promise.all([
           fetchJson<Sport>(`${API_BASE}/api/sports`),
           fetchJson<AppUser>(`${API_BASE}/api/users`, true),
           fetchJson<SessionEvent>(`${API_BASE}/api/sessions`),
-          fetchJson<LocationItem>(`${API_BASE}/api/locations`),
+          fetchJson<LocationItem>(`${API_BASE}/api/inventory`, true),
           fetchJson<Payment>(`${API_BASE}/api/payments`, true),
         ]);
 
@@ -97,7 +107,7 @@ export default function AdminDashboard() {
             (session) => session.status === "scheduled" || session.status === "upcoming",
           ),
         );
-        setInventory(locationsData);
+        setInventory(inventoryData);
         setPayments(paymentsData);
       } catch (error) {
         toast.error("Failed to load dashboard details.");
@@ -147,6 +157,18 @@ export default function AdminDashboard() {
     inventory: "flex items-center gap-3 rounded-xl border border-violet-300/20 bg-violet-200/10 p-4 transition hover:bg-violet-200/20",
   };
 
+  const getInventoryBadgeClass = (item: LocationItem) => {
+    if (item.availableQuantity === 0) {
+      return "bg-red-300/20 text-red-100";
+    }
+
+    if (item.availableQuantity < item.totalQuantity) {
+      return "bg-amber-300/20 text-amber-100";
+    }
+
+    return "bg-emerald-300/20 text-emerald-100";
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -179,7 +201,7 @@ export default function AdminDashboard() {
               <div className={panelTheme.sport}>
                 <div className="mb-6 flex items-center justify-between">
                   <div>
-                    <h2 className="text-xl font-bold text-slate-100">1. Sport Management</h2>
+                    <h2 className="text-xl font-bold text-slate-100">Sport Management</h2>
                     <p className="mt-1 text-sm text-slate-300">Latest added sports</p>
                   </div>
                   <Link to="/admin/sports">
@@ -204,7 +226,7 @@ export default function AdminDashboard() {
               <div className={panelTheme.payment}>
                 <div className="mb-6 flex items-center justify-between">
                   <div>
-                    <h2 className="text-xl font-bold text-slate-100">2. Payment Management</h2>
+                    <h2 className="text-xl font-bold text-slate-100">Payment Management</h2>
                     <p className="mt-1 text-sm text-slate-300">Recent payment records</p>
                   </div>
                   <Link to="/admin/payments">
@@ -232,10 +254,10 @@ export default function AdminDashboard() {
               <div className={panelTheme.user}>
                 <div className="mb-6 flex items-center justify-between">
                   <div>
-                    <h2 className="text-xl font-bold text-slate-100">3. User Management</h2>
+                    <h2 className="text-xl font-bold text-slate-100">User Management</h2>
                     <p className="mt-1 text-sm text-slate-300">Coaches and students</p>
                   </div>
-                  <Link to="/admin/students">
+                  <Link to="/admin/users">
                     <Button className="border-slate-400/40 bg-transparent text-slate-100 hover:bg-slate-100/10" variant="outline">
                       View
                     </Button>
@@ -272,7 +294,7 @@ export default function AdminDashboard() {
               <div className={panelTheme.event}>
                 <div className="mb-6 flex items-center justify-between">
                   <div>
-                    <h2 className="text-xl font-bold text-slate-100">4. Event Management</h2>
+                    <h2 className="text-xl font-bold text-slate-100">Event Management</h2>
                     <p className="mt-1 text-sm text-slate-300">Upcoming sessions as events</p>
                   </div>
                   <Link to="/admin/home">
@@ -303,37 +325,47 @@ export default function AdminDashboard() {
               <div className={panelTheme.inventory}>
                 <div className="mb-6 flex items-center justify-between">
                   <div>
-                    <h2 className="text-xl font-bold text-slate-100">5. Inventory Management</h2>
-                    <p className="mt-1 text-sm text-slate-300">Locations and item estimates</p>
+                    <h2 className="text-xl font-bold text-slate-100">Inventory Management</h2>
+                    <p className="mt-1 text-sm text-slate-300">Latest inventory stock and availability</p>
                   </div>
-                  <Link to="/admin/locations">
+                  <Link to="/admin/inventory">
                     <Button className="border-slate-400/40 bg-transparent text-slate-100 hover:bg-slate-100/10" variant="outline">
                       View
                     </Button>
                   </Link>
                 </div>
                 <div className="space-y-3">
-                  {inventory.slice(0, 5).map((item) => (
-                    <div key={item._id} className={rowTheme.inventory}>
-                      <Boxes className="h-5 w-5 text-violet-300" />
-                      <div className="flex-1">
-                        <p className="font-semibold text-slate-100">{item.name}</p>
-                        <p className="text-xs text-slate-300">
-                          {item.type} • Capacity {item.capacity}
-                        </p>
+                  {inventory.length > 0 ? (
+                    inventory.slice(0, 5).map((item) => (
+                      <div key={item._id} className={rowTheme.inventory}>
+                        <Boxes className="h-5 w-5 text-violet-300" />
+                        <div className="flex-1">
+                          <p className="font-semibold text-slate-100">{item.itemName}</p>
+                          <p className="text-xs text-slate-300">
+                            {item.sport?.name || "No sport"} • {item.location?.name || "No location"}
+                          </p>
+                          <p className="mt-1 text-xs text-slate-400">
+                            Available {item.availableQuantity} of {item.totalQuantity}
+                            {typeof item.waitlistCount === "number" ? ` • ${item.waitlistCount} waiting` : ""}
+                          </p>
+                        </div>
+                        <Badge className={getInventoryBadgeClass(item)}>
+                          {item.availableQuantity > 0 ? `${item.availableQuantity} left` : "Out of stock"}
+                        </Badge>
                       </div>
-                      <Badge className="bg-violet-300/20 text-violet-100">
-                        {Math.max(1, Math.floor(item.capacity / 4))} items
-                      </Badge>
+                    ))
+                  ) : (
+                    <div className="rounded-xl border border-violet-300/20 bg-violet-200/10 p-4 text-sm text-slate-300">
+                      No inventory items found.
                     </div>
-                  ))}
+                  )}
                 </div>
               </div>
 
               <div className={panelTheme.summary}>
                 <div className="mb-6 flex items-center justify-between">
                   <div>
-                    <h2 className="text-xl font-bold text-slate-100">6. Location Booking Requests</h2>
+                    <h2 className="text-xl font-bold text-slate-100">Location Booking Requests</h2>
                     <p className="mt-1 text-sm text-slate-300">Approve or decline coach location requests</p>
                   </div>
                   <Badge className="bg-blue-300/20 text-blue-100">Management</Badge>
