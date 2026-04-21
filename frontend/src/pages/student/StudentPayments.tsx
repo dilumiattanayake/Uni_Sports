@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Eye, Loader } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
+import { merchandiseService } from "@/services/merchandiseService";
 
 type Payment = {
   _id: string;
@@ -40,6 +41,21 @@ type BillingErrors = Record<string, string>;
 type StoredUser = {
   name?: string;
   email?: string;
+};
+
+type MerchandiseVariant = {
+  size: string;
+  stockQuantity: number;
+};
+
+type MerchandiseItem = {
+  _id: string;
+  itemName: string;
+  category: string;
+  price: number;
+  image?: string;
+  sport?: { _id: string; name: string };
+  variants: MerchandiseVariant[];
 };
 
 const getStoredUser = (): StoredUser => {
@@ -74,12 +90,16 @@ const mergeBillingWithUser = (details?: Partial<BillingDetails>): BillingDetails
 };
 
 export default function StudentPayments() {
+  const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:5001";
   const [payments, setPayments] = useState<Payment[]>([]);
+  const [merchandise, setMerchandise] = useState<MerchandiseItem[]>([]);
+  const [merchandiseLoading, setMerchandiseLoading] = useState(true);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<any>(null);
 
   useEffect(() => {
     loadPayments();
+    loadMerchandise();
   }, []);
 
   const getToken = () => localStorage.getItem("token") || "";
@@ -98,6 +118,20 @@ export default function StudentPayments() {
       toast.error("Failed to load payments");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadMerchandise = async () => {
+    try {
+      setMerchandiseLoading(true);
+      const response = await merchandiseService.getAll();
+      const items = Array.isArray(response?.data) ? response.data : [];
+      setMerchandise(items);
+    } catch (error) {
+      toast.error("Failed to load products");
+      setMerchandise([]);
+    } finally {
+      setMerchandiseLoading(false);
     }
   };
 
@@ -121,6 +155,15 @@ export default function StudentPayments() {
 
   const formatDate = (date: string) => {
     return new Date(date).toLocaleDateString();
+  };
+
+  const getTotalStock = (variants: MerchandiseVariant[] = []) =>
+    variants.reduce((sum, variant) => sum + (variant.stockQuantity || 0), 0);
+
+  const resolveImageUrl = (image?: string) => {
+    if (!image || image === "no-photo.jpg") return "";
+    if (image.startsWith("http://") || image.startsWith("https://")) return image;
+    return `${API_BASE}${image.startsWith("/") ? image : `/${image}`}`;
   };
 
   const pendingCount = payments.filter(p => p.status === "pending").length;
@@ -629,140 +672,83 @@ export default function StudentPayments() {
 
 
          {/* Browse Products Section */}
-  <div className="mt-8 ">
-    <h2 className="text-xl font-semibold mb-4">Browse Products</h2>
-    
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+  <div className="mt-8">
+    <h2 className="mb-4 text-xl font-semibold">Browse Products</h2>
 
-      {/* Example Product Card */}
-      <div className="border rounded-lg p-4 shadow hover:shadow-md transition duration-300">
-        <img
-          src="/path/to/image.jpg"
-          alt="Product"
-          className="w-full h-40 object-cover rounded"/>
+    {merchandiseLoading ? (
+      <div className="flex items-center justify-center rounded-lg border p-8 text-gray-500">
+        <Loader className="mr-2 h-5 w-5 animate-spin text-indigo-600" />
+        Loading products...
+      </div>
+    ) : merchandise.length === 0 ? (
+      <div className="rounded-lg border p-8 text-center text-gray-500">
+        No products available right now.
+      </div>
+    ) : (
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        {merchandise.map((item) => {
+          const stock = getTotalStock(item.variants || []);
+          const hasStock = stock > 0;
+          const imageUrl = resolveImageUrl(item.image);
+          const firstAvailableSize = (item.variants || []).find((variant) => variant.stockQuantity > 0)?.size || "";
 
-         {/* Text + Button in one row */}
-        <div className="mt-2 flex items-center justify-between">
-         <h3 className="font-medium text-gray-800">Cricket</h3>
-         <Link to="/student/checkout/cricket" className="text-sm bg-indigo-950 hover:bg-indigo-900 text-white px-3 py-1 rounded-full">
-          Shop Now
-         </Link>
-        </div>
-    </div>
+          return (
+            <div key={item._id} className="rounded-lg border p-4 shadow transition duration-300 hover:shadow-md">
+              {imageUrl ? (
+                <img
+                  src={imageUrl}
+                  alt={item.itemName}
+                  className="h-40 w-full rounded object-cover"
+                />
+              ) : (
+                <div className="flex h-40 w-full items-center justify-center rounded bg-gray-100 text-sm text-gray-500">
+                  No Image
+                </div>
+              )}
 
-      {/* Repeat Product Cards */}
-      <div className="border rounded-lg p-4 shadow hover:shadow-md transition duration-300">
-        <img
-          src="/path/to/image.jpg"
-          alt="Product"
-          className="w-full h-40 object-cover rounded"/>
+              <div className="mt-3 space-y-1">
+                <h3 className="line-clamp-1 font-medium text-gray-800">{item.itemName}</h3>
+                <p className="text-xs text-gray-500">
+                  {item.category} • {item.sport?.name || "All Sports"}
+                </p>
+                <p className="text-sm font-semibold text-indigo-950">
+                  {item.price === 0 ? "Free" : `${item.price} LKR`}
+                </p>
+              </div>
 
-         {/* Text + Button in one row */}
-        <div className="mt-2 flex items-center justify-between">
-         <h3 className="font-medium text-gray-800">Football</h3>
-         <Link to="/student/checkout/football" className="text-sm bg-indigo-950 hover:bg-indigo-900 text-white px-3 py-1 rounded-full">
-          Shop Now
-         </Link>
-        </div>
-    </div>
+              <div className="mt-3 flex items-center justify-between">
+                <span className={`text-xs ${hasStock ? "text-emerald-600" : "text-red-600"}`}>
+                  {hasStock ? `${stock} in stock` : "Out of stock"}
+                </span>
 
-      {/* Repeat Product Cards */}
-    <div className="border rounded-lg p-4 shadow hover:shadow-md transition duration-300">
-        <img
-          src="/path/to/image.jpg"
-          alt="Product"
-          className="w-full h-40 object-cover rounded"/>
-
-         {/* Text + Button in one row */}
-        <div className="mt-2 flex items-center justify-between">
-         <h3 className="font-medium text-gray-800">Volleyball</h3>
-         <Link to="/student/checkout/volleyball" className="text-sm bg-indigo-950 hover:bg-indigo-900 text-white px-3 py-1 rounded-full">
-          Shop Now
-         </Link>
-        </div>
-    </div>
-
-      {/* Repeat Product Cards */}
-      <div className="border rounded-lg p-4 shadow hover:shadow-md transition duration-300">
-        <img
-          src="/path/to/image.jpg"
-          alt="Product"
-          className="w-full h-40 object-cover rounded"/>
-
-         {/* Text + Button in one row */}
-        <div className="mt-2 flex items-center justify-between">
-         <h3 className="font-medium text-gray-800">Badminton</h3>
-         <Link to="/student/checkout/badminton" className="text-sm bg-indigo-950 hover:bg-indigo-900 text-white px-3 py-1 rounded-full">
-          Shop Now
-         </Link>
-        </div>
-    </div>
-
-      {/* Repeat Product Cards */}
-      <div className="border rounded-lg p-4 shadow hover:shadow-md transition duration-300">
-        <img
-          src="/path/to/image.jpg"
-          alt="Product"
-          className="w-full h-40 object-cover rounded"/>
-
-         {/* Text + Button in one row */}
-        <div className="mt-2 flex items-center justify-between">
-         <h3 className="font-medium text-gray-800">Rugby</h3>
-         <Link to="/student/checkout/rugby" className="text-sm bg-indigo-950 hover:bg-indigo-900 text-white px-3 py-1 rounded-full">
-          Shop Now
-         </Link>
-        </div>
-    </div>
-
-      {/* Repeat Product Cards */}
-      <div className="border rounded-lg p-4 shadow hover:shadow-md transition duration-300">
-        <img
-          src="/path/to/image.jpg"
-          alt="Product"
-          className="w-full h-40 object-cover rounded"/>
-
-         {/* Text + Button in one row */}
-        <div className="mt-2 flex items-center justify-between">
-         <h3 className="font-medium text-gray-800">Tennis</h3>
-         <Link to="/student/checkout/tennis" className="text-sm bg-indigo-950 hover:bg-indigo-900 text-white px-3 py-1 rounded-full">
-          Shop Now
-         </Link>
-        </div>
-    </div>
-
-    {/* Repeat Product Cards */}
-      <div className="border rounded-lg p-4 shadow hover:shadow-md transition duration-300">
-        <img
-          src="/path/to/image.jpg"
-          alt="Product"
-          className="w-full h-40 object-cover rounded"/>
-
-         {/* Text + Button in one row */}
-        <div className="mt-2 flex items-center justify-between">
-         <h3 className="font-medium text-gray-800">Netball</h3>
-         <Link to="/student/checkout/netball" className="text-sm bg-indigo-950 hover:bg-indigo-900 text-white px-3 py-1 rounded-full">
-          Shop Now
-         </Link>
-        </div>
-     </div>
-
-     {/* Repeat Product Cards */}
-      <div className="border rounded-lg p-4 shadow hover:shadow-md transition duration-300">
-        <img
-          src="/path/to/image.jpg"
-          alt="Product"
-          className="w-full h-40 object-cover rounded"/>
-
-         {/* Text + Button in one row */}
-        <div className="mt-2 flex items-center justify-between">
-         <h3 className="font-medium text-gray-800">Carrom</h3>
-         <Link to="/student/checkout/carrom" className="text-sm bg-indigo-950 hover:bg-indigo-900 text-white px-3 py-1 rounded-full">
-          Shop Now
-         </Link>
-        </div>
-     </div>
-        
-    </div>
+                {hasStock ? (
+                  <Link
+                    to={`/student/checkout/${item._id}`}
+                    className="rounded-full bg-indigo-950 px-3 py-1 text-sm text-white hover:bg-indigo-900"
+                    onClick={() => {
+                      sessionStorage.setItem(
+                        "checkoutOrderContext",
+                        JSON.stringify({
+                          itemId: item._id,
+                          selectedSize: firstAvailableSize,
+                          quantity: 1,
+                        })
+                      );
+                    }}
+                  >
+                    Shop Now
+                  </Link>
+                ) : (
+                  <span className="rounded-full bg-gray-200 px-3 py-1 text-sm text-gray-600">
+                    Unavailable
+                  </span>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    )}
   </div>
   </div>
     </DashboardLayout>
