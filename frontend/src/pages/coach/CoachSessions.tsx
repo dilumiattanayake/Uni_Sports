@@ -232,7 +232,12 @@ export default function CoachSessions() {
 
       <div className="relative max-w-sm">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by sport or date..." className="pl-9" />
+        <Input
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder="Search by sport or date..."
+          className="pl-9 bg-white text-slate-900 placeholder:text-slate-500 border-slate-300 focus-visible:ring-slate-300"
+        />
       </div>
 
       <div className="space-y-3">
