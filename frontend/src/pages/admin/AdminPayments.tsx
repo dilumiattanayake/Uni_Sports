@@ -30,7 +30,10 @@ interface Payment {
 }
 
 export default function AdminPayments() {
+  const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:5001";
+
   const [payments, setPayments] = useState<Payment[]>([]);
+  const [totalRevenue, setTotalRevenue] = useState(0);
   const [loading, setLoading] = useState(true);
   const [verifyDialogOpen, setVerifyDialogOpen] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
@@ -48,12 +51,29 @@ export default function AdminPayments() {
   const loadPayments = async () => {
     try {
       setLoading(true);
-      const res = await fetch("http://localhost:5001/api/payments", {
-        headers: { "Authorization": `Bearer ${getToken()}` }
-      });
-      if (!res.ok) throw new Error("Failed to load payments");
-      const data = await res.json();
-      setPayments(data.data || []);
+      const [paymentsRes, reportRes] = await Promise.all([
+        fetch(`${API_BASE}/api/payments?limit=1000`, {
+          headers: { "Authorization": `Bearer ${getToken()}` }
+        }),
+        fetch(`${API_BASE}/api/payments/report`, {
+          headers: { "Authorization": `Bearer ${getToken()}` }
+        })
+      ]);
+
+      if (!paymentsRes.ok) throw new Error("Failed to load payments");
+      const paymentsData = await paymentsRes.json();
+      const list: Payment[] = paymentsData.data || [];
+      setPayments(list);
+
+      if (reportRes.ok) {
+        const reportData = await reportRes.json();
+        setTotalRevenue(Number(reportData?.collected?.totalAmount || 0));
+      } else {
+        const fallbackRevenue = list
+          .filter((p) => p.status === "approved" || p.status === "paid" || p.status === "delivered")
+          .reduce((sum, p) => sum + p.amount, 0);
+        setTotalRevenue(fallbackRevenue);
+      }
     } catch (error) {
       console.error(error);
       toast.error("Failed to load payments");
@@ -71,7 +91,7 @@ export default function AdminPayments() {
     }
 
     try {
-      const res = await fetch(`http://localhost:5001/api/payments/${selectedPayment._id}/verify`, {
+      const res = await fetch(`${API_BASE}/api/payments/${selectedPayment._id}/verify`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -125,7 +145,7 @@ export default function AdminPayments() {
     pending: payments.filter(p => p.status === "pending").length,
     approved: payments.filter(p => p.status === "approved").length,
     rejected: payments.filter(p => p.status === "rejected").length,
-    totalAmount: payments.reduce((sum, p) => sum + p.amount, 0)
+    totalAmount: totalRevenue
   };
 
   return (
@@ -154,7 +174,7 @@ export default function AdminPayments() {
           <p className="text-2xl font-bold text-red-400">{stats.rejected}</p>
         </div>
         <div className="bg-slate-800 border border-slate-700 rounded-lg p-4">
-          <p className="text-sm text-slate-400">Total Amount</p>
+          <p className="text-sm text-slate-400">Total Revenue </p>
           <p className="text-2xl font-bold text-white">{stats.totalAmount} LKR</p>
         </div>
       </div>

@@ -4,15 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import {
-	Dialog,
-	DialogContent,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-} from "@/components/ui/dialog";
+
+
 import {
 	Table,
 	TableBody,
@@ -22,7 +15,7 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { toast } from "sonner";
-import { Check, Clock3, ExternalLink, Loader2, Search, X } from "lucide-react";
+import { Clock3, ExternalLink, Loader2, Search } from "lucide-react";
 
 type PaymentStatus = "pending" | "approved" | "rejected" | "paid" | "delivered";
 
@@ -69,10 +62,7 @@ export default function PaymentVerification() {
 	const [statusFilter, setStatusFilter] = useState<"all" | PaymentStatus>("all");
 	const [selected, setSelected] = useState<Payment | null>(null);
 
-	const [verifyDialogOpen, setVerifyDialogOpen] = useState(false);
-	const [verifyAction, setVerifyAction] = useState<"approved" | "rejected">("approved");
-	const [verifyNote, setVerifyNote] = useState("");
-	const [submitting, setSubmitting] = useState(false);
+
 
 	const getToken = () => localStorage.getItem("token") || "";
 
@@ -151,47 +141,7 @@ export default function PaymentVerification() {
 		return "border-amber-500/50 text-amber-200";
 	};
 
-	const openVerifyDialog = (payment: Payment, action: "approved" | "rejected") => {
-		setSelected(payment);
-		setVerifyAction(action);
-		setVerifyNote("");
-		setVerifyDialogOpen(true);
-	};
 
-	const submitVerification = async () => {
-		if (!selected) return;
-		if (verifyAction === "rejected" && !verifyNote.trim()) {
-			toast.error("Rejection note is required");
-			return;
-		}
-
-		try {
-			setSubmitting(true);
-			const res = await fetch(`http://localhost:5001/api/payments/${selected._id}/verify`, {
-				method: "PUT",
-				headers: {
-					"Content-Type": "application/json",
-					Authorization: `Bearer ${getToken()}`,
-				},
-				body: JSON.stringify({ status: verifyAction, note: verifyNote }),
-			});
-
-			const data = await res.json();
-			if (!res.ok) {
-				throw new Error(data?.message || "Failed to verify payment");
-			}
-
-			toast.success(`Payment ${verifyAction} successfully`);
-			setVerifyDialogOpen(false);
-			setSelected(null);
-			loadTransactions();
-		} catch (error) {
-			const message = error instanceof Error ? error.message : "Verification failed";
-			toast.error(message);
-		} finally {
-			setSubmitting(false);
-		}
-	};
 
 	return (
 		<div className="space-y-6">
@@ -306,7 +256,7 @@ export default function PaymentVerification() {
 												</TableCell>
 												<TableCell className="text-xs text-slate-400">{formatDate(payment.createdAt)}</TableCell>
 												<TableCell className="text-right">
-													<div className="inline-flex items-center gap-2">
+													<div>
 														<Button
 															size="sm"
 															variant="outline"
@@ -318,32 +268,6 @@ export default function PaymentVerification() {
 														>
 															View Details
 														</Button>
-														{payment.status === "pending" && (
-															<>
-																<Button
-																	size="sm"
-																	className="bg-emerald-600 hover:bg-emerald-500"
-																	onClick={(e) => {
-																		e.stopPropagation();
-																		openVerifyDialog(payment, "approved");
-																	}}
-																>
-																	<Check className="mr-1 h-4 w-4" />
-																	Approve
-																</Button>
-																<Button
-																	size="sm"
-																	variant="destructive"
-																	onClick={(e) => {
-																		e.stopPropagation();
-																		openVerifyDialog(payment, "rejected");
-																	}}
-																>
-																	<X className="mr-1 h-4 w-4" />
-																	Reject
-																</Button>
-															</>
-														)}
 													</div>
 												</TableCell>
 											</TableRow>
@@ -411,66 +335,12 @@ export default function PaymentVerification() {
 										Address: {selected.billingDetails?.address?.street || "-"}, {selected.billingDetails?.address?.city || "-"}, {selected.billingDetails?.address?.state || "-"}
 									</p>
 								</div>
-
-								{selected.status === "pending" && (
-									<div className="grid grid-cols-2 gap-2">
-										<Button className="bg-emerald-600 hover:bg-emerald-500" onClick={() => openVerifyDialog(selected, "approved")}>
-											<Check className="mr-1 h-4 w-4" />
-											Approve
-										</Button>
-										<Button variant="destructive" onClick={() => openVerifyDialog(selected, "rejected")}>
-											<X className="mr-1 h-4 w-4" />
-											Reject
-										</Button>
-									</div>
-								)}
 							</div>
 						)}
 					</CardContent>
 				</Card>
 			</div>
 
-			<Dialog open={verifyDialogOpen} onOpenChange={setVerifyDialogOpen}>
-				<DialogContent className="border-slate-700 bg-slate-950 text-slate-100">
-					<DialogHeader>
-						<DialogTitle className="capitalize">{verifyAction} Payment</DialogTitle>
-					</DialogHeader>
-
-					<div className="space-y-4">
-						<div className="rounded-lg border border-slate-800 bg-slate-900 p-3 text-sm">
-							<p className="text-slate-300">User: <span className="text-white">{selected?.user?.name || selected?.billingDetails?.name || "Unknown"}</span></p>
-							<p className="text-slate-300">Amount: <span className="text-white">LKR {selected?.amount?.toLocaleString() || 0}</span></p>
-							<p className="text-slate-300">Transaction Ref: <span className="text-white">{selected?.transactionRef || "-"}</span></p>
-						</div>
-
-						<div>
-							<Label className="text-slate-300">
-								Note {verifyAction === "rejected" ? "(Required for rejection)" : "(Optional)"}
-							</Label>
-							<Textarea
-								value={verifyNote}
-								onChange={(e) => setVerifyNote(e.target.value)}
-								placeholder={verifyAction === "rejected" ? "Provide reason for rejection..." : "Optional verification note..."}
-								className="mt-2 border-slate-700 bg-slate-900 text-white placeholder:text-slate-500"
-							/>
-						</div>
-					</div>
-
-					<DialogFooter>
-						<Button variant="outline" onClick={() => setVerifyDialogOpen(false)} className="border-slate-600 text-slate-200">
-							Cancel
-						</Button>
-						<Button
-							onClick={submitVerification}
-							disabled={submitting}
-							className={verifyAction === "approved" ? "bg-emerald-600 hover:bg-emerald-500" : "bg-red-600 hover:bg-red-500"}
-						>
-							{submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-							Confirm {verifyAction === "approved" ? "Approval" : "Rejection"}
-						</Button>
-					</DialogFooter>
-				</DialogContent>
-			</Dialog>
 		</div>
 	);
 }
