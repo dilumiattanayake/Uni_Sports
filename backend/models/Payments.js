@@ -51,6 +51,7 @@ const paymentSchema = new mongoose.Schema(
     transactionRef: {
       type: String,
       trim: true,
+      maxlength: [10, 'Transaction reference must be 10 characters or less'],
     },
 
     // Uploaded receipt (image/PDF URL)

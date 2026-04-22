@@ -245,6 +245,7 @@ export default function Checkout() {
 		if (!billingDetails.address.zipCode.trim()) next["address.zipCode"] = "Postal code is required";
 		if (!billingDetails.address.country.trim()) next["address.country"] = "Country is required";
 		if (!transactionRef.trim()) next.transactionRef = "Transaction reference is required";
+		else if (transactionRef.trim().length > 10) next.transactionRef = "Transaction reference must be 10 characters or less";
 		if (!selectedFile && !receiptUrl) next.receipt = "Payment receipt is required";
 
 		if (next.selectedSize || next.quantity) {
@@ -465,8 +466,9 @@ export default function Checkout() {
 									<input
 										className="text-black w-full rounded-md border px-3 py-2"
 										value={transactionRef}
+										maxLength={10}
 										onChange={(e) => {
-											setTransactionRef(e.target.value);
+											setTransactionRef(e.target.value.slice(0, 10));
 											if (errors.transactionRef) setErrors((prev) => ({ ...prev, transactionRef: "" }));
 										}}
 										placeholder="e.g. TXN-482920"
