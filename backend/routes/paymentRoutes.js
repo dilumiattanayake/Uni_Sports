@@ -67,7 +67,9 @@ router.post(
       .withMessage('Amount must be a number'),
     body('transactionRef')
       .notEmpty()
-      .withMessage('Transaction reference is required'),
+      .withMessage('Transaction reference is required')
+      .isLength({ max: 10 })
+      .withMessage('Transaction reference must be 10 characters or less'),
     body('receiptUrl')
       .isURL({ require_tld: false })
       .withMessage('Valid receipt URL is required'),
