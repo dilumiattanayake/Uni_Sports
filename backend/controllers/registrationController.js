@@ -292,7 +292,7 @@ const cancelMyRegistration = async (req, res, next) => {
     if (registration.event.status !== 'upcoming') {
       return next(new ErrorResponse('You cannot cancel a registration for an ongoing or completed event.', 400));
     }
-
+     //auto-promote waitlisted registrations if a confirmed registration is cancelled
     const shouldPromoteWaitlistedRegistration = registration.status === 'confirmed';
 
     await registration.deleteOne();
