@@ -1,46 +1,163 @@
-// TODO: Replace with actual Axios API calls to MERN backend
-
-import { mockSports, mockCoaches, mockStudents, mockSessions, mockJoinRequests, mockLocations, mockNotifications } from "@/data/mockData";
-
-// Simulates API delay
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+// Real API service - using actual MERN backend endpoints
+const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:5001";
 
 export const sportsService = {
-  getAll: async () => { await delay(100); return [...mockSports]; },
-  getById: async (id: string) => { await delay(50); return mockSports.find(s => s.id === id); },
-  // TODO: create, update, delete endpoints
+  getAll: async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/sports`);
+      const data = await res.json();
+      return data.data || [];
+    } catch (error) {
+      console.error("Error fetching sports:", error);
+      return [];
+    }
+  },
+  getById: async (id: string) => {
+    try {
+      const res = await fetch(`${API_BASE}/api/sports/${id}`);
+      const data = await res.json();
+      return data.data;
+    } catch (error) {
+      console.error("Error fetching sport:", error);
+      return null;
+    }
+  },
 };
 
 export const coachService = {
-  getAll: async () => { await delay(100); return [...mockCoaches]; },
-  getById: async (id: string) => { await delay(50); return mockCoaches.find(c => c.id === id); },
+  getAll: async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/users?role=coach`);
+      const data = await res.json();
+      return data.data || [];
+    } catch (error) {
+      console.error("Error fetching coaches:", error);
+      return [];
+    }
+  },
+  getById: async (id: string) => {
+    try {
+      const res = await fetch(`${API_BASE}/api/users/${id}`);
+      const data = await res.json();
+      return data.data;
+    } catch (error) {
+      console.error("Error fetching coach:", error);
+      return null;
+    }
+  },
 };
 
 export const studentService = {
-  getAll: async () => { await delay(100); return [...mockStudents]; },
-  getById: async (id: string) => { await delay(50); return mockStudents.find(s => s.id === id); },
+  getAll: async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/users?role=student`);
+      const data = await res.json();
+      return data.data || [];
+    } catch (error) {
+      console.error("Error fetching students:", error);
+      return [];
+    }
+  },
+  getById: async (id: string) => {
+    try {
+      const res = await fetch(`${API_BASE}/api/users/${id}`);
+      const data = await res.json();
+      return data.data;
+    } catch (error) {
+      console.error("Error fetching student:", error);
+      return null;
+    }
+  },
 };
 
 export const sessionService = {
-  getAll: async () => { await delay(100); return [...mockSessions]; },
-  getByCoach: async (coachId: string) => { await delay(100); return mockSessions.filter(s => s.coachId === coachId); },
-  getBySport: async (sportId: string) => { await delay(100); return mockSessions.filter(s => s.sportId === sportId); },
+  getAll: async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/sessions`);
+      const data = await res.json();
+      return data.data || [];
+    } catch (error) {
+      console.error("Error fetching sessions:", error);
+      return [];
+    }
+  },
+  getByCoach: async (coachId: string) => {
+    try {
+      const res = await fetch(`${API_BASE}/api/sessions?coachId=${coachId}`);
+      const data = await res.json();
+      return data.data || [];
+    } catch (error) {
+      console.error("Error fetching coach sessions:", error);
+      return [];
+    }
+  },
+  getBySport: async (sportId: string) => {
+    try {
+      const res = await fetch(`${API_BASE}/api/sessions?sportId=${sportId}`);
+      const data = await res.json();
+      return data.data || [];
+    } catch (error) {
+      console.error("Error fetching sessions by sport:", error);
+      return [];
+    }
+  },
 };
 
 export const joinRequestService = {
-  getAll: async () => { await delay(100); return [...mockJoinRequests]; },
-  getByStudent: async (studentId: string) => { await delay(100); return mockJoinRequests.filter(r => r.studentId === studentId); },
+  getAll: async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/join-requests`);
+      const data = await res.json();
+      return data.data || [];
+    } catch (error) {
+      console.error("Error fetching join requests:", error);
+      return [];
+    }
+  },
+  getByStudent: async (studentId: string) => {
+    try {
+      const res = await fetch(`${API_BASE}/api/join-requests?studentId=${studentId}`);
+      const data = await res.json();
+      return data.data || [];
+    } catch (error) {
+      console.error("Error fetching student join requests:", error);
+      return [];
+    }
+  },
   getByCoach: async (coachId: string) => {
-    await delay(100);
-    const coachSessions = mockSessions.filter(s => s.coachId === coachId).map(s => s.id);
-    return mockJoinRequests.filter(r => coachSessions.includes(r.sessionId));
+    try {
+      const res = await fetch(`${API_BASE}/api/join-requests?coachId=${coachId}`);
+      const data = await res.json();
+      return data.data || [];
+    } catch (error) {
+      console.error("Error fetching coach join requests:", error);
+      return [];
+    }
   },
 };
 
 export const locationService = {
-  getAll: async () => { await delay(100); return [...mockLocations]; },
+  getAll: async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/locations`);
+      const data = await res.json();
+      return data.data || [];
+    } catch (error) {
+      console.error("Error fetching locations:", error);
+      return [];
+    }
+  },
 };
 
 export const notificationService = {
-  getAll: async () => { await delay(100); return [...mockNotifications]; },
+  getAll: async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/notifications`);
+      const data = await res.json();
+      return data.data || [];
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+      return [];
+    }
+  },
 };

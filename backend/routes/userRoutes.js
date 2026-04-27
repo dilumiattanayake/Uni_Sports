@@ -13,6 +13,43 @@ const validate = require('../middleware/validate');
 router.get('/', protect, authorize('admin'), userController.getUsers);
 
 /**
+ * @route   GET /api/users/me/billing-details
+ * @desc    Get logged-in user's billing details
+ * @access  Private/Student
+ */
+router.get(
+  '/me/billing-details',
+  protect,
+  authorize('student'),
+  userController.getMyBillingDetails
+);
+
+/**
+ * @route   PUT /api/users/me/billing-details
+ * @desc    Update logged-in user's billing details
+ * @access  Private/Student
+ */
+router.put(
+  '/me/billing-details',
+  protect,
+  authorize('student'),
+  [
+    body('billingDetails.name').trim().notEmpty().withMessage('Billing name is required'),
+    body('billingDetails.email').isEmail().withMessage('Valid billing email is required'),
+    body('billingDetails.phone')
+      .matches(/^\d{10}$/)
+      .withMessage('Billing phone must be exactly 10 digits'),
+    body('billingDetails.address.street').trim().notEmpty().withMessage('Street address is required'),
+    body('billingDetails.address.city').trim().notEmpty().withMessage('City is required'),
+    body('billingDetails.address.state').trim().notEmpty().withMessage('District/Province is required'),
+    body('billingDetails.address.zipCode').trim().notEmpty().withMessage('Postal code is required'),
+    body('billingDetails.address.country').trim().notEmpty().withMessage('Country is required'),
+  ],
+  validate,
+  userController.updateMyBillingDetails
+);
+
+/**
  * @route   GET /api/users/:id
  * @desc    Get single user
  * @access  Private/Admin

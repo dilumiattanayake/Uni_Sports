@@ -91,6 +91,58 @@ router.put(
 );
 
 /**
+ * @route   PUT /api/join-requests/:id/accept
+ * @desc    Accept a join request
+ * @access  Private/Coach
+ */
+router.put(
+  '/:id/accept',
+  protect,
+  authorize('coach'),
+  [
+    body('responseMessage')
+      .optional()
+      .isLength({ max: 500 })
+      .withMessage('Response message must not exceed 500 characters'),
+  ],
+  validate,
+  async (req, res, next) => {
+    try {
+      req.body.status = 'accepted';
+      await joinRequestController.updateJoinRequestStatus(req, res, next);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+/**
+ * @route   PUT /api/join-requests/:id/decline
+ * @desc    Decline a join request
+ * @access  Private/Coach
+ */
+router.put(
+  '/:id/decline',
+  protect,
+  authorize('coach'),
+  [
+    body('responseMessage')
+      .optional()
+      .isLength({ max: 500 })
+      .withMessage('Response message must not exceed 500 characters'),
+  ],
+  validate,
+  async (req, res, next) => {
+    try {
+      req.body.status = 'rejected';
+      await joinRequestController.updateJoinRequestStatus(req, res, next);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+/**
  * @route   DELETE /api/join-requests/:id
  * @desc    Delete join request
  * @access  Private/Student (own) or Admin

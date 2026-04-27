@@ -120,6 +120,16 @@ const createJoinRequest = async (req, res, next) => {
       return next(new ErrorResponse('Session is full', 400));
     }
 
+    // Session must have a coach assigned to process join requests
+    if (!session.coach) {
+      return next(
+        new ErrorResponse(
+          'This session has no coach assigned yet. Please try another session.',
+          400
+        )
+      );
+    }
+
     // Check if student is already enrolled
     const alreadyEnrolled = session.enrolledStudents.some(
       (enrollment) => enrollment.student.toString() === studentId
@@ -156,7 +166,7 @@ const createJoinRequest = async (req, res, next) => {
     const joinRequest = await JoinRequest.create({
       session: sessionId,
       student: studentId,
-      coach: session.coach._id,
+      coach: session.coach._id || session.coach,
       message,
     });
 

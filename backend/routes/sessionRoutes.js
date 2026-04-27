@@ -82,4 +82,16 @@ router.delete(
   sessionController.deleteSession
 );
 
+/**
+ * @route   DELETE /api/sessions/:id/unenroll
+ * @desc    Remove student from session (cancel booking)
+ * @access  Private/Student
+ */
+router.delete(
+  '/:id/unenroll',
+  protect,
+  authorize('student'),
+  sessionController.unenrollFromSession
+);
+
 module.exports = router;

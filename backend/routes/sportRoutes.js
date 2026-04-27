@@ -60,4 +60,32 @@ router.put('/:id', protect, authorize('admin'), sportController.updateSport);
  */
 router.delete('/:id', protect, authorize('admin'), sportController.deleteSport);
 
+/**
+ * @route   GET /api/sports/:id/coaches
+ * @desc    Get all coaches assigned to a sport
+ * @access  Public
+ */
+router.get('/:id/coaches', sportController.getSportCoaches);
+
+/**
+ * @route   GET /api/sports/:id/available-coaches
+ * @desc    Get available coaches for assignment
+ * @access  Private/Admin
+ */
+router.get('/:id/available-coaches', protect, authorize('admin'), sportController.getAvailableCoaches);
+
+/**
+ * @route   POST /api/sports/:id/coaches/:coachId
+ * @desc    Assign a coach to a sport
+ * @access  Private/Admin
+ */
+router.post('/:id/coaches/:coachId', protect, authorize('admin'), sportController.assignCoachToSport);
+
+/**
+ * @route   DELETE /api/sports/:id/coaches/:coachId
+ * @desc    Remove a coach from a sport
+ * @access  Private/Admin
+ */
+router.delete('/:id/coaches/:coachId', protect, authorize('admin'), sportController.removeCoachFromSport);
+
 module.exports = router;

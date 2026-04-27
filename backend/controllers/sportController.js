@@ -246,6 +246,181 @@ const getCategories = async (req, res, next) => {
   }
 };
 
+/**
+ * @desc    Get all coaches assigned to a sport
+ * @route   GET /api/sports/:id/coaches
+ * @access  Public
+ */
+const getSportCoaches = async (req, res, next) => {
+  try {
+    const sport = await Sport.findById(req.params.id)
+      .populate({
+        path: 'coaches',
+        select: 'name email phone specialization isActive',
+      });
+
+    if (!sport) {
+      return next(new ErrorResponse('Sport not found', 404));
+    }
+
+    res.status(200).json({
+      success: true,
+      count: sport.coaches.length,
+      data: sport.coaches,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @desc    Get available coaches (all coaches not assigned to this sport)
+ * @route   GET /api/sports/:id/available-coaches
+ * @access  Private/Admin
+ */
+const getAvailableCoaches = async (req, res, next) => {
+  try {
+    const sport = await Sport.findById(req.params.id);
+    if (!sport) {
+      return next(new ErrorResponse('Sport not found', 404));
+    }
+
+    // Get all active coaches
+    const allCoaches = await User.find({
+      role: 'coach',
+      isActive: true,
+    }).select('name email phone specialization assignedSports');
+
+    // Filter out coaches already assigned to this sport
+    const availableCoaches = allCoaches.filter(
+      coach => !sport.coaches.includes(coach._id)
+    );
+
+    res.status(200).json({
+      success: true,
+      count: availableCoaches.length,
+      data: availableCoaches,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @desc    Assign a coach to a sport
+ * @route   POST /api/sports/:id/coaches/:coachId
+ * @access  Private/Admin
+ */
+const assignCoachToSport = async (req, res, next) => {
+  try {
+    const { id: sportId, coachId } = req.params;
+
+    // Validate sport exists
+    const sport = await Sport.findById(sportId);
+    if (!sport) {
+      return next(new ErrorResponse('Sport not found', 404));
+    }
+
+    // Validate coach exists and is active
+    const coach = await User.findById(coachId);
+    if (!coach) {
+      return next(new ErrorResponse('Coach not found', 404));
+    }
+
+    if (coach.role !== 'coach') {
+      return next(new ErrorResponse('User is not a coach', 400));
+    }
+
+    if (!coach.isActive) {
+      return next(new ErrorResponse('Coach is not active', 400));
+    }
+
+    // Check if coach is already assigned
+    if (sport.coaches.includes(coachId)) {
+      return next(new ErrorResponse('Coach is already assigned to this sport', 400));
+    }
+
+    // Assign coach to sport
+    sport.coaches.push(coachId);
+    await sport.save();
+
+    // Update coach's assigned sports
+    await User.findByIdAndUpdate(
+      coachId,
+      { $addToSet: { assignedSports: sportId } },
+      { new: true }
+    );
+
+    // Create notification for the coach
+    const Notification = require('../models/Notification');
+    await Notification.create({
+      recipient: coachId,
+      type: 'coach_assigned_to_sport',
+      title: `Assigned to ${sport.name}`,
+      message: `You have been assigned to coach ${sport.name}. ${sport.description ? `Description: ${sport.description}` : ''}`,
+      relatedSport: sportId,
+      isRead: false,
+    });
+
+    // Populate and return updated sport
+    const updatedSport = await Sport.findById(sportId)
+      .populate('coaches', 'name email phone specialization');
+
+    res.status(200).json({
+      success: true,
+      message: `Coach assigned to ${sport.name} successfully`,
+      data: updatedSport,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @desc    Remove a coach from a sport
+ * @route   DELETE /api/sports/:id/coaches/:coachId
+ * @access  Private/Admin
+ */
+const removeCoachFromSport = async (req, res, next) => {
+  try {
+    const { id: sportId, coachId } = req.params;
+
+    // Validate sport exists
+    const sport = await Sport.findById(sportId);
+    if (!sport) {
+      return next(new ErrorResponse('Sport not found', 404));
+    }
+
+    // Check if coach is assigned to this sport
+    if (!sport.coaches.includes(coachId)) {
+      return next(new ErrorResponse('Coach is not assigned to this sport', 400));
+    }
+
+    // Remove coach from sport
+    sport.coaches = sport.coaches.filter(id => id.toString() !== coachId);
+    await sport.save();
+
+    // Remove sport from coach's assigned sports
+    await User.findByIdAndUpdate(
+      coachId,
+      { $pull: { assignedSports: sportId } },
+      { new: true }
+    );
+
+    // Populate and return updated sport
+    const updatedSport = await Sport.findById(sportId)
+      .populate('coaches', 'name email phone specialization');
+
+    res.status(200).json({
+      success: true,
+      message: 'Coach removed from sport successfully',
+      data: updatedSport,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getSports,
   getSport,
@@ -253,4 +428,8 @@ module.exports = {
   updateSport,
   deleteSport,
   getCategories,
+  getSportCoaches,
+  getAvailableCoaches,
+  assignCoachToSport,
+  removeCoachFromSport,
 };
